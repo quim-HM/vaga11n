@@ -199,7 +199,7 @@ link.subscribe((m) => {
   else if (m.type === "status" && m.camera === false) $("st-conn").innerHTML = `<span class="bad">${m.error || "sense càmera"}</span>`;
   else if (m.type === "pose") {
     if (!$("st-conn").textContent.startsWith("connectat") && m.people !== undefined) $("st-conn").innerHTML = '<span class="ok">connectat</span>';
-    $("st-fps").textContent = `${m.fps} (càmera: ${m.cam ?? "—"})`; $("st-ms").textContent = m.ms + " ms"; $("st-people").textContent = m.people;
+    $("st-fps").textContent = `${m.fps} (càmera: ${m.cam ?? "—"})`; $("st-ms").textContent = m.ms + " ms" + (m.lat ? ` (de la càmera al joc: ${Math.round(m.lat)} ms)` : ""); $("st-people").textContent = m.people;
     $("st-player").innerHTML = m.present ? `<span class="ok">#${m.seat} detectat</span>` : '<span class="bad">cap</span>';
     $("st-q").textContent = m.player ? m.player.q : "—";
     $("st-reach").textContent = m.player ? m.player.reach : "—";

@@ -12,6 +12,8 @@ Joc per a una persona que es juga amb el cos davant d'una webcam: tres minijocs 
 
 No cal instal·lar res. Després de la primera visita, el joc funciona sense internet en aquell ordinador. Sense càmera es pot jugar amb el ratolí.
 
+Si la mà va amb retard en un portàtil amb dues targetes gràfiques, posa el navegador en «Alt rendiment» (Windows: Configuració → Sistema → Pantalla → Gràfics) i reinicia'l. La pàgina d'operador mostra quina targeta fa servir.
+
 - `O` obre la pàgina d'operador: tria de càmera, zona de joc, paleta de colors, territoris i QR del canal de difusió.
 - `D` mostra la depuració (fps, detecció) i `R` torna a l'inici.
 

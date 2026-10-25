@@ -1,7 +1,7 @@
 // Offline copy of the game (service worker). tools/build_web.py fills in VERSION and ASSETS when it
 // builds dist/; a new build changes VERSION, so browsers fetch the new files on the next visit.
 // Cache-first: once loaded, the installation keeps working without internet at the venue.
-const VERSION = "d0b9bff366ae";
+const VERSION = "336d511ec3fe";
 const ASSETS = [
 "./",
 "css/style.css",

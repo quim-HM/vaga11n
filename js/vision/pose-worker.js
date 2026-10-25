@@ -23,6 +23,22 @@ function options(m) {
   return o;
 }
 
+// Graphics card the browser uses for WebGL. On laptops with two GPUs, browsers often run on the
+// integrated one, which makes detection 2-3x slower: the operator page shows it so it can be fixed.
+function gpuName() {
+  try {
+    const gl = new OffscreenCanvas(1, 1).getContext("webgl2");
+    const ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
+    const r = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl && gl.getParameter(gl.RENDERER);
+    // "ANGLE (NVIDIA, NVIDIA T1200 Laptop GPU (0x00001FBC) Direct3D11 ...)" -> "NVIDIA T1200 Laptop GPU"
+    const m = /ANGLE \([^,]*,\s*(.+?)\s*(?:\(0x[0-9a-f]+\)|Direct3D|OpenGL|Vulkan|,|\)$)/i.exec(r || "");
+    return (m ? m[1] : r || "").trim() || null;
+  } catch (e) {
+    console.warn("[pose] gpu name", e);
+    return null;
+  }
+}
+
 function detectBlank() {
   const blank = new OffscreenCanvas(64, 64);
   blank.getContext("2d").fillRect(0, 0, 64, 64);
@@ -61,7 +77,7 @@ self.onmessage = async (ev) => {
   if (m.type === "init") {
     try {
       const delegate = await init(m);
-      self.postMessage({ type: "ready", delegate });
+      self.postMessage({ type: "ready", delegate, gpu: gpuName() });
     } catch (e) {
       self.postMessage({ type: "error", message: String((e && e.message) || e) });
     }

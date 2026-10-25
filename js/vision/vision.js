@@ -62,8 +62,9 @@ export class BrowserVision {
     const s = this.video;
     return {
       type: "info",
-      provider: this.delegate ? `MediaPipe ${this.delegate}` : null,
+      provider: this.delegate ? `MediaPipe ${this.delegate}${this.delegate === "GPU" && this.gpu ? ` · ${this.gpu}` : ""}` : null,
       delegate: this.delegate,
+      gpu: this.gpu,
       pose_error: this.poseError,
       camera_error: this.cameraErr,
       devices: this.devices,
@@ -94,8 +95,8 @@ export class BrowserVision {
 
   _onWorker(m) {
     if (m.type === "ready") {
-      this.ready = true; this.delegate = m.delegate;
-      console.info(`[vaga11n] Model de postura: MediaPipe ${m.delegate}`);
+      this.ready = true; this.delegate = m.delegate; this.gpu = m.gpu || null;
+      console.info(`[vaga11n] Model de postura: MediaPipe ${m.delegate}${m.gpu ? ` (${m.gpu})` : ""}`);
       this.emit(this.info());
     } else if (m.type === "error") {
       this.poseError = m.message;
@@ -195,10 +196,11 @@ export class BrowserVision {
   // --- frame loop --------------------------------------------------------------------------------
   _loop(gen) {
     const v = this.video;
-    const onFrame = () => {
+    const onFrame = (now, meta) => {
       if (gen !== this._gen || !this.video) return;
       this._camN++;
-      this._send();
+      // when the camera captured this frame (Chrome reports it for webcams), to measure total latency
+      this._send((meta && (meta.captureTime || meta.expectedDisplayTime)) || performance.now());
       schedule();
     };
     let lastTime = -1;
@@ -209,12 +211,13 @@ export class BrowserVision {
     schedule();
   }
 
-  _send() {
+  _send(capturedAt) {
     const now = performance.now();
     if (this.busy && now - this.busySince > 2000) this.busy = false;   // worker hiccup: never stall forever
-    if (this.busy || !this.ready || !this.video || !this.video.videoWidth) return;
-    this.busy = true; this.busySince = now;
-    createImageBitmap(this.video).then((bitmap) => {
+    const v = this.video;
+    if (this.busy || !this.ready || !v || !v.videoWidth) return;
+    this.busy = true; this.busySince = now; this._capturedAt = capturedAt;
+    createImageBitmap(v).then((bitmap) => {
       this.worker.postMessage({ type: "frame", bitmap, ts: performance.now() }, [bitmap]);
     }).catch((e) => { this.busy = false; console.warn("[vaga11n] frame", e); });
   }
@@ -227,6 +230,7 @@ export class BrowserVision {
     const dt = this._lastT === null ? 0 : t - this._lastT;
     this._lastT = t;
     this.inferMs = ms;
+    const lat = this._capturedAt ? performance.now() - this._capturedAt : null;
     const persons = toPersons(poses, w, h, this.cfg.camera.mirror);
     const tracks = this.tracker.update(persons, t);
     const player = this.selector.update(tracks, t, w);
@@ -239,6 +243,7 @@ export class BrowserVision {
       fps: r1(this.fps),
       cam: r1(this.camFps),
       ms: r1(ms),
+      lat: lat === null ? null : r1(lat),   // camera capture -> tracked pose, in ms
     };
     if (msg.present) msg.player = this.selector.features(player, t, w, h);
     msg.cands = tracks.map((tr) => ({
