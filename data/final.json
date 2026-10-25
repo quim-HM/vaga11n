@@ -1,0 +1,27 @@
+{
+  "_nota": "Textos de la pantalla final i d'atracció. Lemes de la campanya (vagageneral.org). Per mostrar el canal de difusió: posa l'enllaç a difusio.url i executa tools\\make_qr.py. «anim»: frases breus del manifest de vagageneral.org per a la pantalla final.",
+  "lemes": {
+    "dalt": "VIURE ENS COSTA LA VIDA",
+    "titol": "VAGA GENERAL",
+    "data": "11 DE NOVEMBRE",
+    "crida": "Ni salaris per terra ni habitatge pels núvols."
+  },
+  "difusio": {
+    "titol": "Canal de difusió",
+    "subtitol": "@COMITE_23N_BAGES",
+    "url": "https://t.me/COMITE_23N_BAGES",
+    "qr": "img/qr.png",
+    "mostrar": true
+  },
+  "anim": {
+    "frase": "Només lluitant podem millorar les nostres vides. Ara és l'hora de redoblar la lluita.",
+    "exigim_titol": "Exigim",
+    "exigim": [
+      "Baixada dels preus de lloguer",
+      "Salari mínim fins als 1.600 €",
+      "Jornada de 35 hores setmanals"
+    ],
+    "font": "vagageneral.org/manifest",
+    "mes_info": "Totes les demandes de la vaga: vagageneral.org/manifest"
+  }
+}

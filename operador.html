@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Operador · 11N</title>
+<style>
+  @font-face { font-family: "Archivo"; src: url("fonts/Archivo-Variable.ttf") format("truetype"); font-weight: 100 900; font-stretch: 62% 125%; }
+  body { font-family: "Archivo", Arial, sans-serif; background: #FFFFFF; color: #14183D; margin: 0; padding: 16px 24px; }
+  h1 { margin: 0 0 8px; font: 900 26px "Arial Black", sans-serif; text-transform: uppercase; color: #00009E; }
+  .row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .card { background: #FFFFFF; border: 3px solid #00009E; border-radius: 4px; padding: 14px 18px; }
+  #video { width: 640px; height: 360px; background: #1A1F36; display: block; border-radius: 8px; }
+  label { display: block; margin: 10px 0 2px; font-weight: 700; }
+  input[type=range] { width: 320px; }
+  .val { font-variant-numeric: tabular-nums; margin-left: 8px; }
+  button { font: 700 16px "Archivo", Arial, sans-serif; padding: 8px 16px; border: 3px solid #1A1F36; border-radius: 8px; background: #fff; cursor: pointer; margin-right: 8px; }
+  button.primary { background: #C8102E; color: #fff; border-color: #C8102E; }
+  table { border-collapse: collapse; } td { padding: 2px 10px 2px 0; }
+  .ok { color: #0B7A75; font-weight: 700; } .bad { color: #C8102E; font-weight: 700; }
+  kbd { border: 2px solid #1A1F36; border-radius: 4px; padding: 0 6px; background: #fff; font-weight: 700; }
+  ul { margin: 6px 0; padding-left: 20px; } li { margin: 3px 0; }
+  select { font: 16px "Archivo", Arial, sans-serif; max-width: 380px; }
+  .hint { color: #555; font-size: 14px; margin: 4px 0 0; }
+  body.servidor .local-only { display: none; }
+</style>
+</head>
+<body>
+<h1>Pàgina d'operador · calibratge i depuració</h1>
+<p style="margin:0 0 12px">La imatge de la càmera només es mostra aquí, es processa en memòria i no es desa enlloc. Tanca aquesta pàgina durant el funcionament normal.
+<span class="local-only">Aquesta pàgina parla amb la finestra del joc oberta en aquest mateix navegador (tecla <kbd>O</kbd> al joc).</span></p>
+<div class="row">
+  <div class="card">
+    <img id="video" alt="Previsualització de la càmera amb els esquelets detectats">
+    <p style="margin:8px 0 0">Franges fosques = fora de la zona de joc. Requadre vermell = jugador actiu.</p>
+    <div class="local-only">
+      <label>Càmera</label>
+      <select id="camdev"><option value="">(la del sistema)</option></select>
+      <label>Detecció</label>
+      <select id="numposes">
+        <option value="1">1 persona (més ràpid, recomanat)</option>
+        <option value="2">Fins a 2 persones (ignora millor la gent que passa, més lent)</option>
+      </select>
+      <label>Model de postura</label>
+      <select id="model">
+        <option value="full">Complet (més precís)</option>
+        <option value="lite">Lleuger (ordinadors lents)</option>
+      </select>
+      <p class="hint">Es desen amb «Desa la configuració».</p>
+    </div>
+  </div>
+  <div class="card" style="min-width:420px">
+    <table>
+      <tr><td>Estat</td><td id="st-conn">—</td></tr>
+      <tr class="local-only"><td>Detector</td><td id="st-prov">—</td></tr>
+      <tr class="local-only"><td>Càmera</td><td id="st-cam">—</td></tr>
+      <tr><td>Fotogrames/s</td><td id="st-fps">—</td></tr>
+      <tr><td>Inferència</td><td id="st-ms">—</td></tr>
+      <tr><td>Persones vistes</td><td id="st-people">—</td></tr>
+      <tr><td>Jugador</td><td id="st-player">—</td></tr>
+      <tr><td>Qualitat braços</td><td id="st-q">—</td></tr>
+      <tr><td>Abast (unitats)</td><td id="st-reach">—</td></tr>
+    </table>
+    <label>Zona de joc: límit esquerre <span class="val" id="v-zmin"></span></label>
+    <input type="range" id="zmin" min="0" max="0.5" step="0.01">
+    <label>Zona de joc: límit dret <span class="val" id="v-zmax"></span></label>
+    <input type="range" id="zmax" min="0.5" max="1" step="0.01">
+    <label>Mida mínima (ignora gent llunyana) <span class="val" id="v-msw"></span></label>
+    <input type="range" id="msw" min="0.01" max="0.15" step="0.005">
+    <label>Temps de gràcia si es perd el jugador (s) <span class="val" id="v-lost"></span></label>
+    <input type="range" id="lost" min="0.2" max="2" step="0.1">
+    <label>Suavitzat: tall mínim (menys = més suau) <span class="val" id="v-mc"></span></label>
+    <input type="range" id="mc" min="0.3" max="5" step="0.1">
+    <label>Suavitzat: reactivitat (beta) <span class="val" id="v-beta"></span></label>
+    <input type="range" id="beta" min="0" max="3" step="0.05">
+    <label><input type="checkbox" id="ae"> Exposició automàtica</label>
+    <label>Exposició manual <span class="val" id="v-exp"></span></label>
+    <input type="range" id="exp" min="-13" max="0" step="1">
+    <p class="hint local-only" id="exp-note"></p>
+    <p><button class="primary" id="save">Desa la configuració</button><span id="saved"></span></p>
+  </div>
+  <div class="card" style="min-width:420px">
+    <strong>Joc</strong>
+    <label>Paleta de colors</label>
+    <select id="tema">
+      <option value="blau-groc-mes">Blau i groc · camp blau (com la web)</option>
+      <option value="blau-groc-menys">Blau i groc · paper i franja blava</option>
+      <option value="groc-vermell-mes">Groc i vermell · camp groc (com el cartell)</option>
+      <option value="groc-vermell-menys">Groc i vermell · paper i disc del logo</option>
+    </select>
+    <label>Ciutat (nivell 1 d'«Encén la vaga»)</label>
+    <select id="ciutat"></select>
+    <label>Comarca (nivell 2)</label>
+    <select id="comarca"></select>
+    <label>Territori final (nivell 3)</label>
+    <select id="final"></select>
+    <p><button class="primary" id="saveJoc">Aplica i desa</button><span id="savedJoc"></span></p>
+    <strong>Canal de difusió (pantalla final)</strong>
+    <label>Enllaç (Telegram, web…). Buit = sense QR</label>
+    <input id="difUrl" type="text" style="width:380px;font:16px Archivo" placeholder="https://t.me/…">
+    <label><input type="checkbox" id="difShow"> Mostra el QR a la pantalla final</label>
+    <p><button class="primary" id="saveDif">Desa i genera el QR</button><span id="savedDif"></span></p>
+    <img id="qrPrev" alt="" style="width:140px;image-rendering:pixelated;display:none">
+  </div>
+  <div class="card" style="max-width:520px">
+    <strong>Tecles a la finestra del joc</strong>
+    <ul>
+      <li><kbd>D</kbd> depuració · <kbd>H</kbd> mostra el ratolí · <kbd>F</kbd> pantalla completa</li>
+      <li><kbd>R</kbd> torna a l'inici · <kbd>J</kbd> comença partida · <kbd>S</kbd> salta pas</li>
+      <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> salta a un minijoc · <kbd>C</kbd> crèdits</li>
+      <li><kbd>P</kbd> pausa · <kbd>U</kbd> mode un braç · <kbd>M</kbd> so · <kbd>O</kbd> aquesta pàgina</li>
+      <li>Mode simulació: ratolí = mà, <kbd>Enter</kbd> = l'altra mà amunt, <kbd>Espai</kbd> = fixa, <kbd>X</kbd> = entra/surt</li>
+    </ul>
+    <strong>Calibratge ràpid</strong>
+    <ul>
+      <li>Càmera centrada sota o sobre la pantalla, a l'alçada del pit (1,2–1,5 m).</li>
+      <li>Jugador a 2,5–3,5 m: ha de veure's de cap a cintura amb els braços estirats amunt.</li>
+      <li>Ajusta la zona perquè la gent que passa pels costats quedi a les franges fosques.</li>
+      <li>Si algú del fons es detecta, puja «Mida mínima» fins que només surti el jugador.</li>
+      <li>Si la imatge parpelleja amb el projector, desactiva l'exposició automàtica.</li>
+    </ul>
+  </div>
+</div>
+<script type="module">
+// Two modes: in-browser (default) talks to the game window through a BroadcastChannel; ?servidor=1
+// talks to the Python server (python -m vaga11n) through its WebSocket, as before.
+import { ChannelLink, WsLink } from "./js/link.js";
+
+const $ = (id) => document.getElementById(id);
+const SERVER = new URLSearchParams(location.search).has("servidor");
+if (SERVER) document.body.classList.add("servidor");
+const sliders = { zmin: ["player", "zone_x_min"], zmax: ["player", "zone_x_max"], msw: ["player", "min_shoulder_width"],
+  lost: ["player", "lost_timeout"], mc: ["filter", "min_cutoff"], beta: ["filter", "beta"], exp: ["camera", "exposure"] };
+const link = SERVER ? new WsLink(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`) : new ChannelLink();
+const send = (obj) => link.send(obj);
+const notConnected = SERVER ? "desconnectat" : "cap finestra del joc oberta (obre el joc en aquest navegador)";
+
+function setFromConfig(cfg) {
+  for (const [id, [s, k]] of Object.entries(sliders)) { $(id).value = cfg[s][k]; $("v-" + id).textContent = cfg[s][k]; }
+  $("ae").checked = !!cfg.camera.auto_exposure;
+  if (cfg.joc) { for (const k of ["tema", "ciutat", "comarca", "final"]) if (cfg.joc[k] !== undefined) $(k).value = cfg.joc[k]; }
+  if (cfg.pose) { $("numposes").value = String(cfg.pose.num_poses); $("model").value = cfg.pose.model; }
+  if (cfg.camera.device_id !== undefined) { $("camdev").dataset.want = cfg.camera.device_id; $("camdev").value = cfg.camera.device_id; }
+}
+async function loadGeoIndex() {
+  try {
+    const idx = await (await fetch("data/geo/index.json", { cache: "no-store" })).json();
+    const fill = (id, list) => { $(id).innerHTML = (list || []).map((x) => `<option value="${x.id}">${x.nom}${x.n ? " (" + x.n + ")" : ""}</option>`).join(""); };
+    fill("ciutat", idx.ciutats); fill("comarca", idx.comarques); fill("final", idx.final);
+    // choosing a city pre-selects its comarca (still editable)
+    $("ciutat").addEventListener("change", () => {
+      const c = (idx.ciutats || []).find((x) => x.id === $("ciutat").value);
+      if (c && c.comarca) $("comarca").value = c.comarca;
+    });
+  } catch (e) {
+    for (const id of ["ciutat", "comarca", "final"]) $(id).innerHTML = '<option value="">(sense índex de mapes)</option>';
+  }
+}
+function showDifusio(d) {
+  $("difUrl").value = d.url || "";
+  $("difShow").checked = d.mostrar !== false && !!d.url;
+  const src = d.qr ? (d.qr.startsWith("data:") ? d.qr : d.qr + "?" + Date.now()) : null;
+  if (d.url && src) { $("qrPrev").src = src; $("qrPrev").style.display = "block"; } else $("qrPrev").style.display = "none";
+}
+async function loadDifusio() {
+  try {
+    const f = await (await fetch("data/final.json", { cache: "no-store" })).json();
+    showDifusio(f.difusio || {});
+  } catch (e) { console.warn(e); }
+}
+function showInfo(m) {
+  $("st-prov").innerHTML = m.pose_error ? `<span class="bad">${m.pose_error}</span>` : (m.provider || "carregant…");
+  $("st-cam").innerHTML = m.camera_error ? `<span class="bad">${m.camera_error}</span>`
+    : `${m.device_label || "—"}${m.resolution ? ` (${m.resolution[0]}×${m.resolution[1]})` : ""}`;
+  const sel = $("camdev");
+  const want = sel.dataset.want ?? sel.value;
+  sel.innerHTML = '<option value="">(la del sistema)</option>' + (m.devices || []).map((d) => `<option value="${d.id}">${d.label}</option>`).join("");
+  sel.value = want;
+  if (sel.value !== want) sel.value = "";
+  const ex = m.exposure || {};
+  $("exp-note").textContent = ex.supported ? "" : "Aquesta càmera no permet fixar l'exposició des del navegador.";
+}
+let lastPreview = null;
+link.subscribe((m) => {
+  if (m.type === "_open") { $("st-conn").innerHTML = '<span class="ok">connectat</span>'; if (SERVER) send({ cmd: "get_config" }); }
+  else if (m.type === "_close") $("st-conn").innerHTML = `<span class="bad">${notConnected}</span>`;
+  else if (m.type === "hello") { if (m.mode !== "camera") $("st-conn").innerHTML = `<span class="bad">mode ${m.mode} (sense càmera)</span>`; }
+  else if (m.type === "config") setFromConfig(m.config);
+  else if (m.type === "info") showInfo(m);
+  else if (m.type === "preview") {
+    const url = URL.createObjectURL(m.blob);
+    $("video").src = url;
+    if (lastPreview) URL.revokeObjectURL(lastPreview);
+    lastPreview = url;
+  } else if (m.type === "difusio") {
+    if (m.error) $("savedDif").textContent = " Error: " + m.error;
+    else if (SERVER) { $("savedDif").textContent = m.mostrar ? " QR generat" : " Sense QR"; }
+    else showDifusio(m);
+  }
+  else if (m.type === "status" && m.camera === false) $("st-conn").innerHTML = `<span class="bad">${m.error || "sense càmera"}</span>`;
+  else if (m.type === "pose") {
+    if (!$("st-conn").textContent.startsWith("connectat") && m.people !== undefined) $("st-conn").innerHTML = '<span class="ok">connectat</span>';
+    $("st-fps").textContent = `${m.fps} (càmera: ${m.cam ?? "—"})`; $("st-ms").textContent = m.ms + " ms"; $("st-people").textContent = m.people;
+    $("st-player").innerHTML = m.present ? `<span class="ok">#${m.seat} detectat</span>` : '<span class="bad">cap</span>';
+    $("st-q").textContent = m.player ? m.player.q : "—";
+    $("st-reach").textContent = m.player ? m.player.reach : "—";
+  }
+});
+for (const [id, [s, k]] of Object.entries(sliders)) {
+  $(id).addEventListener("input", () => {
+    $("v-" + id).textContent = $(id).value;
+    send({ cmd: "config", set: { [s]: { [k]: Number($(id).value) } } });
+  });
+}
+$("ae").addEventListener("change", () => send({ cmd: "config", set: { camera: { auto_exposure: $("ae").checked } } }));
+$("camdev").addEventListener("change", () => { $("camdev").dataset.want = $("camdev").value; send({ cmd: "config", set: { camera: { device_id: $("camdev").value } } }); });
+$("numposes").addEventListener("change", () => send({ cmd: "config", set: { pose: { num_poses: Number($("numposes").value) } } }));
+$("model").addEventListener("change", () => send({ cmd: "config", set: { pose: { model: $("model").value } } }));
+$("save").addEventListener("click", () => {
+  send({ cmd: "config", set: {}, save: true });
+  $("saved").textContent = SERVER ? " Desat a config.local.json" : " Desat en aquest navegador";
+});
+$("tema").addEventListener("change", () => send({ cmd: "config", set: { joc: { tema: $("tema").value } } }));
+$("saveJoc").addEventListener("click", () => {
+  send({ cmd: "config", set: { joc: { tema: $("tema").value, ciutat: $("ciutat").value, comarca: $("comarca").value, final: $("final").value } }, save: true });
+  $("savedJoc").textContent = " Aplicat i desat";
+});
+$("saveDif").addEventListener("click", () => {
+  send({ cmd: "difusio", url: $("difUrl").value, mostrar: $("difShow").checked });
+  $("savedDif").textContent = " Desat";
+  if (SERVER) setTimeout(loadDifusio, 600);
+});
+loadGeoIndex().then(() => send({ cmd: "get_config" }));
+if (SERVER) {
+  loadDifusio();
+  $("video").src = "debug.mjpg";
+  $("video").onerror = () => {
+    $("video").alt = "Sense previsualització (mode simulació, debug_video desactivat o servidor aturat). Reintentant…";
+    setTimeout(() => { $("video").src = "debug.mjpg?" + Date.now(); }, 3000);
+  };
+} else {
+  $("video").alt = "Sense previsualització: obre el joc en aquest mateix navegador";
+}
+$("st-conn").innerHTML = `<span class="bad">${notConnected}</span>`;
+</script>
+</body>
+</html>
