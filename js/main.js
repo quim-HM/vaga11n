@@ -54,6 +54,7 @@ async function boot() {
   });
   await app.goto(params.get("scene") || "attract");
   document.getElementById("boot").classList.add("hidden");
+  app.preloadScenes().catch((e) => console.warn("preload", e));
   let last = performance.now();
   let errors = 0;
   const frame = (now) => {

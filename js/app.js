@@ -76,7 +76,15 @@ export class App {
   }
 
   async goto(name, params = {}) {
+    // Scene modules load on first use (an async import that can take several frames on a slow
+    // connection). Until the new scene is in place the current one is frozen (see update), so it
+    // cannot fire its transition again — e.g. the calibration calling nextGame() every frame and
+    // skipping all the games — and only the latest requested scene is entered.
+    const token = (this._gotoToken = (this._gotoToken || 0) + 1);
+    this.switching = true;
     let Cls = await this.loadScene(name);
+    if (token !== this._gotoToken) return;
+    this.switching = false;
     const game = GAMES.find((g) => g.id === name);
     if (!Cls && game) { Cls = Placeholder; params = { ...params, id: game.id, title: game.title }; }
     if (!Cls) { console.error("missing scene", name); return; }
@@ -86,6 +94,11 @@ export class App {
     this.paused = null;
     this.absentT = 0;
     if (this.scene.enter) this.scene.enter();
+  }
+
+  // Load every scene module in the background so later transitions are instant
+  preloadScenes() {
+    return Promise.all(Object.keys(SCENES).map((name) => this.loadScene(name)));
   }
 
   // --- session flow -------------------------------------------------------
@@ -130,7 +143,7 @@ export class App {
     this.time += dt;
     this.input.update(dt);
     setMouseMode(this.input.usingMouse);
-    if (!this.scene) return;
+    if (!this.scene || this.switching) return;
     if (this.needsPlayer) {
       const present = this.input.state.present;
       this.absentT = present ? 0 : this.absentT + dt;
@@ -341,6 +354,8 @@ export class App {
   // --- operator keyboard --------------------------------------------------
   onKey(e) {
     const k = e.key.toLowerCase();
+    // scene-changing keys wait until the previous change has finished loading
+    if (this.switching && "rsnc123j".includes(k)) { e.preventDefault(); return; }
     if (k === "d") this.debug = !this.debug;
     else if (k === "r") { this.newSession(); this.goto("attract"); }
     else if (k === "s" || k === "n") { if (this.scene && this.scene.skip) this.scene.skip(); else if (GAMES.some((g) => g.id === this.sceneName)) this.finishGame(this.sceneName, { score: 0, summary: T("app.saltat", "Saltat"), skipped: true }); }

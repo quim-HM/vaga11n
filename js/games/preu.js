@@ -388,7 +388,8 @@ export default class Preu {
 
   drawReveal(g) {
     const app = this.app, r = this.results[this.results.length - 1], q = r.q;
-    const prog = easeOut((this.t - 0.8) / 1.4);
+    // the real value counts up from the first frame (no blank card, no "0" pause), landing just before the verdict
+    const prog = easeOut(this.t / 2.0);
     const shown = q.escala === "log" && q.rang.min > 0
       ? q.rang.min * Math.pow(q.valor / q.rang.min, Math.max(prog, 0.0001))
       : lerp(q.rang.min, q.valor, prog);
@@ -400,7 +401,7 @@ export default class Preu {
       text(g, T("preu.tu", "TU"), bl.x + bl.w / 2, 215, { size: 48, kind: "title", align: "center", color: C.blue, maxW: bl.w });
       text(g, T("preu.la_realitat", "LA REALITAT"), br.x + br.w / 2, 215, { size: 48, kind: "title", align: "center", color: C.red, maxW: br.w });
       drawMetaphor(g, q.metafora, bl, r.answer, q, "answer");
-      if (this.t > 0.8) drawMetaphor(g, q.metafora, br, prog >= 1 ? q.valor : shown, q, "real");
+      drawMetaphor(g, q.metafora, br, prog >= 1 ? q.valor : shown, q, "real");
     });
     if (this.t > 2.2) {
       const a = easeOut((this.t - 2.2) / 0.5);
