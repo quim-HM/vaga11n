@@ -2,8 +2,11 @@
 // (city barris -> comarca municipis -> final territory, e.g. the Països Catalans). Each real area is
 // subdivided into hexagonal cells; each hand is a "brush" that heats the cells under it in proportion
 // to how fast it moves (waving heats, a still hand barely does) and every cell cools down
-// continuously. An area is lit when ~70% of its cells are >= 60%; a level is won by keeping ALL
-// areas lit for 5 s. The "adhesion" is a playful simulation, never real data.
+// continuously. A level is won by having a share of the WHOLE map organised at once (TUNING.winArea)
+// and holding it for a few seconds: no area is a prerequisite, but the cells cool fast enough that
+// it takes constant waving. Each area is still marked as organised when ~60 % of its cells are lit,
+// which is what the map outlines and the counter show. The "adhesion" is a playful simulation,
+// never real data.
 // All user-facing strings go through T() from textos.js (keys "encen.*", overridable in data/textos.json) and all
 // colours are derived at draw time from the switchable palette C.
 import { W, H, C, LAYOUT, text, panel, ring, hatch, Particles, clamp, easeOut, fmtNum, font, rrect, onCard, measure, fitSize as uiFit } from "../ui.js";
@@ -44,28 +47,35 @@ const themeSig = () => [C.paper, C.paper2, C.ink, C.inkSoft, C.heatCold, C.heatM
 // --- tuning ------------------------------------------------------------------------------------
 // Gameplay tuning (exported so it can be adjusted from the console / test harness)
 export const TUNING = {
-  brushR: [110, 110, 80],         // brush radius per level (screen px; the final map is smaller on screen)
-  heat: [5.0, 3.0, 1.6],          // max heat/s per level for a cell under a moving brush
-  stillFactor: 0.6,               // fraction of the max heat given by a resting hand (moving = 100%)
+  brushR: [88, 88, 64],           // brush radius per level (screen px; the final map is smaller on screen)
+  heat: [2.0, 1.95, 2.75],        // max heat/s per level: about a third of the range per pass, so a cell
+                                  // fills up in three passes (and counts as organised after about two)
+  stillFactor: 0.25,              // fraction of the max heat given by a resting hand (moving = 100%)
   speedMin: 120,                  // px/s below which a hand counts as still (pose jitter)
-  speedFull: 900,                 // px/s at which a hand gives the full heat
-  dec: [0.05, 0.06, 0.05],        // continuous cooling per level (heat/s); relative to heat, the final level cools fastest
+  speedFull: 1100,                // px/s at which a hand gives the full heat
+  dec: [0.040, 0.044, 0.029],     // cooling per level (heat/s), tuned against the time it takes to sweep the
+                                  // whole map: a zone you left behind cools visibly, and sweeping slowly
+                                  // loses ground faster than it gains it
   spread: [0.25, 0.25, 0.25],     // contagion: warmth flowing from lit neighbour cells
   cellTarget: [720, 650, 300],    // approx. number of hex cells per level (size derived from map area)
   cellMin: 11, cellMax: 30,       // hex radius limits (px)
-  areaLit: 0.6,                   // fraction of an area's cells that must be lit
+  winArea: [0.60, 0.60, 0.55],    // share of the whole map that must be organised at once to win the level
+  winHyst: 0.07,                  // once the target is reached, the hold survives dips this far below it
+  areaLit: 0.6,                   // fraction of an area's cells that marks one area as organised (display only)
   fewAreasLit: 0.15,              // extra lit share required on maps with fewer than ~15 areas
   fewAreasCool: 0.6,              // and extra cooling (x1.6 at <= 5 areas)
   litHyst: 0.15,                  // a lit area stays lit until its fraction drops this much below
   orgCool: 0.6,                   // organised (lit) areas cool at this fraction of the normal rate
   seedHeat: 0.7,                  // initial heat of the area containing the previous territory
-  oneArmCool: 0.7,                // one-arm mode: cooling 30% slower
+  oneArmCool: 0.30,               // one-arm mode: cooling a third as fast (one brush covers half the ground)
+  oneArmWin: 0.60,                // one-arm mode: the share of the map needed is lowered by this factor
   limit: [35, 40, 45],            // per-level timer (no defeat)
-  fast: [15, 20, 28],             // completion time that earns the full speed bonus
+  fast: [18, 22, 26],             // completion time that earns the full speed bonus
 };
 const TU = TUNING;
 const NLEVELS = 3;
-const LIT = 0.6;
+const LIT = 0.5;        // a cell counts as organised from half the range up: the top half is
+                        // headroom that visibly cools down, so the map keeps breathing
 const HOLD_S = 3;
 const INTRO_S = 5.5, READY_S = 3.2, CARD_AUTO_S = 5, CARD_MIN_S = 0.8, RAISE_S = 0.6;
 // legacy data (app.data.geo.manresa/bages/catalunya) and bubble fallback
@@ -205,7 +215,7 @@ export default class Encen {
     this.level = (this.built && this.built[i]) || this.makeLevel(i, this.geoLevels()[i]);
     const L = this.level;
     if (L.fact && !this.facts.some((f) => f.text === L.fact.text)) this.facts.push(L.fact);
-    this.levelT = 0; this.holdT = 0; this.holdTick = null; this.bestFrac = 0; this.mean = 0; this.lit = 0; this.embers = [];
+    this.levelT = 0; this.holdT = 0; this.holdTick = null; this.bestFrac = 0; this.lit = 0; this.area = 0; this.embers = [];
     this.hands = {};
     // the area containing the previous territory starts warm (looks lit, but cools if ignored)
     if (i > 0 && L.seed >= 0) {
@@ -317,9 +327,17 @@ export default class Encen {
     this.app.sfx.select();
   }
 
+  // Share of the whole map that must be organised at once to win the current level
+  // (one hand covers half the ground, so one-arm mode asks for less)
+  winArea() {
+    const w = TU.winArea[Math.min(this.li, TU.winArea.length - 1)];
+    return this.app.input.oneArm ? w * TU.oneArmWin : w;
+  }
+
   endLevel(won) {
     const A = this.level.areas;
-    this.results[this.li] = { i: this.li, won, time: this.levelT, frac: won ? 1 : this.bestFrac, name: this.level.terr.name };
+    this.results[this.li] = { i: this.li, won, time: this.levelT, frac: won ? 1 : this.bestFrac,
+      name: this.level.terr.name, lit: this.lit, total: A.length, area: this.area };
     this.phase = "card"; this.phaseT = 0; this.raiseT = 0; this.raiseArmed = false;
     this.holdT = 0;
     if (won) {
@@ -357,7 +375,8 @@ export default class Encen {
   finish() {
     if (this.done) return;
     if (this.level && !this.results[this.li] && this.phase === "play") {
-      this.results[this.li] = { i: this.li, won: false, time: this.levelT, frac: this.bestFrac, name: this.level.terr.name };
+      this.results[this.li] = { i: this.li, won: false, time: this.levelT, frac: this.bestFrac,
+        name: this.level.terr.name, lit: this.lit, total: this.level.areas.length, area: this.area };
     }
     this.done = true;
     window.removeEventListener("tema", this.onTheme);
@@ -453,12 +472,11 @@ export default class Encen {
     }
     const litCells = L.areaLitCells;
     litCells.fill(0);
-    let sum = 0;
+    let litTotal = 0;
     for (let c = 0; c < n; c++) {
       const x = v2[c] < 0 ? 0 : v2[c] > 1 ? 1 : v2[c];
       v[c] = x;
-      sum += x;
-      if (x >= LIT) litCells[cells.area[c]]++;
+      if (x >= LIT) { litCells[cells.area[c]]++; litTotal++; }
     }
     let lit = 0, newlyLit = 0;
     A.forEach((a, k) => {
@@ -470,10 +488,14 @@ export default class Encen {
       if (a.lit) { lit++; if (!was) newlyLit++; }
     });
     if (newlyLit && this.sfxT <= 0) { sfx.coin(); this.sfxT = 0.12; }
-    this.mean = sum / Math.max(1, n);
     this.lit = lit;
-    this.bestFrac = Math.max(this.bestFrac, lit / A.length);
-    if (lit === A.length) {
+    // the goal is a share of the whole map organised at once, wherever it is
+    this.area = litTotal / Math.max(1, n);
+    const goal = this.winArea();
+    this.bestFrac = Math.max(this.bestFrac, clamp(this.area / goal, 0, 1));
+    // hysteresis while holding: a short dip (a hand crossing an already organised zone) does not
+    // throw away the countdown
+    if (this.area >= (this.holdT > 0 ? goal - TU.winHyst : goal)) {
       if (this.holdT === 0) sfx.lock();
       this.holdT += dt;
       const s = Math.ceil(HOLD_S - this.holdT);
@@ -844,7 +866,9 @@ export default class Encen {
 
   drawHud(g) {
     const L = this.level, A = L.areas, pal = this.pal;
-    const mean = this.phase === "play" ? (this.mean || 0) : 0;
+    // the gauge is the win condition: share of the whole map organised right now, with its target
+    const area = this.phase === "play" ? (this.area || 0) : 0;
+    const goal = this.winArea();
     const lit = this.phase === "play" ? (this.lit || 0) : 0;
     g.save();
     g.fillStyle = pal.band;
@@ -863,13 +887,19 @@ export default class Encen {
       rrect(g, bx, by, bw, bh, 4); g.fill();
       g.save(); g.clip();
       g.fillStyle = barFill();
-      g.fillRect(bx, by, bw * mean, bh);
+      g.fillRect(bx, by, bw * area, bh);
       g.restore();
       rrect(g, bx, by, bw, bh, 4);
       g.lineWidth = 3; g.strokeStyle = C.cardLine; g.stroke();
+      // target mark: reaching it (and holding) wins the level
+      const gx = bx + bw * goal;
+      g.lineWidth = 5; g.strokeStyle = C.cardLine;
+      g.beginPath(); g.moveTo(gx, by - 8); g.lineTo(gx, by + bh + 8); g.stroke();
       g.restore();
     });
-    text(g, T("encen.percent", "{n}%", { n: Math.round(mean * 100) }), bx + bw + 22, by + 42, { size: 50, kind: "title", color: C.ink });
+    text(g, T("encen.objectiu", "objectiu {n}%", { n: Math.round(goal * 100) }), bx + bw * goal, 42,
+      { size: 26, weight: 700, align: "center", color: C.ink });
+    text(g, T("encen.percent", "{n}%", { n: Math.round(area * 100) }), bx + bw + 22, by + 42, { size: 50, kind: "title", color: C.ink });
     const lim = TU.limit[this.li];
     const left = clamp(lim - this.levelT, 0, lim);
     ring(g, 1830, 70, 44, left / lim, { color: left < 8 ? C.red : C.teal, back: pal.track, lw: 10 });
@@ -917,7 +947,7 @@ export default class Encen {
   }
   drawIntro(g) {
     g.save(); g.fillStyle = this.pal.veil; g.fillRect(0, 0, W, H); g.restore();
-    this.drawTitleCard(g, T("encen.titol", "ENCÉN LA VAGA"), T("encen.intro", "Mou les mans per tot el mapa"), { countdown: INTRO_S });
+    this.drawTitleCard(g, T("encen.titol", "ENCÉN LA VAGA"), T("encen.intro", "Mou les mans sense parar per tot el mapa"), { countdown: INTRO_S });
   }
 
   drawReady(g) {
@@ -940,7 +970,10 @@ export default class Encen {
     if (last) { title = T("encen.final", "VAGA GENERAL!"); line = this.summary(); }
     else if (won) {
       title = this.doneTitle(L);
-      line = T("encen.fet_linia_tots", "{n} {unitat} {organitzats}", { n: L.areas.length, unitat: L.terr.unit, organitzats: this.litWord(L) });
+      // winning no longer means every area is organised: say how many actually are
+      line = r && r.lit < r.total
+        ? T("encen.fet_linia_part", "{n} de {total} {unitat} {organitzats}", { n: r.lit, total: r.total, unitat: L.terr.unit, organitzats: this.litWord(L) })
+        : T("encen.fet_linia_tots", "{n} {unitat} {organitzats}", { n: L.areas.length, unitat: L.terr.unit, organitzats: this.litWord(L) });
     } else { title = T("encen.falta", "ENCARA NO!"); line = T("encen.falta_linia", "Fan falta més mans. Podem ser moltes més."); }
     this.drawTitleCard(g, title, line, { alpha: a, hot: won || last });
     // continue: raise a hand (ring fills) or wait (thin bar)

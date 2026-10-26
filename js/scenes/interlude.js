@@ -11,8 +11,14 @@ const RAISE_S = 0.6;
 // Evaluated at draw time so data/textos.json overrides apply
 const INFO = {
   preu: () => ({ what: T("interludi.preu.que", "Endevina xifres reals"), how: T("interludi.preu.com", "Mà amunt ▲ · mà avall ▼ · {check} per respondre") }),
-  finaldemes: () => ({ what: T("interludi.finaldemes.que", "Qui dia passa, any empeny: aconsegueix arribar a final de mes al llarg dels anys"), how: T("interludi.finaldemes.com", "Segueix el camí amb la mà") }),
-  encen: () => ({ what: T("interludi.encen.que", "Encén la vaga, barri a barri"), how: T("interludi.encen.com", "Mou les mans per tot el mapa") }),
+  // the control depends on how you are playing: two hands tilt the line, one hand is followed
+  finaldemes: (app) => ({
+    what: T("interludi.finaldemes.que", "Qui dia passa, any empeny: aconsegueix arribar a final de mes al llarg dels anys"),
+    how: app && (app.input.usingMouse || app.input.oneArm)
+      ? T("interludi.finaldemes.com_una", "Segueix el camí amb la mà")
+      : T("interludi.finaldemes.com", "Inclina la línia entre les dues mans"),
+  }),
+  encen: () => ({ what: T("interludi.encen.que", "Encén la vaga, barri a barri"), how: T("interludi.encen.com", "Mou les mans sense parar per tot el mapa") }),
 };
 
 export default class Interlude {
@@ -35,7 +41,7 @@ export default class Interlude {
   skip() { this.app.goto(this.params.game.id); }
   draw(g) {
     const { game, index } = this.params;
-    const info = INFO[game.id] ? INFO[game.id]() : { what: "", how: "" };
+    const info = INFO[game.id] ? INFO[game.id](this.app) : { what: "", how: "" };
     const a = easeOut(this.t / 0.5);
     posterBlock(g, `${index + 1} / ${GAMES.length}`, W / 2, 196, 56, { bg: C.hl, fg: C.hlText, align: "center", alpha: a });
     text(g, game.title, W / 2, 420, { size: 160, kind: "title", align: "center", color: C.head, alpha: a, maxW: W - 200 });

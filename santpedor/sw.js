@@ -3,14 +3,16 @@
 // next visit. Cache-first: once loaded, the installation keeps working without internet at the venue.
 // Several versions (one per locality) can live on one origin, e.g. /vaga11n/ and /vaga11n/santpedor/:
 // each one names its caches with its locality and never touches the folders of the others (SKIP).
-const VERSION = "468efa0b4ed0";
+const VERSION = "372d3e5c68bf";
 const LLOC = "santpedor";
 const SKIP = [];
 const ASSETS = [
 "./",
 "css/style.css",
+"data/INFORME_DADES.md",
 "data/final.json",
 "data/fonts.json",
+"data/geo/README.md",
 "data/geo/bages_municipis.json",
 "data/geo/barris/08015.json",
 "data/geo/barris/08019.json",
@@ -73,12 +75,10 @@ const ASSETS = [
 "data/geo/index.json",
 "data/geo/manresa_barris.json",
 "data/geo/ppcc.json",
-"data/geo/README.md",
 "data/geo/vistes.json",
-"data/INFORME_DADES.md",
 "data/joc2.json",
-"data/llocs/index.json",
 "data/llocs/README.md",
+"data/llocs/index.json",
 "data/llocs/santpedor/fonts.json",
 "data/llocs/santpedor/lloc.json",
 "data/llocs/santpedor/preguntes.json",
@@ -143,11 +143,11 @@ const ASSETS = [
 "operador.html",
 "package.json",
 "paletes.html",
+"vendor/README.md",
 "vendor/mediapipe/vision_bundle.mjs",
 "vendor/mediapipe/wasm/vision_wasm_module_internal.js",
 "vendor/mediapipe/wasm/vision_wasm_module_internal.wasm",
-"vendor/qrcode/qrcode.mjs",
-"vendor/README.md"
+"vendor/qrcode/qrcode.mjs"
 ];
 const PREFIX = `vaga11n-${LLOC}-`;
 const CACHE = PREFIX + VERSION;

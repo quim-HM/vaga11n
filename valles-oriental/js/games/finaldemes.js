@@ -1,7 +1,8 @@
-// «Final de mes»: arcade corridor on ONE % scale.
+// «Final de mes»: arcade corridor following real data.
 // Each stage's centre line is the real cumulative % change of a series since a common base year;
-// the corridor width is only a game difficulty. Already played stages stay visible as ghost lines,
-// so the player sees each trend getting steeper. Ends with all lines together.
+// the corridor width is only a game difficulty. Each stage is played zoomed to its own range, so it
+// climbs the whole screen from start to finish; already played stages stay visible as ghost lines on
+// that same zoom, which keeps the comparison. The end screen puts every line back on ONE % scale.
 // Colours are read from C.* at draw time (themes mutate C); all strings go through T().
 import { W, H, C, text, panel, ring, hatch, clamp, easeOut, fmtNum, Particles, rrect, onCard, onBg, measure, font, LAYOUT, posterBlock, wrap } from "../ui.js";
 import { drawRaiseIcon, drawFooterHint } from "../hand.js";
@@ -62,11 +63,13 @@ const INTRO_DUR = 3;
 const GATE_PX = 60;         // hand target within this of the ball's height = on the €
 const GATE_HOLD = 0.4;      // ... for this long starts the stage
 const GATE_MAX = 6;         // never block: start anyway after this
-const GATE_TYPICAL = 1.5;
+const GATE_TYPICAL = 2.6;
+const GATE_MIN = 1.8;       // the level card stays up at least this long before the gate can open
 const GO_DUR = 0.5;         // «Som-hi!»
 const GRACE = 1;            // invulnerable seconds at the start of each stage
-const STAGE_MIN = 19, STAGE_MAX = 21;
-const TIME_BUDGET = 101;
+const STAGE_MIN = 15, STAGE_MAX = 17;   // length of the FIRST level (the next ones are shorter)
+const LEVEL_RAMP = [1, 0.9, 0.82, 0.75];   // each level runs this fraction of the first one's time
+const TIME_BUDGET = 80;
 const CARD_TYPICAL = 2.5;
 const SPEEDS = [565, 625, 675, 735];        // scroll px/s (fast; px per year scales with it)
 const WIDTHS = [230, 185, 150, 120];        // corridor width px, narrower every stage (game difficulty, not data)
@@ -78,14 +81,28 @@ const NODATA_DUR = 3;
 const FINAL_LINE_T0 = 0.5, FINAL_LINE_GAP = 0.75, FINAL_LINE_DUR = 0.9;
 const FINAL_MIN = 4.5, FINAL_AUTO = 12;
 
-// Direct control: the ball follows the hand height with capped speed and light inertia
+// Control. With two hands the line between them is the direction the € travels: tilt it up and the
+// € climbs, tilt it down and it dives, hold it level and it keeps its height. With a single hand
+// (one-arm mode, mouse, or only one hand detected) the € follows the hand height directly.
 const VMAX = 900;           // px/s
 const FOLLOW_GAIN = 8;      // 1/s
 const INERTIA = 12;         // 1/s (how fast velocity catches up)
+const TILT_DEAD = 0.09;     // |slope| below this = level line: the € holds its height
+const TILT_FULL = 0.60;     // slope (~31°) that asks for the full climb/dive speed
+const TILT_VMAX = 760;      // px/s at full tilt
+const TILT_SPAN = 170;      // hands closer than this (px apart) give no usable direction
+
+// Vertical speed asked by a hand line, in screen px/s (negative = up). slope > 0 means the hand
+// on the right (where the € is heading) is the higher one.
+export function tiltSpeed(slope) {
+  const mag = clamp((Math.abs(slope) - TILT_DEAD) / (TILT_FULL - TILT_DEAD), 0, 1);
+  return slope > 0 ? -mag * TILT_VMAX : mag * TILT_VMAX;
+}
 
 // Marge
-const DRAIN = 0.175;       // marge/s outside the corridor: ~5.7 s from full to empty
-const REGEN = 0.08;
+const DRAIN = 0.45;        // marge/s outside the corridor: ~2.2 s from full to empty
+const REGEN = 0.06;        // and slow to come back: being out of the corridor has to hurt
+const MARGE_SEG = 5;       // the marge is shown as segments (a life bar), with no label to read
 
 // Fun
 const COIN_PTS = 100;       // x coin chain (1..5): following the wave pays much more
@@ -110,6 +127,13 @@ function catmull(arr, u) {
   const i = Math.floor(u), t = u - i;
   const p0 = arr[Math.max(i - 1, 0)], p1 = arr[i], p2 = arr[Math.min(i + 1, n - 1)], p3 = arr[Math.min(i + 2, n - 1)];
   return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t);
+}
+
+// Round gridline step giving ~5 lines over the range (10 % minimum, so a flat stage is not blown up)
+function niceStep(range) {
+  const raw = Math.max(10, range) / 5;
+  for (const s of [1, 2, 5, 10, 20, 25, 50, 100]) if (raw <= s) return s;
+  return 200;
 }
 
 function fmtPct(v) {
@@ -254,7 +278,11 @@ export default class FinalDeMes {
     const off = Math.max(0, 4 - out.length);  // fewer stages -> start at a harder difficulty step
     const n = out.length;
     const overhead = INTRO_DUR + n * (GATE_TYPICAL + GO_DUR) + n * CARD_TYPICAL;
-    this.stageDur = clamp((TIME_BUDGET - overhead) / Math.max(1, n), STAGE_MIN, STAGE_MAX);
+    // every level runs a bit shorter than the one before (same years, less time): the budget is
+    // shared out in proportion, so the first level still lasts about STAGE_MIN..MAX
+    const ramp = out.map((_, i) => LEVEL_RAMP[Math.min(i, LEVEL_RAMP.length - 1)]);
+    const rampSum = ramp.reduce((a, b) => a + b, 0) || 1;
+    this.stageDur = clamp((TIME_BUDGET - overhead) / rampSum, STAGE_MIN, STAGE_MAX);
     out.forEach((st, i) => {
       const k = Math.min(i + off, 3);
       st.index = i;
@@ -267,7 +295,8 @@ export default class FinalDeMes {
       });
       st.dash = DASHES[k]; st.marker = MARKERS[k];
       st.speed = SPEEDS[k]; st.width = WIDTHS[k];
-      st.ppy = (st.speed * this.stageDur) / (st.n - 1);
+      st.dur = this.stageDur * ramp[i];
+      st.ppy = (st.speed * st.dur) / (st.n - 1);
       st.result = null;
       st.pts = 0; st.inT = 0; st.totT = 0; st.coinsGot = 0;
       st.coins = [];
@@ -275,6 +304,17 @@ export default class FinalDeMes {
       const phase = i * 1.9 + 0.5;
       for (let uu = 0.4; uu <= st.n - 1.1; uu += COIN_STEP) st.coins.push({ u: uu, s: Math.sin((2 * Math.PI * uu) / COIN_PERIOD + phase), got: false });
     });
+    // each stage is played zoomed to its own range (its last year lands near the top of the screen),
+    // so every trend climbs the whole screen and the stage feels like a climb from start to finish
+    for (const st of out) {
+      let a = 0, b = 0;
+      for (const p of st.pct) { a = Math.min(a, p); b = Math.max(b, p); }
+      const s = niceStep(b - a);
+      st.step = s;
+      st.lo = Math.floor(a / s) * s;
+      st.hi = Math.max(st.lo + s, Math.ceil(b / s) * s);
+    }
+    // the end screen still puts every stage on one common scale: that is where they get compared
     let lo = 0, hi = 10;
     for (const st of out) for (const p of st.pct) { lo = Math.min(lo, p); hi = Math.max(hi, p); }
     const step = hi - lo > 60 ? 20 : 10;
@@ -284,9 +324,12 @@ export default class FinalDeMes {
     this.stages = out;
   }
 
-  yOf(p) { return PLAY_BOT - PAD - ((p - this.lo) / (this.hi - this.lo)) * (PLAY_H - 2 * PAD); }
+  // Scale of the stage being played (the end screen passes the common one explicitly)
+  yOf(p, sc = this.st || this) {
+    return PLAY_BOT - PAD - ((p - sc.lo) / (sc.hi - sc.lo)) * (PLAY_H - 2 * PAD);
+  }
 
-  centreAt(st, u) { return this.yOf(catmull(st.pct, clamp(u, 0, st.n - 1))); }
+  centreAt(st, u) { return this.yOf(catmull(st.pct, clamp(u, 0, st.n - 1)), this.st || st); }
 
   widthOf(st) { return st.width + (this.app.input.oneArm ? ONE_ARM_EXTRA : 0); }
 
@@ -328,13 +371,13 @@ export default class FinalDeMes {
 
   _startPlay() { this.phase = "play"; this.pt = 0; this.graceT = GRACE; this.vy = 0; }
 
-  _uOf(t) { return (t / this.stageDur) * (this.st.n - 1); }
+  _uOf(t) { return (t / this.st.dur) * (this.st.n - 1); }
 
   _endStage(ok) {
     const st = this.st;
     st.result = ok ? "ok" : "fail";
     if (!ok) {
-      const rest = Math.max(0, this.stageDur - this.stT);  // unplayed time counts as outside
+      const rest = Math.max(0, this.st.dur - this.stT);  // unplayed time counts as outside
       this.totalTime += rest; st.totT += rest;
     }
     this.app.sfx[ok ? "good" : "bad"]();
@@ -356,7 +399,7 @@ export default class FinalDeMes {
     const score = this._score();
     this.app.finishGame(GAME_ID, {
       score,
-      summary: T("finaldemes.resum.frase", "Has superat {ok} de {n} etapes i has estat dins del passadís el {pct} % del temps.", { ok, n, pct: score }),
+      summary: T("finaldemes.resum.frase", "Has superat {ok} de {n} nivells i has estat dins del passadís el {pct} % del temps.", { ok, n, pct: score }),
       facts: this._facts(),
     });
   }
@@ -413,14 +456,44 @@ export default class FinalDeMes {
     return clamp(c.y, PLAY_TOP + BALL_R, PLAY_BOT - BALL_R);
   }
 
+  // Both hands as [left, right] on screen, when two-hand steering applies (camera, two arms,
+  // two hands detected). null = steer with a single hand.
+  _pair() {
+    const inp = this.app.input;
+    if (inp.usingMouse || inp.oneArm) return null;
+    const cs = inp.cursors();
+    if (cs.length < 2) return null;
+    return cs[0].x <= cs[1].x ? [cs[0], cs[1]] : [cs[1], cs[0]];
+  }
+
+  // Slope of the line between the hands (> 0 = pointing up towards where the € is heading);
+  // null when there is no usable line (one hand, or both hands on top of each other).
+  _slope() {
+    const p = this._pair();
+    if (!p) return null;
+    const dx = p[1].x - p[0].x;
+    if (dx < TILT_SPAN) return null;
+    return (p[0].y - p[1].y) / dx;
+  }
+
   _steer(dt) {
-    const target = this._handTarget();
-    const want = target === null ? 0 : clamp((target - this.py) * FOLLOW_GAIN, -VMAX, VMAX);
+    const slope = this._slope();
+    let want;
+    if (slope !== null) want = tiltSpeed(slope);
+    else if (this._pair()) want = 0;      // hands together: no direction, hold the height
+    else {
+      const target = this._handTarget();
+      want = target === null ? 0 : clamp((target - this.py) * FOLLOW_GAIN, -VMAX, VMAX);
+    }
     this.vy += (want - this.vy) * Math.min(1, dt * INERTIA);
     this.py = clamp(this.py + this.vy * dt, PLAY_TOP + BALL_R, PLAY_BOT - BALL_R);
   }
 
+  // Start gate: two hands apart and level, or (single hand) the hand on the €
   _handReady() {
+    const slope = this._slope();
+    if (slope !== null) return Math.abs(slope) < TILT_DEAD;
+    if (this._pair()) return false;
     const target = this._handTarget();
     return target !== null && Math.abs(target - this.py) < GATE_PX;
   }
@@ -454,7 +527,7 @@ export default class FinalDeMes {
       // hand-placement gate: ball locked at the corridor centre, nothing counts
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       this.gateT = this._handReady() ? this.gateT + dt : 0;
-      if (this.gateT >= GATE_HOLD || this.pt >= GATE_MAX) this._startGo();
+      if ((this.gateT >= GATE_HOLD && this.pt >= GATE_MIN) || this.pt >= GATE_MAX) this._startGo();
     } else if (this.phase === "go") {
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       if (this.pt >= GO_DUR) this._startPlay();
@@ -482,7 +555,7 @@ export default class FinalDeMes {
     if (this.graceT > 0) {
       this.graceT -= dt;
       this.touching = false;
-      if (this.stT >= this.stageDur) this._endStage(true);
+      if (this.stT >= this.st.dur) this._endStage(true);
       return;
     }
 
@@ -528,7 +601,7 @@ export default class FinalDeMes {
       }
     }
     if (this.marge <= 0) { this.marge = 0; this._endStage(false); return; }
-    if (this.stT >= this.stageDur) this._endStage(true);
+    if (this.stT >= this.st.dur) this._endStage(true);
   }
 
   _addPts(p) { this.points += p; this.st.pts += p; }
@@ -543,19 +616,20 @@ export default class FinalDeMes {
     if (this.phase === "final") { this._drawFinal(g); return; }
 
     const st = this.st;
-    // the chart lives directly on the campaign field; the corridor is a white «road» (card colours)
-    // with dark edges, the outside is hatched with the field's ink. Data drawn inside the road
+    // the chart sits on a panel of its own (so it reads as a graph, not as a dark screen); the
+    // corridor is a white «road» (card colours) with dark edges. Lines of levels already played are
+    // drawn ON TOP of the road, so they stay visible where they cross it. Data drawn inside the road
     // (current line, coins, ball, labels) uses the card roles; what lies on the field uses the bg roles.
     g.save();
     if (this.shake > 0) {
       const a = 12 * (this.shake / 0.35);
       g.translate(Math.sin(this.t * 55) * a, Math.cos(this.t * 47) * a * 0.6);
     }
-    this._drawGrid(g);
+    this._drawGrid(g, st);
     this._drawSpeed(g, st);
     this._tags = [];
-    this._drawGhosts(g, st);
     this._drawCorridor(g, st);
+    this._drawGhosts(g, st);
     onCard(() => {
       this._drawDataLine(g, st);
       this._drawCoins(g, st);
@@ -570,6 +644,8 @@ export default class FinalDeMes {
       // single soft pulse per hit (hits are rate-limited to < 1.5 Hz)
       withAlpha(g, 0.22 * (this.flash / 0.3), () => { g.fillStyle = C.red; g.fillRect(0, PLAY_TOP, W, PLAY_H); });
     }
+    // the level card goes under the hands: the player has to see them to line them up
+    if (this.phase === "prep") onCard(() => this._drawPrep(g));
     this._drawHandLink(g);
     this.app.drawCursors(g, { alpha: 0.6 });
     this._drawHud(g, st);
@@ -577,7 +653,6 @@ export default class FinalDeMes {
     this._drawFooter(g, st);
     onCard(() => {
       if (this.phase === "intro") this._drawIntro(g);
-      if (this.phase === "prep") this._drawPrep(g);
       if (this.phase === "card") this._drawCard(g);
     });
     if (this.phase === "go") this._drawGo(g);
@@ -585,22 +660,30 @@ export default class FinalDeMes {
 
   _xOfU(st, uu) { return PLAYER_X + (uu - this.u) * st.ppy; }
 
-  _drawGrid(g) {
+  _drawGrid(g, st) {
     g.save();
     g.beginPath(); g.rect(0, PLAY_TOP, W, PLAY_H); g.clip();
+    // panel behind the chart: a lighter field than the page, so the whole thing reads as a graph
+    g.fillStyle = C.paper2;
+    g.fillRect(0, PLAY_TOP, W, PLAY_H);
     g.strokeStyle = C.ink;
-    for (let p = this.lo; p <= this.hi + 1e-6; p += this.step) {
-      const y = this.yOf(p);
-      g.globalAlpha = p === 0 ? 0.45 : 0.13;
+    for (let p = st.lo; p <= st.hi + 1e-6; p += st.step) {
+      const y = this.yOf(p, st);
+      g.globalAlpha = p === 0 ? 0.6 : 0.24;
       g.lineWidth = p === 0 ? 3 : 2;
       g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
     }
     g.restore();
+    // top edge of the panel (the bottom one is the years axis)
+    g.save();
+    g.globalAlpha = 0.5; g.strokeStyle = C.ink; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(0, PLAY_TOP + 1); g.lineTo(W, PLAY_TOP + 1); g.stroke();
+    g.restore();
   }
 
-  _drawGridLabels(g) {
-    for (let p = this.lo; p <= this.hi + 1e-6; p += this.step) {
-      const y = this.yOf(p);
+  _drawGridLabels(g, st) {
+    for (let p = st.lo; p <= st.hi + 1e-6; p += st.step) {
+      const y = this.yOf(p, st);
       if (y < PLAY_TOP + 20 || y > PLAY_BOT - 4) continue;
       // small field-coloured chip so the label stays legible where it crosses the white road
       const lab = fmtPct(p), lw = measure(g, lab, 28, "body", 700);
@@ -663,12 +746,17 @@ export default class FinalDeMes {
       const st = this.stages[i];
       const xOf = (uu) => xOfYear(st.years[0] + uu);
       g.save();
-      g.globalAlpha = 0.6;
-      g.strokeStyle = st.color; g.lineWidth = 6; g.setLineDash(st.dash); g.lineCap = "round";
+      g.globalAlpha = 0.95;
+      g.lineCap = "round"; g.lineJoin = "round";
+      // dark casing first, so the line separates both from the panel and from the white road
+      g.strokeStyle = C.paper; g.lineWidth = 13; g.globalAlpha = 0.35;
+      this._linePath(g, st, xOf, 0, st.n - 1, cur.ppy); g.stroke();
+      g.globalAlpha = 0.95;
+      g.strokeStyle = st.color; g.lineWidth = 7; g.setLineDash(st.dash);
       this._linePath(g, st, xOf, 0, st.n - 1, cur.ppy); g.stroke();
       g.setLineDash([]);
       g.fillStyle = st.color;
-      for (let k = 0; k < st.n; k++) marker(g, st.marker, xOf(k), this.yOf(st.pct[k]), 7);
+      for (let k = 0; k < st.n; k++) marker(g, st.marker, xOf(k), this.yOf(st.pct[k]), 8);
       g.restore();
       const xe = xOf(st.n - 1);
       if (xe > 40) {
@@ -735,7 +823,7 @@ export default class FinalDeMes {
       text(g, String(st.years[k]), x, PLAY_BOT + 44, { size: k === cur ? 32 : 28, weight: 700, align: "center", color: k === cur ? C.ink : C.inkSoft });
     }
     g.restore();
-    this._drawGridLabels(g);
+    this._drawGridLabels(g, st);
   }
 
   _drawBall(g, st) {
@@ -781,12 +869,41 @@ export default class FinalDeMes {
   }
 
   _drawHandLink(g) {
+    const p = this._pair();
+    if (p) { this._drawTiltBar(g, p); return; }
     const c = this.app.input.primary();
     if (!c) return;
     g.save();
     g.globalAlpha = 0.25;
     g.strokeStyle = C.blue; g.lineWidth = 4; g.setLineDash([6, 12]); g.lineCap = "round";
     g.beginPath(); g.moveTo(c.x, c.y); g.lineTo(PLAYER_X + (c.x > PLAYER_X ? BALL_R + 8 : -BALL_R - 8), this.py); g.stroke();
+    g.restore();
+  }
+
+  // The steering line drawn between both hands, plus what it is asking of the € right now
+  // (a chevron above or below the ball, a flat dash while the line is level).
+  _drawTiltBar(g, [l, r]) {
+    const dx = r.x - l.x;
+    const slope = dx >= TILT_SPAN ? (l.y - r.y) / dx : 0;
+    const v = dx >= TILT_SPAN ? tiltSpeed(slope) : 0;
+    const col = v === 0 ? C.teal : C.mustard;
+    g.save();
+    g.lineCap = "round";
+    g.globalAlpha = 0.45;
+    g.strokeStyle = col; g.lineWidth = 10;
+    g.beginPath(); g.moveTo(l.x, l.y); g.lineTo(r.x, r.y); g.stroke();
+    g.globalAlpha = 0.75;
+    const k = clamp(Math.abs(v) / TILT_VMAX, 0, 1);
+    g.fillStyle = col;
+    if (v === 0) g.fillRect(PLAYER_X - 26, this.py - BALL_R - 34, 52, 8);
+    else {
+      const up = v < 0, y = this.py + (up ? -1 : 1) * (BALL_R + 22 + 14 * k), s = 16 + 10 * k;
+      g.beginPath();
+      g.moveTo(PLAYER_X, y + (up ? -s : s));
+      g.lineTo(PLAYER_X + s * 1.1, y + (up ? s * 0.5 : -s * 0.5));
+      g.lineTo(PLAYER_X - s * 1.1, y + (up ? s * 0.5 : -s * 0.5));
+      g.closePath(); g.fill();
+    }
     g.restore();
   }
 
@@ -813,34 +930,42 @@ export default class FinalDeMes {
     return x;
   }
 
-  _drawHud(g, st) {
-    const y = 26;
-    const x = this._drawChips(g, LAYOUT.m, y);
-    const bx = Math.max(x + 24, 960), bw = 220, bh = 50;
+  // How much longer the € can stay out of the corridor, as a row of segments next to a small €:
+  // a life bar reads at a glance and needs no word (it empties in ~3 s and refills slowly).
+  _drawMarge(g, bx, y) {
     const m = clamp(this.marge, 0, 1);
-    // marge only while it matters (outside the corridor or still refilling); hidden on the stage cards
-    const live = this.phase === "play" && (this.touching || this.marge < 0.999);
-    if (live) onCard(() => {
+    const r = 24, gap = 10, sw = 34, sh = 44, sy = y + 3;
+    const col = m < 0.4 ? C.red : C.teal;
+    onCard(() => {
       g.save();
-      g.fillStyle = C.card; rrect(g, bx, y, bw, bh, 25); g.fill();
-      if (m > 0) {
-        g.save(); rrect(g, bx, y, bw, bh, 25); g.clip();
-        g.fillStyle = m < 0.35 ? C.red : C.teal; g.fillRect(bx, y, bw * m, bh);
-        g.restore();
-      }
-      g.lineWidth = 3; g.strokeStyle = C.ink; rrect(g, bx, y, bw, bh, 25); g.stroke();
+      // the € that is losing ground, same look as the ball
+      g.fillStyle = C.mustard;
+      g.beginPath(); g.arc(bx + r, y + 25, r, 0, Math.PI * 2); g.fill();
+      g.lineWidth = 4; g.strokeStyle = C.cardInk; g.stroke();
       g.restore();
-      // label in navy over the empty part and in white over the filled part (never navy on teal/red)
-      const lab = T("finaldemes.marge", "marge");
-      g.save(); g.beginPath(); g.rect(bx + bw * m, y, bw * (1 - m), bh); g.clip();
-      text(g, lab, bx + bw / 2, y + 35, { size: 28, weight: 700, align: "center", color: C.ink });
-      g.restore();
-      if (m > 0) {
-        g.save(); g.beginPath(); g.rect(bx, y, bw * m, bh); g.clip();
-        text(g, lab, bx + bw / 2, y + 35, { size: 28, weight: 700, align: "center", color: C.white });
+      centerText(g, "€", bx + r, y + 25, { size: 30, weight: 700, color: C.cardInk });
+      for (let i = 0; i < MARGE_SEG; i++) {
+        const x0 = bx + 2 * r + 16 + i * (sw + gap);
+        const f = clamp(m * MARGE_SEG - i, 0, 1);      // the segment being spent drains smoothly
+        g.save();
+        g.fillStyle = C.card; rrect(g, x0, sy, sw, sh, 4); g.fill();
+        if (f > 0) {
+          g.save(); rrect(g, x0, sy, sw, sh, 4); g.clip();
+          g.fillStyle = col; g.fillRect(x0, sy + sh * (1 - f), sw, sh * f);
+          g.restore();
+        }
+        g.lineWidth = 3; g.strokeStyle = C.cardInk; rrect(g, x0, sy, sw, sh, 4); g.stroke();
         g.restore();
       }
     });
+  }
+
+  _drawHud(g, st) {
+    const y = 26;
+    const x = this._drawChips(g, LAYOUT.m, y);
+    const bx = Math.max(x + 24, 960);
+    // marge only while it matters (outside the corridor or still refilling); hidden on the stage cards
+    if (this.phase === "play" && (this.touching || this.marge < 0.999)) this._drawMarge(g, bx, y);
     const shown = clamp(Math.round(this.u), 0, st.n - 1);
     const yr = String(st.years[shown]);
     text(g, yr, W - LAYOUT.m, y + 66, { size: 84, kind: "title", align: "right", color: C.ink });
@@ -862,29 +987,40 @@ export default class FinalDeMes {
     g.save(); g.globalAlpha = a;
     const { x, y } = this._drawOverlayPanel(g, 900, 260);
     text(g, T("finaldemes.titol", "Final de mes"), x + 50, y + 117, { size: 96, kind: "title", color: C.head, maxW: 800 });
-    fitText(g, T("finaldemes.control", "Segueix el camí amb la mà"), x + 50, y + 200, 800, { size: 44, weight: 700, color: C.ink });
+    const inp = this.app.input;
+    const control = inp.usingMouse || inp.oneArm
+      ? T("finaldemes.controlUna", "Segueix el camí amb la mà")
+      : T("finaldemes.control", "Inclina la línia entre les dues mans");
+    fitText(g, control, x + 50, y + 200, 800, { size: 44, weight: 700, color: C.ink });
     g.restore();
   }
 
-  // Hand-placement gate: pulsing target ring on the locked €, fills while the hand stays on it
+  // Level announcement + hand-placement gate: which trend comes next, and what to do with the hands.
+  // It stays up at least GATE_MIN so there is time to read it.
   _drawPrep(g) {
     const a = easeOut(this.pt / 0.3);
+    const st = this.st;
     const pulse = Math.sin(this.t * Math.PI * 2) * 6;   // smooth 1 Hz size pulse, no blinking
     g.save(); g.globalAlpha = a;
     g.lineWidth = 5; g.strokeStyle = C.teal;
     g.beginPath(); g.arc(PLAYER_X, this.py, BALL_R + 22 + pulse, 0, Math.PI * 2); g.stroke();
     g.restore();
     ring(g, PLAYER_X, this.py, BALL_R + 42, clamp(this.gateT / GATE_HOLD, 0, 1), { color: C.teal, lw: 10 });
-    const msg = T("finaldemes.coloca", "Coloca't sobre l'€");
-    g.save();
-    font(g, 48, "body", 700);
-    const tw = g.measureText(msg).width + 48;
-    const bx = PLAYER_X + 90, by = clamp(this.py - 50, PLAY_TOP + 10, PLAY_BOT - 130);
-    g.globalAlpha = a;
-    panel(g, bx, by, tw, 130, { lw: 3 });
-    g.restore();
-    text(g, msg, bx + 24, by + 62, { size: 48, weight: 700, color: C.ink, alpha: a });
-    if (this.st) text(g, this.st.label, bx + 24, by + 100, { size: 30, weight: 700, color: this.st.ink, alpha: a });
+    const msg = this._pair()
+      ? T("finaldemes.colocaDues", "Posa les dues mans en línia")
+      : T("finaldemes.coloca", "Coloca't sobre l'€");
+    const w = 1140, h = 324, x = (W - w) / 2 + 170, y = PLAY_TOP + (PLAY_H - h) / 2 - 30;
+    onCard(() => {
+      g.save();
+      g.globalAlpha *= a;
+      panel(g, x, y, w, h, {});
+      fitText(g, T("finaldemes.kicker", "Viu l'augment del cost de la vida:"), x + 50, y + 76, w - 100,
+        { size: 42, weight: 700, color: C.ink });
+      fitText(g, T("finaldemes.nivell", "Nivell {n}: {etapa}", { n: this.si + 1, etapa: st.label }), x + 50, y + 176, w - 100,
+        { size: 88, kind: "title", color: st.ink });
+      fitText(g, msg, x + 50, y + 262, w - 100, { size: 46, weight: 700, color: C.ink });
+      g.restore();
+    });
   }
 
   _drawGo(g) {
@@ -901,8 +1037,8 @@ export default class FinalDeMes {
     g.strokeStyle = C.ink; g.lineCap = "round";
     // far layer: ticks on the % gridlines at half speed
     g.globalAlpha = 0.18; g.lineWidth = 3;
-    for (let p = this.lo; p <= this.hi + 1e-6; p += this.step) {
-      const y = this.yOf(p);
+    for (let p = st.lo; p <= st.hi + 1e-6; p += st.step) {
+      const y = this.yOf(p, st);
       for (let x = -((sx * 0.5) % 160); x < W; x += 160) { g.beginPath(); g.moveTo(x, y - 7); g.lineTo(x, y + 7); g.stroke(); }
     }
     g.restore();
@@ -915,7 +1051,7 @@ export default class FinalDeMes {
     g.save(); g.globalAlpha = a;
     const { x, y } = this._drawOverlayPanel(g, 1000, 330);
     if (!ok) withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, x, y, 1000, 34, 6); g.fill(); });
-    if (ok) text(g, T("finaldemes.superat", "Etapa superada"), x + 50, y + 105, { size: 92, kind: "title", color: C.teal, maxW: 900 });
+    if (ok) text(g, T("finaldemes.superat", "Nivell superat"), x + 50, y + 105, { size: 92, kind: "title", color: C.teal, maxW: 900 });
     else wrap(g, T("finaldemes.senseMarge", "No li has pogut seguir el ritme al mercat!"), x + 50, y + 92, 900, { size: 54, kind: "title", color: C.red, lineH: 1.08, maxLines: 2 });
     fitText(g, T("finaldemes.resultatEtapaPct", "{etapa}: {pct} des del {any}", { etapa: st.label, pct: fmtPct(st.finalPct), any: st.years[0] }),
       x + 50, y + (ok ? 180 : 208), 900, { size: 44, weight: 700, color: st.ink });

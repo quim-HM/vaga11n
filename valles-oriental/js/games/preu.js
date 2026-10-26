@@ -31,6 +31,31 @@ const Y_UP = yOf(LEVER_UP), Y_DOWN = yOf(LEVER_DOWN);
 const BTN = { w: 250, h: 330 };
 const BTN_Y = (Y_UP + Y_DOWN) / 2 - BTN.h / 2;
 const BUTTONS = [{ x: 30, y: BTN_Y, ...BTN }, { x: W - 30 - BTN.w, y: BTN_Y, ...BTN }];
+// Reveal screen: the metaphor cards («TU» / «LA REALITAT») take only the upper half, so the
+// explanation and the source below them have room (pad = card border around the drawing box).
+const REVEAL_CARD = { x: 272, y: 232, w: 636, h: 350, pad: 22, panelY: 150, panelH: 450 };
+// …and the explanation below them is set as large as it fits in the band left between the verdict
+// and the source line (which always ends on the same baseline, just above the footer prompt).
+const REV = { w: 1560, lineH: 1.2, maxLines: 4, maxSize: 60, minSize: 26, top: 112 };
+const SRC = { w: 1500, size: 24, maxLines: 2, lastBaseline: 980 };
+
+function countLines(g, str, maxW, size, maxLines) {
+  font(g, size, "body", 400);
+  return Math.min(maxLines, wrapLines(g, str, maxW).length);
+}
+
+// Largest size at which the text fits the band, with the height the block will occupy
+function fitBlock(g, str, maxW, bandH) {
+  for (let size = REV.maxSize; size > REV.minSize; size -= 2) {
+    font(g, size, "body", 400);
+    const n = wrapLines(g, str, maxW).length;
+    const h = (n - 1) * size * REV.lineH + size * 0.94;
+    if (n <= REV.maxLines && h <= bandH) return { size, h };
+  }
+  font(g, REV.minSize, "body", 400);
+  const n = Math.min(REV.maxLines, wrapLines(g, str, maxW).length);
+  return { size: REV.minSize, h: (n - 1) * REV.minSize * REV.lineH + REV.minSize * 0.94 };
+}
 
 function stepsOf(q) {
   // ~12 lever steps per order of magnitude on log scales
@@ -379,7 +404,9 @@ export default class Preu {
         g.lineWidth = 6; g.strokeStyle = C.teal; g.strokeRect(b.x, b.y, b.w, b.h);
       }
       // icon-only button: a large, static check badge
-      const hint = over && !allowed;
+      // «tria primer» only on the very first question of the session: after that the player knows
+      // the ✓ needs a value chosen first, and the hint is just noise
+      const hint = over && !allowed && this.i === 0 && !this.continuing;
       const cx = b.x + b.w / 2, cy = b.y + b.h / 2 - (hint ? 24 : 0);
       drawOkBadge(g, cx, cy, 78, active && p > 0.5 ? { fill: C.white, color: C.teal } : {});
       if (hint) text(g, T("preu.primer_tria", "tria primer"), cx, b.y + b.h - 40, { size: 30, weight: 800, align: "center", color: C.teal, maxW: b.w - 24 });
@@ -395,11 +422,15 @@ export default class Preu {
       : lerp(q.rang.min, q.valor, prog);
     this.drawProgress(g, 34);
     wrap(g, q.enunciat, W / 2, 90, 1600, { size: 30, weight: 700, align: "center", maxLines: 2, color: C.ink, lineH: 1.18 });
-    const bl = { x: 140, y: 230, w: 760, h: 490 }, br = { x: 1020, y: 230, w: 760, h: 490 };
+    // the two comparison cards are deliberately small: the numbers are the headline, but what the
+    // figure means (revelation + source) is what people read, so it gets the lower half of the screen
+    const bl = { x: REVEAL_CARD.x, y: REVEAL_CARD.y, w: REVEAL_CARD.w, h: REVEAL_CARD.h };
+    const br = { ...bl, x: W - REVEAL_CARD.x - REVEAL_CARD.w };
+    const panelH = REVEAL_CARD.panelH + (q.escala === "log" ? 20 : 0);
     onCard(() => {
-      for (const b of [bl, br]) panel(g, b.x - 20, 150, b.w + 40, q.escala === "log" ? 610 : 590, { lw: 3 });
-      text(g, T("preu.tu", "TU"), bl.x + bl.w / 2, 215, { size: 48, kind: "title", align: "center", color: C.blue, maxW: bl.w });
-      text(g, T("preu.la_realitat", "LA REALITAT"), br.x + br.w / 2, 215, { size: 48, kind: "title", align: "center", color: C.red, maxW: br.w });
+      for (const b of [bl, br]) panel(g, b.x - REVEAL_CARD.pad, REVEAL_CARD.panelY, b.w + 2 * REVEAL_CARD.pad, panelH, { lw: 3 });
+      text(g, T("preu.tu", "TU"), bl.x + bl.w / 2, 212, { size: 44, kind: "title", align: "center", color: C.blue, maxW: bl.w });
+      text(g, T("preu.la_realitat", "LA REALITAT"), br.x + br.w / 2, 212, { size: 44, kind: "title", align: "center", color: C.red, maxW: br.w });
       drawMetaphor(g, q.metafora, bl, r.answer, q, "answer");
       drawMetaphor(g, q.metafora, br, prog >= 1 ? q.valor : shown, q, "real");
     });
@@ -409,14 +440,27 @@ export default class Preu {
       const verdict = r.points >= 95 ? T("preu.veredicte.clavat", "Clavat!")
         : r.points >= 80 ? T("preu.veredicte.aprop", "Molt a prop!")
         : diff < 0 ? T("preu.veredicte.sota", "No ben bé!") : T("preu.veredicte.sobre", "No ben bé!");
-      // vertical rhythm: cards → verdict → revelation → source (small) → footer prompt
-      const cardsBottom = 150 + (q.escala === "log" ? 610 : 590);
-      const vy = cardsBottom + 76;
-      text(g, verdict, W / 2, vy, { size: 64, kind: "title", align: "center", color: r.points >= 80 ? C.teal : C.ink, alpha: a, maxW: W - 200 });
-      const revH = q.revelacio ? wrap(g, q.revelacio, W / 2, vy + 52, 1500, { size: 32, align: "center", alpha: a, maxLines: 2, lineH: 1.18 }) : 0;
+      // vertical rhythm: cards → verdict → revelation → source (small) → footer prompt.
+      // The source sits on a fixed baseline above the footer prompt, so the explanation always gets
+      // the same band and can be set as large as it fits in it; the verdict is then centred in
+      // whatever room is left between the cards and the top of that explanation.
+      const cardsBottom = REVEAL_CARD.panelY + panelH;
       const src = app.data.cite(q.font_id, q.any_referencia ? String(q.any_referencia) : "");
       const note = q.nota_curta ? `  ·  ${q.nota_curta}` : "";
-      wrap(g, src + note, W / 2, Math.max(vy + 52 + revH + 14, 950), 1500, { size: 21, color: C.inkSoft, alpha: a, maxLines: 2, align: "center", lineH: 1.2 });
+      const srcLines = countLines(g, src + note, SRC.w, SRC.size, SRC.maxLines);
+      const srcTop = SRC.lastBaseline - (srcLines - 1) * SRC.size * 1.2;
+      const y0 = cardsBottom + REV.top, y1 = srcTop - SRC.size - 30;
+      let revTop = y1;
+      if (q.revelacio) {
+        const fit = fitBlock(g, q.revelacio, REV.w, y1 - y0);
+        // vertically centred in the band (cap height to descender), horizontally centred
+        revTop = y0 + (y1 - y0 - fit.h) / 2;
+        wrap(g, q.revelacio, W / 2, revTop + fit.size * 0.74, REV.w,
+          { size: fit.size, align: "center", alpha: a, maxLines: REV.maxLines, lineH: REV.lineH });
+      }
+      const vy = (cardsBottom + revTop) / 2 + 64 * 0.36;   // cap height centred in the gap
+      text(g, verdict, W / 2, vy, { size: 64, kind: "title", align: "center", color: r.points >= 80 ? C.teal : C.ink, alpha: a, maxW: W - 200 });
+      wrap(g, src + note, W / 2, srcTop, SRC.w, { size: SRC.size, color: C.inkSoft, alpha: a, maxLines: SRC.maxLines, align: "center", lineH: 1.2 });
     }
     this.drawNextHint(g, REVEAL_NEXT_MIN_S);
   }
