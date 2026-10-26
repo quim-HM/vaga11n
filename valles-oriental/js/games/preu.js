@@ -8,12 +8,13 @@ import { T } from "../textos.js";
 //    a hand is there). Nothing is ever confirmed by just standing still, so players can take their
 //    time to think, and a hand still raised from the previous screen does not move the value until
 //    it has come down once.
-import { W, H, C, LAYOUT, text, wrap, wrapLines, font, panel, ring, clamp, lerp, easeOut, shuffle, Particles, rrect, drawCheck, onCard, posterBlock } from "../ui.js";
+import { W, H, C, LAYOUT, text, wrap, wrapLines, font, panel, clamp, lerp, easeOut, shuffle, Particles, onCard, posterBlock } from "../ui.js";
 import { MAP, inRect } from "../input.js";
 import { drawMetaphor, fmtWithUnit } from "./metafores.js";
 import { drawCountdown } from "../countdown.js";
 import { drawOkBadge, textIcon } from "../icons.js";
-import { drawFooterHint, drawHand } from "../hand.js";
+import { drawFooterHint } from "../hand.js";
+import { drawTutorial, preuFigure } from "../tutorial.js";
 
 // A round is short (3 questions); «Més preguntes» offers another one while unseen questions remain
 export const N_QUESTIONS = 3;
@@ -22,8 +23,10 @@ const WARN_S = 6;              // countdown shown during the last seconds
 const CONFIRM_S = 1.2;
 const ARM_AFTER_S = 1.2;       // ignore input right after the question appears
 const LEVER_MAX_SPS = 25;      // lever speed cap (steps per second): fast, but no wild overshoot
-const REVEAL_NEXT_MIN_S = 3.0;
-const HOWTO_MIN_S = 3.5;      // the how-to card stays at least this long before a raised hand skips it
+// Minimum reading time before a raised hand can move on (even a player who is ready at once gets
+// time to take in what the screen says): the reveal has the figure, a verdict and an explanation.
+const REVEAL_NEXT_MIN_S = 5.0;
+const HOWTO_MIN_S = 4.0;      // the how-to card stays at least this long before a raised hand skips it
 const REVEAL_MAX_S = 25;   // players move on themselves (raise a hand / click); auto only as a safety net
 const NEXT_RAISE_S = 0.6;
 const LEVER_UP = 0.45, LEVER_DOWN = -0.1, REST_Y = -0.5;
@@ -204,6 +207,9 @@ export default class Preu {
     });
   }
 
+  // the hand raised to resume from the pause must come down before it counts here
+  onResume() { this.nextArmed = false; this.nextT = 0; this.leverArmed = false; }
+
   // "Raise a hand to continue" helper with a short minimum delay. A hand that is still up from the
   // previous screen does not count: it has to come down first (so the instructions get read).
   wantsNext(dt, minS) {
@@ -326,20 +332,16 @@ export default class Preu {
   drawHowto(g) {
     const app = this.app;
     app.drawSilhouette(g, { alpha: 0.08 });
-    text(g, T("preu.el_preu_in_just", "EL PREU (IN)JUST"), W / 2, 150, { size: 110, kind: "title", align: "center", color: C.head, maxW: W - 200 });
-    // the goal of the game was said on the interlude: here, just how to play it
-    posterBlock(g, T("preu.com_es_juga", "Com es juga"), W / 2, 252, 56, { align: "center", maxW: W - 200 });
-    // three pictograms: up / down / confirm
-    const items = [
-      { x: 480, label: T("preu.ma_amunt", "Mà amunt"), sub: T("preu.puja__", "puja"), arm: 1 },
-      { x: 960, label: T("preu.ma_a_la_panxa", "Mà a la panxa"), sub: T("preu.baixa__", "baixa"), arm: -1 },
-      { x: 1440, label: T("preu.ma_quieta_ok", "Mà quieta al {check}"), sub: T("preu.respon", "respon"), arm: 0 },
-    ];
-    for (const it of items) onCard(() => {
-      panel(g, it.x - 220, 300, 440, 540, { lw: 3 });
-      figure(g, it.x, 684, it.arm, this.t);
-      textIcon(g, it.label, it.x, 734, { size: 44, weight: 800, align: "center", maxW: 400 });
-      textIcon(g, it.sub, it.x, 786, { size: 36, align: "center", color: it.arm > 0 ? C.red : it.arm < 0 ? C.blue : C.teal, weight: 800 });
+    // the goal of the game was said on the interlude: here, just how to play it (shared tutorial layout)
+    drawTutorial(g, {
+      title: T("preu.el_preu_in_just", "EL PREU (IN)JUST"),
+      block: T("preu.com_es_juga", "Com es juga"),
+      t: this.t,
+      cards: [
+        { label: T("preu.ma_amunt", "Mà amunt"), sub: T("preu.puja__", "▲ puja"), tone: "red", draw: (gg, x, y, t) => preuFigure(gg, x, y, 1, t) },
+        { label: T("preu.ma_a_la_panxa", "Mà a la panxa"), sub: T("preu.baixa__", "▼ baixa"), tone: "blue", draw: (gg, x, y, t) => preuFigure(gg, x, y, -1, t) },
+        { label: T("preu.ma_quieta_ok", "Mà quieta al {check}"), sub: T("preu.respon", "respon"), tone: "teal", draw: (gg, x, y, t) => preuFigure(gg, x, y, 0, t) },
+      ],
     });
     this.drawNextHint(g, HOWTO_MIN_S);
   }
@@ -478,60 +480,4 @@ export default class Preu {
     }
     this.drawNextHint(g, REVEAL_NEXT_MIN_S);
   }
-}
-
-// Instruction pictogram (ISO-style figure): head, rounded torso whose top corners are the shoulders,
-// arms attached at those corners, and hands drawn with the cursor's hand shape, rotated to continue
-// the forearm. arm: 1 = up, -1 = low, 0 = sideways to ✓.
-function handOnArm(g, wx, wy, ang, s, opts) {
-  // ang = direction of the forearm (elbow -> wrist); the hand's fingers continue that direction
-  g.save();
-  g.translate(wx, wy);
-  g.rotate(ang + Math.PI / 2);
-  drawHand(g, 0, -0.62 * s, s, opts);
-  g.restore();
-}
-
-function limb(g, pts) {
-  g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
-  for (let k = 1; k < pts.length; k++) g.lineTo(pts[k][0], pts[k][1]);
-  g.stroke();
-}
-
-function figure(g, x, y, arm, t) {
-  const s = 0.98;
-  const accent = arm > 0 ? C.red : arm < 0 ? C.blue : C.teal;
-  const sway = Math.sin(t * 2.4) * 6;        // small, slow arm motion that shows the gesture
-  const TW = 46, TOP = -212, HIP = -104, SH = TOP + 12;   // torso width/top, hips, shoulder height
-  const shL = [-TW / 2 + 6, SH], shR = [TW / 2 - 6, SH];   // shoulder joints inside the torso corners
-  g.save();
-  g.translate(x, y);
-  g.scale(s, s);
-  g.lineCap = "round"; g.lineJoin = "round";
-  g.fillStyle = C.ink; g.strokeStyle = C.ink;
-  // head and torso
-  g.beginPath(); g.arc(0, TOP - 44, 30, 0, Math.PI * 2); g.fill();
-  rrect(g, -TW / 2, TOP, TW, HIP - TOP, [16, 16, 8, 8]); g.fill();
-  // legs
-  g.lineWidth = 20;
-  limb(g, [[-11, HIP - 6], [-22, -6]]);
-  limb(g, [[11, HIP - 6], [22, -6]]);
-  // relaxed arm (screen left), with its hand
-  g.lineWidth = 15;
-  const rel = [shL, [-TW / 2 - 12, SH + 52], [-TW / 2 - 14, SH + 100]];
-  limb(g, rel);
-  handOnArm(g, rel[2][0], rel[2][1], Math.atan2(rel[2][1] - rel[1][1], rel[2][0] - rel[1][0]), 13, { fill: C.ink, stroke: C.card || C.white, side: "l" });
-  // active arm (screen right)
-  let elbow, wrist;
-  if (arm > 0) { elbow = [shR[0] + 26, SH - 50 - sway * 0.4]; wrist = [shR[0] + 34, SH - 110 - sway]; }
-  else if (arm < 0) { elbow = [shR[0] + 30, SH + 46]; wrist = [shR[0] + 48, SH + 92 + sway]; }
-  else { elbow = [shR[0] + 50, SH + 2]; wrist = [shR[0] + 100, SH - 2]; }
-  g.strokeStyle = accent;
-  limb(g, [shR, elbow, wrist]);
-  handOnArm(g, wrist[0], wrist[1], Math.atan2(wrist[1] - elbow[1], wrist[0] - elbow[0]), 17, { fill: accent, stroke: C.card || C.white, side: "r" });
-  if (arm === 0) {
-    g.fillStyle = C.teal; rrect(g, wrist[0] + 34, SH - 48, 64, 92, 10); g.fill();
-    drawCheck(g, wrist[0] + 66, SH - 2, 34, { color: C.white });
-  }
-  g.restore();
 }

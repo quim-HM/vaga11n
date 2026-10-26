@@ -12,6 +12,7 @@ import { drawTrail } from "../trail.js";
 import { centerText, drawOkBadge } from "../icons.js";
 import { inRect } from "../input.js";
 import { pictoKind, drawPicto, drawPictoBadge } from "../pictos.js";
+import { drawTutorial, finaldemesCards, drawFinaldemesGoal } from "../tutorial.js";
 
 // Text overrides (data/textos.json via web/js/textos.js); safe fallback if the module is missing
 function fill(str, vars) {
@@ -66,10 +67,12 @@ const TRAIL_S = 0.4;         // seconds of ball trail
 // says what it is and how it is played, so the game opens straight on the first level card.
 const GATE_PX = 60;         // hand target within this of the ball's height = on the €
 const GATE_HOLD = 0.4;      // ... for this long starts the stage
-const GATE_MAX = 6;         // never block: start anyway after this
-const GATE_TYPICAL = 2.4;
-const GATE_MIN = 1.8;       // the first level card stays up at least this long before the gate can open
-const GATE_MIN_NEXT = 1.2;  // ... and the next ones (same layout, already known)
+const GATE_MAX = 7;         // never block: start anyway after this
+const GATE_TYPICAL = 3.4;
+// Reading time: even a player who is ready at once gets time to take in each card
+const GATE_MIN = 3.0;       // the first level card stays up at least this long before the gate can open
+const GATE_MIN_NEXT = 2.5;  // ... and the next ones (same layout, already known)
+const HOWTO_MIN = 4.0, HOWTO_AUTO = 16;   // «Com es juga»: raise a hand after 4 s, or it goes on by itself
 const GO_DUR = 0.5;         // «Som-hi!»
 const GRACE = 1;            // invulnerable seconds at the start of each stage
 const STAGE_MIN = 15, STAGE_MAX = 17;   // length of the FIRST level (the next ones are shorter)
@@ -79,16 +82,16 @@ const SPEEDS = [565, 625, 675, 735];        // scroll px/s (fast; px per year sc
 const WIDTHS = [230, 185, 150, 120];        // corridor width px, narrower every stage (game difficulty, not data)
 const ONE_ARM_EXTRA = 40;                   // assist: wider corridor in one-arm mode
 // After each level its result (the real rise) shows by itself, with no gesture: raising a hand would
-// break the two-hand steering pose four times per game.
-const RESULT_DUR = 2.4;
-const RESULT_FAIL_DUR = 3.0;
-const CARD_RETRY_AUTO = 8;  // a lost level offers a retry: longer, and it carries on by itself
+// break the two-hand steering pose four times per game. Long enough to read the figure.
+const RESULT_DUR = 4.0;
+const RESULT_FAIL_DUR = 4.5;
+const CARD_RETRY_AUTO = 9;  // a lost level offers a retry: longer, and it carries on by itself
 const CARD_DWELL = 1.0;     // hold a hand over an option for this long to pick it
 const RAISE_S = 0.6;
 const NODATA_DUR = 3;
 // End screen: all lines revealed one after another, then the campaign line
 const FINAL_LINE_T0 = 0.5, FINAL_LINE_GAP = 0.75, FINAL_LINE_DUR = 0.9;
-const FINAL_MIN = 4.5, FINAL_AUTO = 12;
+const FINAL_MIN = 6, FINAL_AUTO = 14;
 
 // Control. With two hands the line between them is the direction the € travels: tilt it up and the
 // € climbs, tilt it down and it dives, hold it level and it keeps its height. With a single hand
@@ -362,7 +365,8 @@ export default class FinalDeMes {
       if (!this.stages.length) { this.phase = "nodata"; this.pt = 0; return; }
       this.si = 0;
       this._prepStage();
-      this._startPrep();
+      // first «Com es juga» (the stickman cards), then the first level card
+      this.phase = "howto"; this.pt = 0; this.armed = false; this.raiseT = 0;
     }).catch((e) => { console.error("finaldemes setup", e); this.phase = "nodata"; this.pt = 0; });
   }
 
@@ -518,11 +522,18 @@ export default class FinalDeMes {
     return target !== null && Math.abs(target - this.py) < GATE_PX;
   }
 
-  _raiseToContinue(minT, autoT) {
+  // Raise-a-hand to continue, timed within this screen: the hand must have come down once (armed),
+  // and only the time it is held up after the reading time counts (so a hand raised early, or the
+  // gesture that resumed from the pause, does not skip the screen in one frame)
+  _raiseToContinue(dt, minT, autoT) {
     const r = this.app.input.anyRaisedFor();
-    if (r === 0) this.armed = true;   // hand must come down first
-    return (this.pt > minT && this.armed && r > RAISE_S) || this.pt > autoT;
+    if (r === 0) this.armed = true;
+    this.raiseT = this.armed && this.pt > minT && r > 0 ? (this.raiseT || 0) + dt : 0;
+    return this.raiseT >= RAISE_S || this.pt > autoT;
   }
+
+  // Called by the app when play resumes after the pause: the hand raised to resume must come down
+  onResume() { this.armed = false; this.raiseT = 0; }
 
   update(dt) {
     if (this.finished) return;
@@ -541,7 +552,9 @@ export default class FinalDeMes {
     if (this.phase === "loading") return;
     if (this.phase === "nodata") { if (this.pt > NODATA_DUR) this._finish(); return; }
 
-    if (this.phase === "prep") {
+    if (this.phase === "howto") {
+      if (this._raiseToContinue(dt, HOWTO_MIN, HOWTO_AUTO)) { this.app.sfx.select(); this._startPrep(); }
+    } else if (this.phase === "prep") {
       // hand-placement gate: ball locked at the corridor centre, nothing counts
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       this.gateT = this._handReady() ? this.gateT + dt : 0;
@@ -554,7 +567,7 @@ export default class FinalDeMes {
       this._steer(dt);
       this._updatePlay(dt);
     } else if (this.phase === "final") {
-      if (this._raiseToContinue(FINAL_MIN, FINAL_AUTO)) this._finish();
+      if (this._raiseToContinue(dt, FINAL_MIN, FINAL_AUTO)) this._finish();
     } else if (this.phase === "card") {
       // a level lost for want of marge can be played again once; otherwise the result moves on by itself
       if (this._canRetry()) {
@@ -566,7 +579,7 @@ export default class FinalDeMes {
   }
 
   _afterCard() {
-    if (this.si >= this.stages.length - 1) { this.phase = "final"; this.pt = 0; this.armed = false; this.app.sfx.reveal(); }
+    if (this.si >= this.stages.length - 1) { this.phase = "final"; this.pt = 0; this.armed = false; this.raiseT = 0; this.app.sfx.reveal(); }
     else { this.si += 1; this._prepStage(); this._startPrep(); }
   }
 
@@ -674,6 +687,7 @@ export default class FinalDeMes {
     if (this.phase === "loading") { text(g, T("finaldemes.carregant", "Carregant…"), W / 2, H / 2, { size: 48, align: "center", color: C.inkSoft }); return; }
     if (this.phase === "nodata") { this._drawNoData(g); return; }
     if (this.phase === "final") { this._drawFinal(g); return; }
+    if (this.phase === "howto") { this._drawHowto(g); return; }
 
     const st = this.st;
     // the chart sits on a panel of its own (so it reads as a graph, not as a dark screen); the
@@ -912,7 +926,7 @@ export default class FinalDeMes {
     g.beginPath(); g.moveTo(0, PLAY_BOT); g.lineTo(W, PLAY_BOT); g.stroke();
     for (let k = 0; k < st.n; k++) {
       const x = this._xOfU(st, k);
-      if (x < LAYOUT.footX0 || x > LAYOUT.footX1) continue;   // footer corners belong to the ◀ ▶ shortcuts
+      if (x < -120 || x > W + 120) continue;   // labels slide all the way off screen (they sit above the footer row)
       const near = clamp(1 - Math.abs(x - PLAYER_X) / 420, 0, 1);
       const e = near * near * (3 - 2 * near);
       g.beginPath(); g.moveTo(x, PLAY_BOT); g.lineTo(x, PLAY_BOT + 12 + 8 * e); g.stroke();
@@ -1071,6 +1085,26 @@ export default class FinalDeMes {
     const yr = String(st.years[shown]);
     text(g, yr, W - LAYOUT.m, y + 60, { size: 48, kind: "title", align: "right", color: C.inkSoft });
     text(g, fmtPct(st.pct[shown]), W - LAYOUT.m - measure(g, yr, 48, "title") - 24, y + 72, { size: 88, kind: "title", align: "right", color: st.ink });
+  }
+
+  // «Com es juga»: the stickman cards (two hands tilt the line; one hand sets the height), the rule
+  // of the game under them, and «raise a hand» to start (it pulses if nobody reacts)
+  _drawHowto(g) {
+    const inp = this.app.input;
+    drawTutorial(g, {
+      title: T("joc.finaldemes", "Final de mes"),
+      block: T("finaldemes.com_es_juga", "Com es juga"),
+      t: this.pt,
+      cards: finaldemesCards(inp.usingMouse || !!inp.oneArm, T),
+    });
+    drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins del camí"));
+    if (this.pt > HOWTO_MIN) {
+      const mouse = inp.usingMouse;
+      const r = clamp((this.raiseT || 0) / RAISE_S, 0, 1);
+      drawFooterHint(g, T("finaldemes.com.continua", "Aixeca la mà per començar"), r,
+        { mouse, waitT: this.pt - HOWTO_MIN });
+    }
+    this.app.drawCursors(g, { alpha: 0.7 });
   }
 
   _drawFooter(g, st) {
@@ -1285,7 +1319,7 @@ export default class FinalDeMes {
       { size: 22, color: C.inkSoft, align: "center", alpha: fade, maxW: W - 2 * m });
     // continue: raised hand / held click (footer centre; the corners belong to ◀ ▶)
     const mouse = this.app.input.usingMouse;
-    const r = this.armed && this.pt > FINAL_MIN ? clamp(this.app.input.anyRaisedFor() / RAISE_S, 0, 1) : 0;
+    const r = clamp((this.raiseT || 0) / RAISE_S, 0, 1);
     drawFooterHint(g, T("finaldemes.final.continua", mouse ? "Mantén el clic per continuar" : "Aixeca la mà per continuar"), r,
       { mouse, alpha: clamp((this.pt - tPhrase) / 0.5, 0, 1), waitT: this.pt - Math.max(FINAL_MIN, tPhrase) });
     this.app.drawCursors(g, { alpha: 0.6 });

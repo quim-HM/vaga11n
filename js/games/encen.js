@@ -12,6 +12,8 @@
 import { W, H, C, LAYOUT, text, wrap, panel, ring, hatch, Particles, clamp, easeOut, fmtNum, font, rrect, onCard, measure, fitSize as uiFit } from "../ui.js";
 import { centerText, drawOkBadge } from "../icons.js";
 import { drawTrail } from "../trail.js";
+import { drawFooterHint } from "../hand.js";
+import { drawTutorial, encenCards } from "../tutorial.js";
 import { areasFromGeo, areasFromBubbles, fallbackZones, pointInArea, buildCells, cellsInCircle } from "./encen_geo.js";
 import { T } from "../textos.js";
 
@@ -76,9 +78,10 @@ const NLEVELS = 3;
 const LIT = 0.5;        // a cell counts as organised from half the range up: the top half is
                         // headroom that visibly cools down, so the map keeps breathing
 const HOLD_S = 2;
-// The interlude already says what the game is: it opens straight on the first level card (a bit
-// longer, as it also carries the instruction). Result cards move on by themselves (no gesture).
-const READY_FIRST_S = 4.5, READY_S = 3.2, CARD_WON_S = 2.5, CARD_FAIL_S = 3.0, CARD_LAST_S = 3.5;
+// «Com es juga» (stickman cards) first, then a level card before each map. Result cards move on by
+// themselves (no gesture), but stay long enough to be read even by a player who is ready at once.
+const HOWTO_MIN_S = 4.0, HOWTO_AUTO_S = 16, RAISE_S = 0.6;
+const READY_FIRST_S = 5.0, READY_S = 4.2, CARD_WON_S = 4.0, CARD_FAIL_S = 4.5, CARD_LAST_S = 5.5;
 // legacy data (app.data.geo.manresa/bages/catalunya) and bubble fallback
 const LEGACY_IDS = ["manresa", "bages", "catalunya"];
 const LEGACY_NAMES = [["Manresa", "barris"], ["el Bages", "municipis"], ["Catalunya", "comarques"]];
@@ -163,7 +166,9 @@ export default class Encen {
     this.params = params || {};
     this.needsPlayer = true;
     this.t = 0;
-    this.phase = "ready";
+    this.phase = "howto";
+    this.raiseT = 0;
+    this.raiseArmed = false;
     this.phaseT = 0;
     this.li = 0;
     this.level = null;
@@ -199,6 +204,9 @@ export default class Encen {
   }
 
   skip() { this.finish(); }
+
+  // the hand raised to resume from the pause must come down before it can move the how-to on
+  onResume() { this.raiseArmed = false; this.raiseT = 0; }
 
   // Operator-chosen territories (app.data.geo.levels) or the legacy fixed trio
   geoLevels() {
@@ -396,10 +404,23 @@ export default class Encen {
       if (c !== this.lastCount) { this.lastCount = c; if (c) this.app.sfx.tick(); }
     };
     switch (this.phase) {
+      case "howto": this.updateHowto(dt); break;
       case "ready": countdown(this.readyDur()); if (this.phaseT >= this.readyDur()) this.startPlay(); break;
       case "play": this.simulate(dt); break;
       case "card": if (this.phaseT >= this.cardDur()) this.next(); break;
       default: break;
+    }
+  }
+
+  // «Com es juga»: a raised hand (once it has come down) moves on after the reading time, or it goes on alone
+  updateHowto(dt) {
+    const r = this.app.input.anyRaisedFor();
+    if (r === 0) this.raiseArmed = true;
+    this.raiseT = this.raiseArmed && this.phaseT > HOWTO_MIN_S && r > 0 ? this.raiseT + dt : 0;
+    if (this.raiseT >= RAISE_S || this.phaseT >= HOWTO_AUTO_S || (this.phaseT > HOWTO_MIN_S && this.app.input.keys.has("Space"))) {
+      if (this.raiseT >= RAISE_S) this.app.sfx.select();
+      this.phase = "ready"; this.phaseT = 0; this.lastCount = null;
+      this.app.sfx.whoosh();
     }
   }
 
@@ -542,6 +563,7 @@ export default class Encen {
   fitSize(g, str, size, maxW, kind = "title", weight = 400) { return uiFit(g, str, size, maxW, kind, weight); }
 
   draw(g) {
+    if (this.phase === "howto") { this.drawHowto(g); return; }
     if (!this.level) return;
     const ph = this.phase;
     this.palette();
@@ -560,6 +582,23 @@ export default class Encen {
     if (ph === "ready") this.drawReady(g);
     else if (ph === "card") this.drawCard(g);
     if (ph !== "play" && ph !== "ready") this.app.drawCursors(g);
+  }
+
+  // «Com es juga»: three stickman cards (wave, sweep the whole map, pass the flag and hold)
+  drawHowto(g) {
+    const inp = this.app.input;
+    this.app.drawSilhouette(g, { alpha: 0.08 });
+    drawTutorial(g, {
+      title: T("joc.encen", "Encén la vaga"),
+      block: T("encen.com_es_juga", "Com es juga"),
+      t: this.phaseT,
+      cards: encenCards(!!inp.oneArm, T),
+    });
+    if (this.phaseT > HOWTO_MIN_S) {
+      const p = this.raiseArmed ? clamp(this.raiseT / RAISE_S, 0, 1) : 0;
+      drawFooterHint(g, T("encen.com.continua", "Aixeca la mà per començar"), p, { mouse: inp.usingMouse, waitT: this.phaseT - HOWTO_MIN_S });
+    }
+    this.app.drawCursors(g, { alpha: 0.7 });
   }
 
   // Sticker-style label: card ink with a card-coloured halo, legible on any map colour and any theme
@@ -978,7 +1017,6 @@ export default class Encen {
     const bottom = this.drawTitleCard(g, L.terr.upper, line, {
       alpha: easeOut(this.phaseT / 0.4), y: 220,
       kicker: T("encen.nivell", "Nivell {n} de {total}", { n: this.li + 1, total: NLEVELS }),
-      hint: this.li === 0 ? T("encen.intro", "Mou les mans sense parar!") : "",
     });
     this.drawCountdown(g, this.readyDur(), W / 2, Math.max(720, bottom + 110));
   }

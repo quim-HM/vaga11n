@@ -6,7 +6,7 @@ import { textIcon } from "../icons.js";
 import { drawRaiseIcon } from "../hand.js";
 
 const AUTO_S = 10;
-const MIN_S = 2;
+const MIN_S = 3;   // reading time before a raised hand moves on
 const RAISE_S = 0.6;
 // Evaluated at draw time so data/textos.json overrides apply. Pattern for every game: «what» = what it
 // means (60 px), «how» = the goal or the gesture (44 px). Detailed controls are taught inside each game.
@@ -40,6 +40,8 @@ export default class Interlude {
     if (this.t > AUTO_S || this.nextT > RAISE_S || (this.t > MIN_S && inp.keys.has("Space"))) this.app.goto(this.params.game.id);
   }
   skip() { this.app.goto(this.params.game.id); }
+  // the hand raised to resume from the pause must come down before it counts here
+  onResume() { this.armed = false; this.nextT = 0; }
   draw(g) {
     const { game, index } = this.params;
     const info = INFO[game.id] ? INFO[game.id](this.app) : { what: "", how: "" };

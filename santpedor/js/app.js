@@ -153,6 +153,8 @@ export class App {
         this.paused.t += dt;
         if (!this.paused.manual && present && this.input.anyRaisedFor() > RESUME_RAISE_S) {
           this.paused = null; sfx.select();
+          // the hand raised to resume must not also count as «continue» on the screen underneath
+          if (this.scene && this.scene.onResume) this.scene.onResume();
         } else if (!this.paused.manual && this.paused.t > PAUSE_TIMEOUT_S) {
           this.endSession("timeout");
         }
