@@ -404,6 +404,6 @@ export function encenCards(oneArm, T) {
   return [
     { label: T("encen.com.mou", "Mou les mans"), sub: T("encen.com.mou_sub", "sense parar"), tone: "red", draw: wave },
     { label: T("encen.com.mapa", "Per tot el mapa"), sub: T("encen.com.mapa_sub", "si pares, es refreda"), tone: "blue", draw: sweep },
-    { label: T("encen.com.bandera", "Suma la majoria"), sub: T("encen.com.bandera_sub", "i aguanta-hi"), tone: "teal", draw: goal },
+    { label: T("encen.com.bandera", "Supera la fita"), sub: T("encen.com.bandera_sub", "i mantén-t'hi"), tone: "teal", draw: goal },
   ];
 }
