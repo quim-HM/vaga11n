@@ -22,7 +22,7 @@ per a totes les versions.
 | Fitxer | Obligatori | Contingut |
 |---|---|---|
 | `lloc.json` | sí | Manifest de la versió (vegeu més avall) |
-| `preguntes.json` | sí | Preguntes locals: el mateix format que `data/preguntes_comunes.json` (enunciat, valor, unitat, any, àmbit, font, definició, confiança, rang, pas, escala, metàfora, revelació, nota, nota curta) |
+| `preguntes.json` | sí | Preguntes locals: el mateix format que `data/preguntes_comunes.json` (enunciat, valor, unitat, any, àmbit, font, definició, confiança, rang, pas, escala, metàfora, revelació, nota, nota curta; opcionalment `linia_base`, el valor neutre on arrenca la palanca) |
 | `series.json` + `series/*.csv` | no (`[]`) | Sèries locals per a «Final de mes». Com a `data/series.json`; el camp `fitxer` és relatiu a `data/` (`llocs/<id>/series/x.csv`). Camps opcionals: `subjecte` (p. ex. «el lloguer mitjà dels contractes nous a Santpedor», per a les frases del final) i `subjecte_plural` |
 | `fonts.json` | no (`[]`) | Fonts noves, o fonts comunes amb el mateix `id` i una URL o còpia pròpia del lloc (substitueixen la comuna en aquesta versió) |
 

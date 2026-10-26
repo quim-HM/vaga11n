@@ -8,6 +8,7 @@ import { W, H, C, text, panel, ring, hatch, clamp, easeOut, fmtNum, Particles, r
 import { drawRaiseIcon, drawFooterHint } from "../hand.js";
 import { drawTrail } from "../trail.js";
 import { centerText } from "../icons.js";
+import { inRect } from "../input.js";
 
 // Text overrides (data/textos.json via web/js/textos.js); safe fallback if the module is missing
 function fill(str, vars) {
@@ -75,6 +76,8 @@ const SPEEDS = [565, 625, 675, 735];        // scroll px/s (fast; px per year sc
 const WIDTHS = [230, 185, 150, 120];        // corridor width px, narrower every stage (game difficulty, not data)
 const ONE_ARM_EXTRA = 40;                   // assist: wider corridor in one-arm mode
 const CARD_MIN = 1.0, CARD_AUTO = 5;
+const CARD_RETRY_AUTO = 8;  // a lost level offers a retry: longer, and it carries on by itself
+const CARD_DWELL = 1.0;     // hold a hand over an option for this long to pick it
 const RAISE_S = 0.6;
 const NODATA_DUR = 3;
 // End screen: all lines revealed one after another, then the campaign line
@@ -243,6 +246,7 @@ export default class FinalDeMes {
     this.hudPts = { x: 1300, y: 60 };
     this.graceT = 0;
     this.marge = 1;
+    this.btnP = { retry: 0, next: 0 };
     this.stageDur = STAGE_MAX;
     this.cfgPromise = loadConfig(app.data);
   }
@@ -383,6 +387,7 @@ export default class FinalDeMes {
     this.app.sfx[ok ? "good" : "bad"]();
     if (ok) this.fx.burst(PLAYER_X, this.py, 14, [C.mustard, st.color]);
     this.armed = false;
+    this.btnP = { retry: 0, next: 0 };
     this.pt = 0;
     this.phase = "card";   // after the last stage card comes the end screen (all lines together)
   }
@@ -537,11 +542,52 @@ export default class FinalDeMes {
     } else if (this.phase === "final") {
       if (this._raiseToContinue(FINAL_MIN, FINAL_AUTO)) this._finish();
     } else if (this.phase === "card") {
-      if (this._raiseToContinue(CARD_MIN, CARD_AUTO)) {
-        if (this.si >= this.stages.length - 1) { this.phase = "final"; this.pt = 0; this.armed = false; this.app.sfx.reveal(); }
-        else { this.si += 1; this._prepStage(); this._startPrep(); }
-      }
+      // a level lost for want of marge can be played again once; otherwise a raised hand moves on
+      if (this._canRetry()) {
+        const pick = this._pickOnCard(dt);
+        if (pick === "retry") this._retryStage();
+        else if (pick === "next" || this.pt > CARD_RETRY_AUTO) this._afterCard();
+      } else if (this._raiseToContinue(CARD_MIN, CARD_AUTO)) this._afterCard();
     }
+  }
+
+  _afterCard() {
+    if (this.si >= this.stages.length - 1) { this.phase = "final"; this.pt = 0; this.armed = false; this.app.sfx.reveal(); }
+    else { this.si += 1; this._prepStage(); this._startPrep(); }
+  }
+
+  // A level is only offered again if it was lost and has not been retried yet
+  _canRetry() {
+    const st = this.stages[this.si];
+    return !!st && st.result === "fail" && !st.retried;
+  }
+
+  // The two options on the card: hold a hand over one (or click it in mouse mode)
+  _pickOnCard(dt) {
+    const r = this._cardRects();
+    const cs = this.app.input.cursors();
+    for (const k of ["retry", "next"]) {
+      const b = r[k];
+      const over = cs.some((c) => inRect(c, b.x, b.y, b.w, b.h));
+      this.btnP[k] = clamp(this.btnP[k] + (over ? dt / CARD_DWELL : -dt * 2), 0, 1);
+      if (this.app.input.consumeClick(b.x, b.y, b.w, b.h)) this.btnP[k] = 1;
+      if (this.btnP[k] >= 1) return k;
+    }
+    return null;
+  }
+
+  // Play the level again: the lost attempt leaves no trace in the score
+  _retryStage() {
+    const st = this.stages[this.si];
+    st.retried = true;
+    st.result = null;
+    this.insideTime = Math.max(0, this.insideTime - st.inT);
+    this.totalTime = Math.max(0, this.totalTime - st.totT);
+    this.points = Math.max(0, this.points - st.pts);
+    st.inT = 0; st.totT = 0; st.pts = 0; st.coinsGot = 0;
+    for (const co of st.coins) co.got = false;
+    this._prepStage();
+    this._startPrep();
   }
 
   _updatePlay(dt) {
@@ -655,6 +701,8 @@ export default class FinalDeMes {
       if (this.phase === "intro") this._drawIntro(g);
       if (this.phase === "card") this._drawCard(g);
     });
+    // on the card with options the hand goes on top: it is what you aim at the buttons with
+    if (this.phase === "card" && this._canRetry()) this.app.drawCursors(g, { alpha: 0.9 });
     if (this.phase === "go") this._drawGo(g);
   }
 
@@ -1044,10 +1092,58 @@ export default class FinalDeMes {
     g.restore();
   }
 
+  // Geometry of the card with the two options (retry / go on), shared by update and draw
+  _cardRects() {
+    const w = 1000, h = 430;
+    const x = (W - w) / 2 + 160, y = PLAY_TOP + (PLAY_H - h) / 2;
+    const bw = (w - 3 * 40) / 2, bh = 100, by = y + h - 56 - bh;
+    return { x, y, w, h, retry: { x: x + 40, y: by, w: bw, h: bh }, next: { x: x + 80 + bw, y: by, w: bw, h: bh } };
+  }
+
+  // One option: the hold fills it from the left, as on the «FIXA-HO» buttons of the first game
+  _drawCardButton(g, b, label, p, accent) {
+    g.save();
+    g.fillStyle = C.card; rrect(g, b.x, b.y, b.w, b.h, 6); g.fill();
+    if (p > 0) {
+      g.save(); rrect(g, b.x, b.y, b.w, b.h, 6); g.clip();
+      g.fillStyle = accent; g.fillRect(b.x, b.y, b.w * p, b.h);
+      g.restore();
+    }
+    g.lineWidth = 4; g.strokeStyle = accent; rrect(g, b.x, b.y, b.w, b.h, 6); g.stroke();
+    g.restore();
+    // label twice: card ink over the empty part, white over the filled one
+    const draw = (color) => fitText(g, label, b.x + b.w / 2, b.y + b.h / 2 + 14, b.w - 36,
+      { size: 40, weight: 700, align: "center", color });
+    g.save(); g.beginPath(); g.rect(b.x + b.w * p, b.y, b.w * (1 - p), b.h); g.clip(); draw(C.cardInk); g.restore();
+    if (p > 0) { g.save(); g.beginPath(); g.rect(b.x, b.y, b.w * p, b.h); g.clip(); draw(C.white); g.restore(); }
+  }
+
+  // Lost level, first time: the same card, plus «play it again» / «carry on»
+  _drawRetryCard(g, st, a) {
+    const r = this._cardRects();
+    g.save(); g.globalAlpha = a;
+    panel(g, r.x, r.y, r.w, r.h, {});
+    withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, r.x, r.y, r.w, 34, 6); g.fill(); });
+    wrap(g, T("finaldemes.senseMarge", "No li has pogut seguir el ritme al mercat!"), r.x + 50, r.y + 92, 900,
+      { size: 54, kind: "title", color: C.red, lineH: 1.08, maxLines: 2 });
+    fitText(g, T("finaldemes.resultatEtapaPct", "{etapa}: {pct} des del {any}", { etapa: st.label, pct: fmtPct(st.finalPct), any: st.years[0] }),
+      r.x + 50, r.y + 208, 900, { size: 42, weight: 700, color: st.ink });
+    fitText(g, T("finaldemes.tria", "Mantén la mà sobre una opció"), r.x + 50, r.y + 256, 900,
+      { size: 30, weight: 700, color: C.cardInkSoft });
+    this._drawCardButton(g, r.retry, T("finaldemes.reintenta", "Torna-ho a provar"), this.btnP.retry, C.teal);
+    this._drawCardButton(g, r.next, T("finaldemes.continua", "Continua"), this.btnP.next, C.cardLine);
+    // it carries on by itself if nobody chooses (nothing ever blocks the installation)
+    const auto = clamp(this.pt / CARD_RETRY_AUTO, 0, 1);
+    g.fillStyle = C.cardSoft; g.fillRect(r.x + 40, r.y + r.h - 30, r.w - 80, 6);
+    g.fillStyle = C.cardInkSoft; g.fillRect(r.x + 40, r.y + r.h - 30, (r.w - 80) * auto, 6);
+    g.restore();
+  }
+
   _drawCard(g) {
     const st = this.stages[this.si];
     const ok = st.result === "ok";
     const a = easeOut(this.pt / 0.3);
+    if (this._canRetry()) { this._drawRetryCard(g, st, a); return; }
     g.save(); g.globalAlpha = a;
     const { x, y } = this._drawOverlayPanel(g, 1000, 330);
     if (!ok) withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, x, y, 1000, 34, 6); g.fill(); });

@@ -78,6 +78,18 @@ function valueAt(q, t) {
   return clamp(v, min, max);
 }
 
+// Where the lever starts. By default at the bottom of the scale, but a question with a neutral
+// point starts there instead, so the answer can move either way from «no change»: ranges that cross
+// zero start at zero (e.g. the change in purchasing power) and a question can name its own baseline
+// with "linia_base" (e.g. the 100 € the 2019 shopping trolley cost).
+function startParam(q) {
+  const { min, max } = q.rang;
+  const base = Number.isFinite(q.linia_base) ? q.linia_base : (min < 0 && max > 0 ? 0 : null);
+  if (base === null || base <= min || base >= max) return 0;
+  if (q.escala === "log" && min > 0) return clamp(Math.log(base / min) / Math.log(max / min), 0, 1);
+  return clamp((base - min) / (max - min), 0, 1);
+}
+
 function scoreOf(q, a) {
   const { min, max } = q.rang;
   // Log scales reward the right order of magnitude: 0 points when off by a factor of 10
@@ -127,7 +139,7 @@ export default class Preu {
 
   startQuestion() {
     const q = this.q;
-    this.tParam = 0;   // start at the bottom of the scale: the player decides how high to go
+    this.tParam = startParam(q);   // bottom of the scale, or the question's neutral point
     this.value = valueAt(q, this.tParam);
     this.prevValue = this.value;
     this.touched = false;

@@ -77,6 +77,7 @@
       "max": 200
     },
     "pas": 1,
+    "linia_base": 100,
     "escala": "lineal",
     "metafora": "carro",
     "revelacio": "134,86 €: un 34,9 % més, mentre que l'IPC general ha pujat un 20,6 %. El sou mitjà català, del 2019 al 2024, un 22,2 %.",
