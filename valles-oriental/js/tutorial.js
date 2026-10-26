@@ -6,7 +6,7 @@
 // figure are in its own space: origin between the feet, y up negative, about 290 units tall.
 import { W, C, text, panel, rrect, onCard, posterBlock, clamp, drawCheck } from "./ui.js";
 import { textIcon, centerText, drawOkBadge } from "./icons.js";
-import { drawHand } from "./hand.js";
+import { drawHand, handOutline } from "./hand.js";
 
 // --- colours ------------------------------------------------------------------------------------
 function rgbOf(c) {
@@ -45,7 +45,7 @@ function handOnArm(g, wx, wy, ang, s, opts) {
   g.save();
   g.translate(wx, wy);
   g.rotate(ang + Math.PI / 2);
-  drawHand(g, 0, -0.62 * s, s, opts);
+  drawHand(g, 0, -0.62 * s, s, { ...opts, stroke: handOutline(opts.fill, opts.stroke) });
   g.restore();
 }
 
@@ -151,20 +151,78 @@ export function drawTutorial(g, { title, block, cards, t }) {
 }
 
 // --- «El preu (in)just» --------------------------------------------------------------------------
-// arm: 1 = up, -1 = down, 0 = sideways to the ✓ button
+// The answer as a small value chip (as on the game's answer card): the number, an arrow showing which
+// way it is moving and a gauge under it; locked = answered (teal frame + ✓ badge).
+function valueChip(g, cx, cy, value, dir, colour, { locked = false, frac = 0.5 } = {}) {
+  const w = 150, h = 92, x = cx - w / 2, y = cy - h / 2;
+  g.save();
+  g.fillStyle = C.card; rrect(g, x, y, w, h, 10); g.fill();
+  g.lineWidth = locked ? 6 : 4; g.strokeStyle = locked ? C.teal : colour; rrect(g, x, y, w, h, 10); g.stroke();
+  // gauge
+  const gx = x + 18, gw = w - 36, gy = y + h - 22;
+  g.fillStyle = C.cardSoft; rrect(g, gx, gy, gw, 9, 4.5); g.fill();
+  g.fillStyle = locked ? C.teal : colour; rrect(g, gx, gy, Math.max(9, gw * clamp(frac, 0, 1)), 9, 4.5); g.fill();
+  g.restore();
+  const num = String(value);
+  if (dir) {
+    centerText(g, num, cx - 14, y + 36, { size: 40, kind: "title", color: C.ink });
+    // arrow beside the number: ▲ up / ▼ down
+    const ax = cx + 44, ay = y + 36, s = 12;
+    g.save(); g.fillStyle = colour; g.beginPath();
+    if (dir > 0) { g.moveTo(ax, ay - s); g.lineTo(ax + s, ay + s * 0.7); g.lineTo(ax - s, ay + s * 0.7); }
+    else { g.moveTo(ax, ay + s); g.lineTo(ax + s, ay - s * 0.7); g.lineTo(ax - s, ay - s * 0.7); }
+    g.closePath(); g.fill(); g.restore();
+  } else centerText(g, num, cx, y + 36, { size: 40, kind: "title", color: C.ink });
+  if (locked) drawOkBadge(g, x + w - 4, y + 4, 17);
+}
+
+// arm: 1 = up (the answer climbs), -1 = down (it drops), 0 = hand held still on the ✓ (it is answered)
 export function preuFigure(g, x, y, arm, t) {
   const tone = arm > 0 ? C.red : arm < 0 ? C.blue : C.teal;
   const sway = Math.sin(t * 2.4) * 6;        // small, slow arm motion that shows the gesture
   const right = arm > 0 ? { e: [26, -50 - sway * 0.4], w: [34, -110 - sway] }
     : arm < 0 ? { e: [30, 46], w: [48, 92 + sway] }
     : { e: [50, 2], w: [100, -2] };
+  // the value runs through 20..49 (up) or 49..20 (down) on a loop, a few steps a second, as the lever does
+  const LO = 20, N = 30, k = Math.floor((t * 5) % N);
+  const v = arm > 0 ? LO + k : arm < 0 ? LO + N - 1 - k : 35;
+  // the ✓ fills from the bottom while the hand stays on it, then the answer is fixed for a moment
+  const cyc = t % 3.2, p = clamp((cyc - 0.4) / 1.2, 0, 1), locked = arm === 0 && p >= 1;
   drawFigure(g, x, y, {
     right: { ...right, colour: tone },
-    front: arm === 0 ? (gg, J) => {
-      gg.fillStyle = C.teal; rrect(gg, J.wR[0] + 34, J.SH - 48, 64, 92, 10); gg.fill();
-      drawCheck(gg, J.wR[0] + 66, J.SH - 2, 34, { color: C.white });
-    } : null,
+    front: (gg, J) => {
+      valueChip(gg, -92, -326, v, arm, tone, { locked, frac: (v - LO) / (N - 1) });
+      if (arm !== 0) return;
+      const bx = J.wR[0] + 34, by = J.SH - 48, bw = 64, bh = 92;
+      gg.fillStyle = C.card; rrect(gg, bx, by, bw, bh, 10); gg.fill();
+      if (p > 0) {
+        gg.save(); rrect(gg, bx, by, bw, bh, 10); gg.clip();
+        gg.fillStyle = C.teal; gg.fillRect(bx, by + bh * (1 - p), bw, bh * p);
+        gg.restore();
+      }
+      gg.lineWidth = 5; gg.strokeStyle = C.teal; rrect(gg, bx, by, bw, bh, 10); gg.stroke();
+      // check in teal over the empty part and white over the filled one (always whole)
+      const fy = by + bh * (1 - p);
+      gg.save(); gg.beginPath(); gg.rect(bx, by, bw, fy - by); gg.clip(); drawCheck(gg, bx + bw / 2, by + bh / 2, 34, { color: C.teal }); gg.restore();
+      if (p > 0) { gg.save(); gg.beginPath(); gg.rect(bx, fy, bw, by + bh - fy); gg.clip(); drawCheck(gg, bx + bw / 2, by + bh / 2, 34, { color: C.white }); gg.restore(); }
+    },
   });
+}
+
+// Goal line under the cards: a small target (the real figure) and the rule
+export function drawPreuGoal(g, label, y = 916) {
+  const size = 40, r = 22, gap = 22;
+  const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
+  const x0 = W / 2 - (2 * r + gap + tw) / 2, cx = x0 + r, cy = y - 2;
+  onCard(() => {
+    g.save();
+    for (const [rr, col] of [[r, C.red], [r * 0.66, C.card], [r * 0.33, C.red]]) {
+      g.fillStyle = col; g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); g.fill();
+    }
+    g.lineWidth = 3; g.strokeStyle = C.card; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+    g.restore();
+  });
+  textIcon(g, label, x0 + 2 * r + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
 }
 
 // --- «Final de mes» -------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ import { drawMetaphor, fmtWithUnit } from "./metafores.js";
 import { drawCountdown } from "../countdown.js";
 import { drawOkBadge, textIcon } from "../icons.js";
 import { drawFooterHint } from "../hand.js";
-import { drawTutorial, preuFigure } from "../tutorial.js";
+import { drawTutorial, preuFigure, drawPreuGoal } from "../tutorial.js";
 
 // A round is short (3 questions); «Més preguntes» offers another one while unseen questions remain
 export const N_QUESTIONS = 3;
@@ -343,6 +343,7 @@ export default class Preu {
         { label: T("preu.ma_quieta_ok", "Mà quieta al {check}"), sub: T("preu.respon", "respon"), tone: "teal", draw: (gg, x, y, t) => preuFigure(gg, x, y, 0, t) },
       ],
     });
+    drawPreuGoal(g, T("preu.com.objectiu", "Acosta't el màxim a la xifra real"));
     this.drawNextHint(g, HOWTO_MIN_S);
   }
 
