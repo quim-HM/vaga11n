@@ -4,6 +4,7 @@ import { T } from "../textos.js";
 import { W, H, C, text, wrap, clamp, rrect, font, posterField, posterSlogan, posterTitle, privacyFooter } from "../ui.js";
 
 const START_RAISE_S = 1.0;
+const NUDGE_AFTER_S = 4;   // someone in front without raising a hand for this long: the call pulses
 // small "play with the mouse" link-button, centred under the call to play (above the privacy footer)
 const MOUSE_BTN = { x: W / 2 - 190, y: 962, w: 380, h: 54 };
 
@@ -21,6 +22,8 @@ export default class Attract {
   update(dt) {
     this.t += dt;
     const inp = this.app.input;
+    // someone in front who has not raised a hand yet: after a while the call to play pulses
+    this.idleT = inp.state.present && inp.anyRaisedFor() === 0 ? (this.idleT || 0) + dt : 0;
     const b = MOUSE_BTN;
     if (!inp.mouseForced && inp.cameraAvailable && inp.consumeClick(b.x, b.y, b.w, b.h)) {
       inp.mouseForced = true;
@@ -54,6 +57,14 @@ export default class Attract {
     g.fillStyle = present ? C.ctaBg : C.field;
     rrect(g, W / 2 - bw / 2, y - bh / 2, bw, bh, 4); g.fill();
     g.lineWidth = 6; g.strokeStyle = C.ctaBg === C.field ? C.fieldInk : C.ctaBg; g.stroke();
+    if (present && this.idleT > NUDGE_AFTER_S) {
+      const k = ((this.idleT - NUDGE_AFTER_S) % 1.4) / 1.4, e = 8 + 28 * k;
+      g.save();
+      g.globalAlpha = 0.7 * (1 - k);
+      g.lineWidth = 6; g.strokeStyle = C.ctaBg === C.field ? C.fieldInk : C.ctaBg;
+      rrect(g, W / 2 - bw / 2 - e, y - bh / 2 - e, bw + 2 * e, bh + 2 * e, 4 + e / 2); g.stroke();
+      g.restore();
+    }
     const msg = !present ? T("inici.posa_t_davant_la", "POSA'T DAVANT LA PANTALLA")
       : inp.usingMouse ? T("inici.mante_clic", "MANTÉN PREMUT EL CLIC PER JUGAR")
       : T("inici.aixeca_una_ma_per", "AIXECA UNA MÀ PER JUGAR");

@@ -8,17 +8,18 @@ import { drawRaiseIcon } from "../hand.js";
 const AUTO_S = 10;
 const MIN_S = 2;
 const RAISE_S = 0.6;
-// Evaluated at draw time so data/textos.json overrides apply
+// Evaluated at draw time so data/textos.json overrides apply. Pattern for every game: «what» = what it
+// means (60 px), «how» = the goal or the gesture (44 px). Detailed controls are taught inside each game.
 const INFO = {
-  preu: () => ({ what: T("interludi.preu.que", "Endevina xifres reals"), how: T("interludi.preu.com", "Mà amunt ▲ · mà avall ▼ · {check} per respondre") }),
+  preu: () => ({ what: T("interludi.preu.que", "Posem xifres a com hem arribat fins aquí"), how: T("interludi.preu.com", "Mira d'acostar-te el màxim a la xifra real") }),
   // the control depends on how you are playing: two hands tilt the line, one hand is followed
   finaldemes: (app) => ({
-    what: T("interludi.finaldemes.que", "Qui dia passa, any empeny: aconsegueix arribar a final de mes al llarg dels anys"),
+    what: T("interludi.finaldemes.que", "Aconsegueix arribar a final de mes al llarg dels anys"),
     how: app && (app.input.usingMouse || app.input.oneArm)
-      ? T("interludi.finaldemes.com_una", "Segueix el camí amb la mà")
-      : T("interludi.finaldemes.com", "Inclina la línia entre les dues mans"),
+      ? T("interludi.finaldemes.com_una", "Puja i baixa la mà i mantén-te dins els marges dels preus")
+      : T("interludi.finaldemes.com", "Inclina les mans i mantén-te dins els marges dels preus"),
   }),
-  encen: () => ({ what: T("interludi.encen.que", "Encén la vaga, barri a barri"), how: T("interludi.encen.com", "Mou les mans sense parar per tot el mapa") }),
+  encen: () => ({ what: T("interludi.encen.que", "Organitza la vaga, barri a barri"), how: T("interludi.encen.com", "Mou les mans sense parar per tot el mapa per organitzar la vaga al teu entorn") }),
 };
 
 export default class Interlude {
@@ -53,12 +54,12 @@ export default class Interlude {
       text(g, parts.slice(1).join(": "), W / 2, 578, { size: 46, weight: 700, align: "center", alpha: a, maxW: W - 200 });
       wy = 578;
     } else {
-      text(g, info.what, W / 2, 530, { size: 56, weight: 700, align: "center", alpha: a, maxW: W - 200 });
+      text(g, info.what, W / 2, 530, { size: 60, weight: 800, align: "center", alpha: a, maxW: W - 200 });
     }
-    textIcon(g, info.how, W / 2, wy + 100, { size: 44, weight: 700, align: "center", color: C.blue, alpha: a, maxW: W - 200 });
+    textIcon(g, info.how, W / 2, wy + 96, { size: 44, weight: 700, align: "center", color: C.ink, alpha: a, maxW: W - 200 });
     if (this.t > MIN_S) {
       text(g, T("interludi.aixeca_la_ma_quan", "Aixeca la mà quan estiguis a punt"), W / 2, 860, { size: 44, weight: 700, align: "center" });
-      drawRaiseIcon(g, W / 2, 960, 46, clamp(this.nextT / RAISE_S, 0, 1), { mouse: this.app.input.usingMouse });
+      drawRaiseIcon(g, W / 2, 960, 46, clamp(this.nextT / RAISE_S, 0, 1), { mouse: this.app.input.usingMouse, waitT: this.t - MIN_S });
     } else {
       text(g, T("interludi.descansa_els_bracos_un", "Descansa els braços un moment"), W / 2, 860, { size: 40, align: "center", color: C.inkSoft });
     }

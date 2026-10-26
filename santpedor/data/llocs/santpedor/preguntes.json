@@ -34,7 +34,7 @@
       "min": 0,
       "max": 56
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "setmana",
     "revelacio": "Unes 17 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
@@ -55,7 +55,7 @@
       "min": 0,
       "max": 30
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "casetes",
     "revelacio": "El 7,9 % (a Catalunya, el 10,7 %): 258 habitatges. Són gairebé el doble dels contractes de lloguer nous signats a Santpedor el 2021 (140).",

@@ -1,7 +1,7 @@
 // End of session: campaign poster (vagageneral.org wording/style), a short encouragement from the
 // manifest (quote + «Exigim» list, data/final.json → anim) and the broadcast-channel QR. No scores.
 // Unsigned on purpose. Texts live in data/final.json.
-import { W, H, C, text, wrap, panel, clamp, easeOut, measure, Particles, posterField, posterSlogan, posterTitle, posterBlock } from "../ui.js";
+import { W, H, C, LAYOUT, text, wrap, panel, clamp, easeOut, measure, Particles, posterField, posterSlogan, posterTitle, posterBlock } from "../ui.js";
 import { drawFooterHint } from "../hand.js";
 
 // The poster field uses its own ink (C.fieldInk): draw shared helpers with C.ink = fieldInk
@@ -109,9 +109,10 @@ export default class Final {
         g.restore();
         text(g, it, x0 + 34, y + i * 52, { size, weight: 700, color: C.fieldInk, alpha: ai, maxW: textW - 34 });
       });
-      // pointer to the full list of demands
-      if (A.mes_info) {
-        const iy = y + items.length * 52 + 14;
+      // pointer to the full list of demands: under the QR panel when there is one (the footer row
+      // belongs to the restart prompt), otherwise below the list but never inside the footer
+      if (A.mes_info && !showQr) {
+        const iy = Math.min(y + items.length * 52 + 14, LAYOUT.footY - 30);
         text(g, A.mes_info, al === "center" ? cx : x0, iy, { size: 30, weight: 700, color: C.fieldSoft, alpha: a(1.8), align: al === "center" ? "center" : "left", maxW: textW });
       }
     }
@@ -119,6 +120,7 @@ export default class Final {
     // broadcast channel + QR (optional)
     if (showQr) {
       const bx = 1310, by = 165, bw = 500, bh = 620;   // top aligned with the poster title block
+      if (A.mes_info && !this.short) wrap(g, A.mes_info, bx + bw / 2, by + bh + 64, bw, { size: 30, weight: 700, color: C.fieldSoft, alpha: a(1.8), align: "center", maxLines: 2, lineH: 1.2 });
       g.save(); g.globalAlpha = a(1.0);
       panel(g, bx, by, bw, bh, { fill: C.card, stroke: C.cardAccent, lw: 6, r: 6, shadow: false });
       text(g, (d.titol || T("final.canal", "Canal de difusió")).toUpperCase(), bx + bw / 2, by + 66, { size: 34, kind: "poster", align: "center", color: C.cardAccent, maxW: bw - 40 });
@@ -140,7 +142,7 @@ export default class Final {
     // restart prompt in the footer centre (icon fills while the hand is up); the corners are the ◀ ▶ shortcuts
     if (this.t > RESTART_AFTER_S) {
       const inp = this.app.input;
-      onField(() => drawFooterHint(g, T("final.reinicia", "Aixeca la mà per tornar a començar"), clamp(inp.anyRaisedFor() / 1.0, 0, 1), { mouse: inp.usingMouse, size: 32 }));
+      onField(() => drawFooterHint(g, T("final.reinicia", "Aixeca la mà per tornar a començar"), clamp(inp.anyRaisedFor() / 1.0, 0, 1), { mouse: inp.usingMouse, size: 34, waitT: this.t - RESTART_AFTER_S }));
     }
     this.fx.draw(g);
     app.drawCursors(g, { alpha: 0.7 });

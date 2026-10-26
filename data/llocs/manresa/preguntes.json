@@ -55,7 +55,7 @@
       "min": 0,
       "max": 56
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "setmana",
     "revelacio": "Unes 17 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
@@ -76,7 +76,7 @@
       "min": 0,
       "max": 60
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "casetes",
     "revelacio": "El 13,7 % (a Catalunya, el 10,7 %): 5.517 habitatges. Són el triple dels contractes de lloguer nous signats a Manresa el 2021 (1.814).",
@@ -100,9 +100,9 @@
     "pas": 5,
     "escala": "lineal",
     "metafora": "edifici",
-    "revelacio": "107 en 13 anys. El Pla territorial d'habitatge (2024) en fixa 495 per al 2025–2029; el Pla Local d'Habitatge vigent és encara el 2017–2022.",
-    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Les xifres d'un sol municipi depenen de poques promocions i varien molt d'un any a l'altre. Entre 2002 i 2012 se n'havien acabat 935 (uns 85 l'any). A tot Catalunya: 5.425 acabats l'any de mitjana (2002–2012) i 1.438 (2013–2025). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), objectius de solidaritat urbana de Manresa: 2.871 habitatges destinats a polítiques socials de 31.302 principals (9,2 %) a la situació inicial; nous a promoure per quinquenni (2025–2029, 2030–2034, 2035–2039, 2040–2044): 495, 981, 1.187, 260 (total 2.923), per arribar al 15 % de l'article 73 de la Llei 18/2007. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social, allotjaments dotacionals o habitatges cedits en masoveria urbana), de manera que la comparació és orientativa. Registre de sol·licitants d'habitatge protegit a Manresa (dades del Pla): 1.153 el 2019 (mitjana 2017–2019: 958). Pla Local d'Habitatge: segons la llista oficial «Plans vigents de l'Ajuntament de Manresa» (font manresa_plans_vigents, fitxer modificat el 31-07-2026, consultat el 25-10-2026), el pla d'habitatge vigent és el 2017-2022, aprovat el 15-06-2017; a data de consulta no se n'ha aprovat cap de nou (la llista no n'inclou cap de posterior). El mateix pla preveia una vigència de sis anys des de l'aprovació, és a dir, fins al 15-06-2023 (font manresa_plh_2017_2022).",
-    "nota_curta": "Objectiu del Pla territorial (Decret 408/2024). PLH: llista de plans vigents de l'Ajuntament, consulta 25-10-2026."
+    "revelacio": "Uns 8 l'any. Del 2025 al 2029, la Generalitat en demana 99 l'any a Manresa. L'Ajuntament no ha renovat el pla d'habitatge des del 2022.",
+    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Les xifres d'un sol municipi depenen de poques promocions i varien molt d'un any a l'altre. Entre 2002 i 2012 se n'havien acabat 935 (uns 85 l'any). A tot Catalunya: 5.425 acabats l'any de mitjana (2002–2012) i 1.438 (2013–2025). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), objectius de solidaritat urbana de Manresa: 2.871 habitatges destinats a polítiques socials de 31.302 principals (9,2 %) a la situació inicial; nous a promoure per quinquenni (2025–2029, 2030–2034, 2035–2039, 2040–2044): 495, 981, 1.187, 260 (total 2.923), per arribar al 15 % de l'article 73 de la Llei 18/2007. Primer quinquenni (de l'1-1-2025 al 31-12-2029), municipi de Manresa: 495 en 5 anys, 99 l'any de mitjana. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social, allotjaments dotacionals o habitatges cedits en masoveria urbana), de manera que la comparació és orientativa. Registre de sol·licitants d'habitatge protegit a Manresa (dades del Pla): 1.153 el 2019 (mitjana 2017–2019: 958). Pla Local d'Habitatge: segons la llista oficial «Plans vigents de l'Ajuntament de Manresa» (font manresa_plans_vigents, fitxer modificat el 31-07-2026, consultat el 25-10-2026), el pla d'habitatge vigent és el 2017-2022, aprovat el 15-06-2017; a data de consulta no se n'ha aprovat cap de nou (la llista no n'inclou cap de posterior). El mateix pla preveia una vigència de sis anys des de l'aprovació, és a dir, fins al 15-06-2023 (font manresa_plh_2017_2022).",
+    "nota_curta": "Pla territorial (Decret 408/2024), comparació orientativa. Pla d'habitatge: llista de plans vigents de l'Ajuntament."
   },
   {
     "id": "llancaments_partit_judicial_manresa",

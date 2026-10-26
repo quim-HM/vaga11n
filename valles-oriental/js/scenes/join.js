@@ -62,9 +62,9 @@ export default class Join {
 
   draw(g) {
     const app = this.app, inp = app.input;
-    text(g, T("hola.hola", "HOLA!"), W / 2, 150, { size: 120, kind: "title", align: "center", color: C.head });
-    const msg = this.doneT !== null ? T("hola.molt_be_comencem", "Molt bé! Comencem.") : inp.oneArm ? T("hola.diana_una", "Posa la mà als cercles") : T("hola.diana_dues", "Posa les mans als cercles");
-    text(g, msg, W / 2, 240, { size: 56, weight: 700, align: "center" });
+    text(g, T("hola.hola", "HOLA!"), W / 2, 150, { size: 110, kind: "title", align: "center", color: C.head });
+    const msg = this.doneT !== null ? T("hola.molt_be_comencem", "Molt bé! Comencem.") : inp.oneArm ? T("hola.diana_una", "Col·loca la mà als cercles") : T("hola.diana_dues", "Col·loca les mans als cercles");
+    text(g, msg, W / 2, 240, { size: 60, weight: 800, align: "center" });
     app.drawSilhouette(g, { alpha: 0.18, lw: 40 });
     for (const s of this.stars) {
       handTarget(g, s.x, s.y, s.r, s.done, s.x < W / 2 ? "l" : "r");
@@ -75,7 +75,7 @@ export default class Join {
     const label = inp.oneArm ? T("hola.mode_un_brac_activat", "Mode un braç: activat") : T("hola.jugo_amb_un_sol", "Jugo amb un sol braç");
     const p = inp.oneArm ? 1 - b.dwell.p : b.dwell.p;
     campaignButton(g, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, { label, p, size: 36 });
-    wrap(g, T("hola.tambe_es_pot_jugar", "També es pot jugar assegut."), W / 2, H - 110, 1500, { size: 32, align: "center", color: C.inkSoft });
+    wrap(g, T("hola.tambe_es_pot_jugar", "Es pot jugar assegut."), W / 2, H - 110, 1500, { size: 32, align: "center", color: C.inkSoft });
     this.fx.draw(g);
     const over = inp.cursors().find((c) => inRect(c, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h));
     app.drawCursors(g, { progress: over ? { [over.side]: clamp(b.dwell.p, 0, 1) } : null });

@@ -55,7 +55,7 @@
       "min": 0,
       "max": 56
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "setmana",
     "revelacio": "Unes 23 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
@@ -76,7 +76,7 @@
       "min": 0,
       "max": 20
     },
-    "pas": 0.2,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "casetes",
     "revelacio": "El 5,8 % (a Catalunya, el 10,7 %): 9.896 habitatges, més que tots els contractes de lloguer nous signats a la comarca el 2021 (7.097).",

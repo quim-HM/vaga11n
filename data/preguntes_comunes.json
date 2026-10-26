@@ -34,7 +34,7 @@
       "min": 18,
       "max": 40
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "calendari",
     "revelacio": "Als 30,2 anys, gairebé 4 anys més tard que la mitjana de la UE (26,3). El 2008 era als 28,4.",
@@ -43,7 +43,7 @@
   },
   {
     "id": "salari_real_catalunya",
-    "enunciat": "Descomptant la pujada dels preus, en quin percentatge ha canviat el poder de compra del sou mitjà a Catalunya entre 2008 i 2024?",
+    "enunciat": "Descomptant la pujada dels preus, en quin percentatge ha canviat el poder adquisitiu del sou mitjà a Catalunya entre 2008 i 2024?",
     "unitat": "%",
     "valor": -0.5,
     "any_referencia": 2024,
@@ -58,7 +58,7 @@
     "pas": 1,
     "escala": "lineal",
     "metafora": "barres",
-    "revelacio": "Un 0,5 % menys: el sou ha pujat un 35,7 % i els preus, un 36,5 %. En poder de compra, és pràcticament el sou de fa 16 anys.",
+    "revelacio": "Un 0,5 % menys: el sou ha pujat un 35,7 % i els preus, un 36,5 %. En poder adquisitiu, és pràcticament el sou de fa 16 anys.",
     "nota": "Salari mitjà brut (la mitjana pot amagar diferències entre salaris alts i baixos). Deflactat amb l'IPC general de Catalunya; sèries a series/salari_catalunya.csv i series/ipc_catalunya_general.csv.",
     "nota_curta": "Càlcul propi: salari mitjà brut de l'INE dividit per l'IPC de Catalunya."
   },
@@ -182,7 +182,7 @@
       "min": 0,
       "max": 30
     },
-    "pas": 0.5,
+    "pas": 1,
     "escala": "lineal",
     "metafora": "bitllets",
     "revelacio": "6,49 €: 782 milions de 12.052. Del conjunt de la banca rescatada pel FROB, se n'ha recuperat el 13,5 %.",

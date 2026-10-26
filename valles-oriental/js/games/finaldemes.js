@@ -3,12 +3,15 @@
 // the corridor width is only a game difficulty. Each stage is played zoomed to its own range, so it
 // climbs the whole screen from start to finish; already played stages stay visible as ghost lines on
 // that same zoom, which keeps the comparison. The end screen puts every line back on ONE % scale.
+// Flow per level: level card (kicker + icon + name) with the two-hands gate → «Som-hi!» → play →
+// result card showing the real rise (auto, no gesture; a first loss offers a retry) → next level.
 // Colours are read from C.* at draw time (themes mutate C); all strings go through T().
-import { W, H, C, text, panel, ring, hatch, clamp, easeOut, fmtNum, Particles, rrect, onCard, onBg, measure, font, LAYOUT, posterBlock, wrap } from "../ui.js";
-import { drawRaiseIcon, drawFooterHint } from "../hand.js";
+import { W, H, C, text, panel, ring, hatch, clamp, easeOut, fmtNum, Particles, rrect, onCard, measure, font, LAYOUT, posterBlock } from "../ui.js";
+import { drawFooterHint } from "../hand.js";
 import { drawTrail } from "../trail.js";
-import { centerText } from "../icons.js";
+import { centerText, drawOkBadge } from "../icons.js";
 import { inRect } from "../input.js";
+import { pictoKind, drawPicto, drawPictoBadge } from "../pictos.js";
 
 // Text overrides (data/textos.json via web/js/textos.js); safe fallback if the module is missing
 function fill(str, vars) {
@@ -59,23 +62,26 @@ const PLAYER_X = 480;
 const BALL_R = 24;
 const TRAIL_S = 0.4;         // seconds of ball trail
 
-// Timing / difficulty (per stage position, easiest first)
-const INTRO_DUR = 3;
+// Timing / difficulty (per stage position, easiest first). The interlude before the game already
+// says what it is and how it is played, so the game opens straight on the first level card.
 const GATE_PX = 60;         // hand target within this of the ball's height = on the €
 const GATE_HOLD = 0.4;      // ... for this long starts the stage
 const GATE_MAX = 6;         // never block: start anyway after this
-const GATE_TYPICAL = 2.6;
-const GATE_MIN = 1.8;       // the level card stays up at least this long before the gate can open
+const GATE_TYPICAL = 2.4;
+const GATE_MIN = 1.8;       // the first level card stays up at least this long before the gate can open
+const GATE_MIN_NEXT = 1.2;  // ... and the next ones (same layout, already known)
 const GO_DUR = 0.5;         // «Som-hi!»
 const GRACE = 1;            // invulnerable seconds at the start of each stage
 const STAGE_MIN = 15, STAGE_MAX = 17;   // length of the FIRST level (the next ones are shorter)
 const LEVEL_RAMP = [1, 0.9, 0.82, 0.75];   // each level runs this fraction of the first one's time
 const TIME_BUDGET = 80;
-const CARD_TYPICAL = 2.5;
 const SPEEDS = [565, 625, 675, 735];        // scroll px/s (fast; px per year scales with it)
 const WIDTHS = [230, 185, 150, 120];        // corridor width px, narrower every stage (game difficulty, not data)
 const ONE_ARM_EXTRA = 40;                   // assist: wider corridor in one-arm mode
-const CARD_MIN = 1.0, CARD_AUTO = 5;
+// After each level its result (the real rise) shows by itself, with no gesture: raising a hand would
+// break the two-hand steering pose four times per game.
+const RESULT_DUR = 2.4;
+const RESULT_FAIL_DUR = 3.0;
 const CARD_RETRY_AUTO = 8;  // a lost level offers a retry: longer, and it carries on by itself
 const CARD_DWELL = 1.0;     // hold a hand over an option for this long to pick it
 const RAISE_S = 0.6;
@@ -115,6 +121,14 @@ const COIN_AMP = 0.7;       // fraction of the half corridor
 const COIN_STREAK = 1.0;    // seconds of combo streak gained per coin
 const GRAZE_PX = 22;
 const GRAZE_PTS = 30;
+
+// Campaign slogan as scenery: giant faint text behind the chart, drifting with the scroll (parallax)
+// and slowly between levels. The white road covers it, so it never competes with the data.
+const BANNER_SIZE = 170;
+const BANNER_GAP = 220;
+const BANNER_ALPHA = 0.08;
+const BANNER_PARALLAX = 0.3;   // fraction of the chart scroll speed while playing
+const BANNER_IDLE = 60;        // px/s on the level cards
 
 // Stage styles by difficulty step: palette KEYS (resolved at draw time), dashes, markers
 const COLOR_KEYS = ["teal", "blue", "mustard", "red"];
@@ -281,7 +295,7 @@ export default class FinalDeMes {
     if (cfg.ordenar_per_pujada !== false) out.sort((a, b) => a.finalPct - b.finalPct);
     const off = Math.max(0, 4 - out.length);  // fewer stages -> start at a harder difficulty step
     const n = out.length;
-    const overhead = INTRO_DUR + n * (GATE_TYPICAL + GO_DUR) + n * CARD_TYPICAL;
+    const overhead = n * (GATE_TYPICAL + GO_DUR) + n * RESULT_DUR;
     // every level runs a bit shorter than the one before (same years, less time): the budget is
     // shared out in proportion, so the first level still lasts about STAGE_MIN..MAX
     const ramp = out.map((_, i) => LEVEL_RAMP[Math.min(i, LEVEL_RAMP.length - 1)]);
@@ -298,6 +312,7 @@ export default class FinalDeMes {
         ink: { get: () => (COLOR_KEYS[k] === "mustard" ? C.ink : C[COLOR_KEYS[k]]) },  // mustard text is not legible
       });
       st.dash = DASHES[k]; st.marker = MARKERS[k];
+      st.picto = pictoKind(st.id, st.label, st.s && st.s.picto);
       st.speed = SPEEDS[k]; st.width = WIDTHS[k];
       st.dur = this.stageDur * ramp[i];
       st.ppy = (st.speed * st.dur) / (st.n - 1);
@@ -347,7 +362,7 @@ export default class FinalDeMes {
       if (!this.stages.length) { this.phase = "nodata"; this.pt = 0; return; }
       this.si = 0;
       this._prepStage();
-      this.phase = "intro"; this.pt = 0;
+      this._startPrep();
     }).catch((e) => { console.error("finaldemes setup", e); this.phase = "nodata"; this.pt = 0; });
   }
 
@@ -521,18 +536,17 @@ export default class FinalDeMes {
     if (this.popup) { this.popup.t += dt; if (this.popup.t > 0.9) this.popup = null; }
     for (const f of this.flying) f.t += dt;
     this.flying = this.flying.filter((f) => f.t < 0.3);
+    this.bannerX = (this.bannerX || 0) + dt * (this.phase === "play" && this.st ? this.st.speed * BANNER_PARALLAX : BANNER_IDLE);
 
     if (this.phase === "loading") return;
     if (this.phase === "nodata") { if (this.pt > NODATA_DUR) this._finish(); return; }
 
-    if (this.phase === "intro") {
-      this.py = this.centreAt(this.st, 0);
-      if (this.pt >= INTRO_DUR) this._startPrep();
-    } else if (this.phase === "prep") {
+    if (this.phase === "prep") {
       // hand-placement gate: ball locked at the corridor centre, nothing counts
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       this.gateT = this._handReady() ? this.gateT + dt : 0;
-      if ((this.gateT >= GATE_HOLD && this.pt >= GATE_MIN) || this.pt >= GATE_MAX) this._startGo();
+      const minT = this.si === 0 && !this.st.retried ? GATE_MIN : GATE_MIN_NEXT;
+      if ((this.gateT >= GATE_HOLD && this.pt >= minT) || this.pt >= GATE_MAX) this._startGo();
     } else if (this.phase === "go") {
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       if (this.pt >= GO_DUR) this._startPlay();
@@ -542,12 +556,12 @@ export default class FinalDeMes {
     } else if (this.phase === "final") {
       if (this._raiseToContinue(FINAL_MIN, FINAL_AUTO)) this._finish();
     } else if (this.phase === "card") {
-      // a level lost for want of marge can be played again once; otherwise a raised hand moves on
+      // a level lost for want of marge can be played again once; otherwise the result moves on by itself
       if (this._canRetry()) {
         const pick = this._pickOnCard(dt);
         if (pick === "retry") this._retryStage();
         else if (pick === "next" || this.pt > CARD_RETRY_AUTO) this._afterCard();
-      } else if (this._raiseToContinue(CARD_MIN, CARD_AUTO)) this._afterCard();
+      } else if (this.pt > (this.stages[this.si].result === "ok" ? RESULT_DUR : RESULT_FAIL_DUR)) this._afterCard();
     }
   }
 
@@ -698,7 +712,6 @@ export default class FinalDeMes {
     this._drawFlyingCoins(g);
     this._drawFooter(g, st);
     onCard(() => {
-      if (this.phase === "intro") this._drawIntro(g);
       if (this.phase === "card") this._drawCard(g);
     });
     // on the card with options the hand goes on top: it is what you aim at the buttons with
@@ -714,6 +727,7 @@ export default class FinalDeMes {
     // panel behind the chart: a lighter field than the page, so the whole thing reads as a graph
     g.fillStyle = C.paper2;
     g.fillRect(0, PLAY_TOP, W, PLAY_H);
+    this._drawBanner(g);
     g.strokeStyle = C.ink;
     for (let p = st.lo; p <= st.hi + 1e-6; p += st.step) {
       const y = this.yOf(p, st);
@@ -727,6 +741,18 @@ export default class FinalDeMes {
     g.globalAlpha = 0.5; g.strokeStyle = C.ink; g.lineWidth = 2;
     g.beginPath(); g.moveTo(0, PLAY_TOP + 1); g.lineTo(W, PLAY_TOP + 1); g.stroke();
     g.restore();
+  }
+
+  // «VIURE ENS COSTA LA VIDA» marquee: two rows half a block apart, always drifting left (called
+  // inside the play-area clip of _drawGrid, before the gridlines)
+  _drawBanner(g) {
+    const str = T("finaldemes.banner", "Viure ens costa la vida");
+    const span = measure(g, str, BANNER_SIZE, "title") + BANNER_GAP;
+    const rows = [PLAY_TOP + PLAY_H * 0.36, PLAY_TOP + PLAY_H * 0.86];
+    rows.forEach((y, i) => {
+      const off = (((this.bannerX || 0) + i * span / 2) % span + span) % span;
+      for (let x = -off; x < W; x += span) text(g, str, x, y, { size: BANNER_SIZE, kind: "title", color: C.ink, alpha: BANNER_ALPHA });
+    });
   }
 
   _drawGridLabels(g, st) {
@@ -830,23 +856,33 @@ export default class FinalDeMes {
     g.restore();
   }
 
-  // Right-aligned line labels, pushed apart vertically so they never overlap
-  _drawTags(g) {
+  // Right-aligned line labels, pushed apart vertically so they never overlap (idempotent)
+  _layoutTags() {
     const tags = this._tags.sort((a, b) => a.y - b.y);
     for (let i = 1; i < tags.length; i++) {
       const p = tags[i - 1], q = tags[i];
       if (Math.abs(p.x - q.x) < 500 && q.y - p.y < 50) q.y = p.y + 50;
     }
-    for (const t of tags) tag(g, t.str, t.x, clamp(t.y, PLAY_TOP + 40, PLAY_BOT - 14), t.st.ink, t.st.color, { size: t.size, align: "right" });
+    return tags;
+  }
+
+  _drawTags(g) {
+    for (const t of this._layoutTags()) tag(g, t.str, t.x, clamp(t.y, PLAY_TOP + 40, PLAY_BOT - 14), t.st.ink, t.st.color, { size: t.size, align: "right" });
   }
 
   _drawCoins(g, st) {
     if (this.phase === "card") return;
+    // coins hidden under an (opaque) ghost-line label are not drawn
+    const under = this._layoutTags().map((t) => {
+      const w = measure(g, t.str, t.size, "body", 700) + 20, y = clamp(t.y, PLAY_TOP + 40, PLAY_BOT - 14);
+      return { x0: t.x - w - 17, x1: t.x + 17, y0: y - t.size - 19, y1: y + 31 };
+    });
     for (const co of st.coins) {
       if (co.got === true) continue;
       const x = this._xOfU(st, co.u);
       if (x < -40 || x > W + 40) continue;
       const y = this.coinY(st, co);
+      if (under.some((r) => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1)) continue;
       g.save();
       if (co.got === "missed") g.globalAlpha = 0.35;
       g.fillStyle = C.mustard;
@@ -859,16 +895,28 @@ export default class FinalDeMes {
     }
   }
 
+  // Years as milestones going past: a faint post across the chart at each year, and a label that
+  // grows as it nears the € (peaks on it) and shrinks as it moves away, smoothly (no pop)
   _drawYears(g, st) {
+    g.save();
+    g.beginPath(); g.rect(0, PLAY_TOP, W, PLAY_H); g.clip();
+    g.strokeStyle = C.ink; g.lineWidth = 3; g.globalAlpha = 0.14; g.setLineDash([4, 14]);
+    for (let k = 0; k < st.n; k++) {
+      const x = this._xOfU(st, k);
+      if (x < -10 || x > W + 10) continue;
+      g.beginPath(); g.moveTo(x, PLAY_TOP); g.lineTo(x, PLAY_BOT); g.stroke();
+    }
+    g.restore();
     g.save();
     g.strokeStyle = C.ink; g.lineWidth = 3;
     g.beginPath(); g.moveTo(0, PLAY_BOT); g.lineTo(W, PLAY_BOT); g.stroke();
-    const cur = clamp(Math.round(this.u), 0, st.n - 1);
     for (let k = 0; k < st.n; k++) {
       const x = this._xOfU(st, k);
       if (x < LAYOUT.footX0 || x > LAYOUT.footX1) continue;   // footer corners belong to the ◀ ▶ shortcuts
-      g.beginPath(); g.moveTo(x, PLAY_BOT); g.lineTo(x, PLAY_BOT + 12); g.stroke();
-      text(g, String(st.years[k]), x, PLAY_BOT + 44, { size: k === cur ? 32 : 28, weight: 700, align: "center", color: k === cur ? C.ink : C.inkSoft });
+      const near = clamp(1 - Math.abs(x - PLAYER_X) / 420, 0, 1);
+      const e = near * near * (3 - 2 * near);
+      g.beginPath(); g.moveTo(x, PLAY_BOT); g.lineTo(x, PLAY_BOT + 12 + 8 * e); g.stroke();
+      text(g, String(st.years[k]), x, PLAY_BOT + 46 + 10 * e, { size: Math.round(36 + 22 * e), kind: "title", align: "center", color: e > 0.5 ? C.ink : C.inkSoft });
     }
     g.restore();
     this._drawGridLabels(g, st);
@@ -898,9 +946,6 @@ export default class FinalDeMes {
     g.restore();
     centerText(g, "€", PLAYER_X, this.py, { size: 32, weight: 700, color: hurt ? C.white : C.ink });
   }
-
-  // "Raise your hand" (or "hold the click" in mouse mode) pictogram inside a progress ring
-  _drawRaiseIcon(g, cx, cy, r, progress) { drawRaiseIcon(g, cx, cy, r, progress, { mouse: this.app.input.usingMouse }); }
 
   // Coin pickup: one small soft ring at the coin (it scrolls with the chart), no flying coins
   _drawFlyingCoins(g) {
@@ -955,24 +1000,31 @@ export default class FinalDeMes {
     g.restore();
   }
 
+  // Level chips: the current one in its own colour with icon + name; played ones show the real rise
+  // they ended at (a running comparison); the ones to come are just their icon.
   _drawChips(g, x, y) {
+    const h = 54, ic = 38, pad = 14;
     g.save();
-    font(g, 28, "body", 700);
     for (let i = 0; i < this.stages.length; i++) {
       const st = this.stages[i];
-      const w = g.measureText(st.label).width + 36, h = 50;
       const cur = i === this.si;
-      const done = st.result !== null;
+      const done = st.result !== null && !cur;
+      const str = cur ? st.label : done ? fmtPct(st.finalPct) : "";
       onCard(() => {
-        g.fillStyle = cur ? C.ink : done ? st.soft : C.card;
-        rrect(g, x, y, w, h, 25); g.fill();
+        const tw = str ? measure(g, str, 28, "body", 800) + 10 : 0;
+        const w = pad + ic + tw + pad;
+        const light = COLOR_KEYS[st.k] === "mustard";
+        const fg = cur ? (light ? C.cardInk : C.white) : done ? C.cardInk : C.cardInkSoft;
         g.save();
-        if (!cur && !done) g.globalAlpha = 0.6;
-        g.lineWidth = 3; g.strokeStyle = cur ? C.card : done ? st.color : C.ink; g.stroke();   // white rim keeps the navy pill visible on the navy field
+        if (!cur && !done) g.globalAlpha *= 0.7;
+        g.fillStyle = cur ? st.color : done ? st.soft : C.card;
+        rrect(g, x, y, w, h, h / 2); g.fill();
+        g.lineWidth = 3; g.strokeStyle = cur ? C.card : st.color; g.stroke();
+        drawPicto(g, st.picto, x + pad + ic / 2, y + h / 2, ic, { ink: fg, lw: 0.1 });
         g.restore();
-        text(g, st.label, x + w / 2, y + 35, { size: 28, weight: 700, align: "center", color: cur ? C.white : done ? C.ink : C.inkSoft });
+        if (str) text(g, str, x + pad + ic + 8, y + h / 2 + 10, { size: 28, weight: 800, color: fg });
+        x += w + 10;
       });
-      x += w + 12;
     }
     g.restore();
     return x;
@@ -1015,36 +1067,18 @@ export default class FinalDeMes {
     // marge only while it matters (outside the corridor or still refilling); hidden on the stage cards
     if (this.phase === "play" && (this.touching || this.marge < 0.999)) this._drawMarge(g, bx, y);
     const shown = clamp(Math.round(this.u), 0, st.n - 1);
+    // the rise is the data: big, in the level colour; the year is its context
     const yr = String(st.years[shown]);
-    text(g, yr, W - LAYOUT.m, y + 66, { size: 84, kind: "title", align: "right", color: C.ink });
-    text(g, fmtPct(st.pct[shown]), W - LAYOUT.m - measure(g, yr, 84, "title") - 28, y + 56, { size: 56, kind: "title", align: "right", color: st.ink });
+    text(g, yr, W - LAYOUT.m, y + 60, { size: 48, kind: "title", align: "right", color: C.inkSoft });
+    text(g, fmtPct(st.pct[shown]), W - LAYOUT.m - measure(g, yr, 48, "title") - 24, y + 72, { size: 88, kind: "title", align: "right", color: st.ink });
   }
 
   _drawFooter(g, st) {
     fitText(g, this._cite(st, true), W / 2, LAYOUT.navY + 8, LAYOUT.footW - 120, { size: 24, minSize: 18, color: C.inkSoft, align: "center" });
   }
 
-  _drawOverlayPanel(g, w, h) {
-    const x = (W - w) / 2 + 160, y = PLAY_TOP + (PLAY_H - h) / 2;
-    panel(g, x, y, w, h, {});
-    return { x, y };
-  }
-
-  _drawIntro(g) {
-    const a = easeOut(this.pt / 0.35);
-    g.save(); g.globalAlpha = a;
-    const { x, y } = this._drawOverlayPanel(g, 900, 260);
-    text(g, T("finaldemes.titol", "Final de mes"), x + 50, y + 117, { size: 96, kind: "title", color: C.head, maxW: 800 });
-    const inp = this.app.input;
-    const control = inp.usingMouse || inp.oneArm
-      ? T("finaldemes.controlUna", "Segueix el camí amb la mà")
-      : T("finaldemes.control", "Inclina la línia entre les dues mans");
-    fitText(g, control, x + 50, y + 200, 800, { size: 44, weight: 700, color: C.ink });
-    g.restore();
-  }
-
-  // Level announcement + hand-placement gate: which trend comes next, and what to do with the hands.
-  // It stays up at least GATE_MIN so there is time to read it.
+  // Level announcement + hand-placement gate. Hierarchy: why (the campaign kicker), which trend
+  // (icon + name in its colour), then the gesture, small. Stays up at least GATE_MIN(_NEXT).
   _drawPrep(g) {
     const a = easeOut(this.pt / 0.3);
     const st = this.st;
@@ -1056,20 +1090,27 @@ export default class FinalDeMes {
     ring(g, PLAYER_X, this.py, BALL_R + 42, clamp(this.gateT / GATE_HOLD, 0, 1), { color: C.teal, lw: 10 });
     const msg = this._pair()
       ? T("finaldemes.colocaDues", "Posa les dues mans en línia")
-      : T("finaldemes.coloca", "Coloca't sobre l'€");
-    const w = 1140, h = 324, x = (W - w) / 2 + 170, y = PLAY_TOP + (PLAY_H - h) / 2 - 30;
+      : T("finaldemes.coloca", "Col·loca't sobre l'€");
+    const w = 1140, h = 350, x = (W - w) / 2 + 170, y = PLAY_TOP + (PLAY_H - h) / 2 - 30;
     onCard(() => {
       g.save();
       g.globalAlpha *= a;
       panel(g, x, y, w, h, {});
-      fitText(g, T("finaldemes.kicker", "Viu l'augment del cost de la vida:"), x + 50, y + 76, w - 100,
-        { size: 42, weight: 700, color: C.ink });
-      fitText(g, T("finaldemes.nivell", "Nivell {n}: {etapa}", { n: this.si + 1, etapa: st.label }), x + 50, y + 176, w - 100,
-        { size: 88, kind: "title", color: st.ink });
-      fitText(g, msg, x + 50, y + 262, w - 100, { size: 46, weight: 700, color: C.ink });
+      fitText(g, T("finaldemes.kicker", "Viu l'augment del cost de la vida"), x + 50, y + 78, w - 100,
+        { size: 46, weight: 800, color: C.ink });
+      const r = 66, cx = x + 50 + r, cy = y + 182;
+      drawPictoBadge(g, st.picto, cx, cy, r, { fill: st.color, ink: this._badgeInk(st) });
+      const tx = cx + r + 36, tw = x + w - 50 - tx;
+      text(g, T("finaldemes.nivellDe", "Nivell {n} de {total}", { n: this.si + 1, total: this.stages.length }), tx, y + 152,
+        { size: 30, kind: "ample", color: C.inkSoft, maxW: tw });
+      fitText(g, st.label, tx, y + 232, tw, { size: 92, kind: "title", color: st.ink, minSize: 48 });
+      fitText(g, msg, x + 50, y + 312, w - 100, { size: 34, weight: 700, color: C.inkSoft });
       g.restore();
     });
   }
+
+  // Pictogram colour on a badge filled with the level colour (mustard is too light for white)
+  _badgeInk(st) { return COLOR_KEYS[st.k] === "mustard" ? C.cardInk : C.white; }
 
   _drawGo(g) {
     const k = clamp(this.pt / GO_DUR, 0, 1);
@@ -1094,9 +1135,9 @@ export default class FinalDeMes {
 
   // Geometry of the card with the two options (retry / go on), shared by update and draw
   _cardRects() {
-    const w = 1000, h = 430;
+    const w = 1000, h = 476;
     const x = (W - w) / 2 + 160, y = PLAY_TOP + (PLAY_H - h) / 2;
-    const bw = (w - 3 * 40) / 2, bh = 100, by = y + h - 56 - bh;
+    const bw = (w - 3 * 40) / 2, bh = 96, by = y + 328;
     return { x, y, w, h, retry: { x: x + 40, y: by, w: bw, h: bh }, next: { x: x + 80 + bw, y: by, w: bw, h: bh } };
   }
 
@@ -1118,24 +1159,44 @@ export default class FinalDeMes {
     if (p > 0) { g.save(); g.beginPath(); g.rect(b.x, b.y, b.w * p, b.h); g.clip(); draw(C.white); g.restore(); }
   }
 
-  // Lost level, first time: the same card, plus «play it again» / «carry on»
+  // The result of a level is the real rise, not the game outcome: icon, «Salaris, del 2015 al 2024»
+  // and a huge «+30 %» in the level colour. A loss only adds a red line above it; a win, a small check.
+  // (x, y) = top-left of the content row; returns nothing.
+  _drawResultRow(g, st, x, y, w, ok) {
+    const r = 70, cx = x + r, cy = y + 104;
+    drawPictoBadge(g, st.picto, cx, cy, r, { fill: st.color, ink: this._badgeInk(st) });
+    if (ok) drawOkBadge(g, cx + r * 0.74, cy - r * 0.74, 24);
+    const tx = cx + r + 40, tw = x + w - tx;
+    const head = st.label, sub = T("finaldemes.periode", "del {any0} al {any1}", { any0: st.years[0], any1: st.lastYear });
+    const full = measure(g, head, 42, "body", 800) + 42 * 0.4 + measure(g, sub, 36, "body", 600);
+    const hs = full > tw ? Math.max(24, (42 * tw) / full) : 42;
+    text(g, head, tx, y + 44, { size: hs, weight: 800, color: C.ink });
+    text(g, sub, tx + measure(g, head, hs, "body", 800) + hs * 0.4, y + 44, { size: hs * 0.86, weight: 600, color: C.inkSoft });
+    fitText(g, fmtPct(st.finalPct), tx, y + 178, tw, { size: 150, kind: "title", color: st.ink, minSize: 80 });
+  }
+
+  // Thin bar that fills while the card waits: it carries on by itself (nothing blocks the installation)
+  _drawAutoBar(g, x, y, w, k) {
+    g.fillStyle = C.cardSoft; g.fillRect(x, y, w, 6);
+    g.fillStyle = C.cardInkSoft; g.fillRect(x, y, w * clamp(k, 0, 1), 6);
+  }
+
+  _drawFailHead(g, x, y, w) {
+    withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, x, y, w, 30, 6); g.fill(); });
+    fitText(g, T("finaldemes.senseMarge", "No li has pogut seguir el ritme al mercat!"), x + 50, y + 86, w - 100,
+      { size: 40, weight: 800, color: C.red, minSize: 26 });
+  }
+
+  // Lost level, first time: the result plus «play it again» / «carry on» (hold a hand over one)
   _drawRetryCard(g, st, a) {
     const r = this._cardRects();
     g.save(); g.globalAlpha = a;
     panel(g, r.x, r.y, r.w, r.h, {});
-    withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, r.x, r.y, r.w, 34, 6); g.fill(); });
-    wrap(g, T("finaldemes.senseMarge", "No li has pogut seguir el ritme al mercat!"), r.x + 50, r.y + 92, 900,
-      { size: 54, kind: "title", color: C.red, lineH: 1.08, maxLines: 2 });
-    fitText(g, T("finaldemes.resultatEtapaPct", "{etapa}: {pct} des del {any}", { etapa: st.label, pct: fmtPct(st.finalPct), any: st.years[0] }),
-      r.x + 50, r.y + 208, 900, { size: 42, weight: 700, color: st.ink });
-    fitText(g, T("finaldemes.tria", "Mantén la mà sobre una opció"), r.x + 50, r.y + 256, 900,
-      { size: 30, weight: 700, color: C.cardInkSoft });
+    this._drawFailHead(g, r.x, r.y, r.w);
+    this._drawResultRow(g, st, r.x + 50, r.y + 104, r.w - 100, false);
     this._drawCardButton(g, r.retry, T("finaldemes.reintenta", "Torna-ho a provar"), this.btnP.retry, C.teal);
     this._drawCardButton(g, r.next, T("finaldemes.continua", "Continua"), this.btnP.next, C.cardLine);
-    // it carries on by itself if nobody chooses (nothing ever blocks the installation)
-    const auto = clamp(this.pt / CARD_RETRY_AUTO, 0, 1);
-    g.fillStyle = C.cardSoft; g.fillRect(r.x + 40, r.y + r.h - 30, r.w - 80, 6);
-    g.fillStyle = C.cardInkSoft; g.fillRect(r.x + 40, r.y + r.h - 30, (r.w - 80) * auto, 6);
+    this._drawAutoBar(g, r.x + 40, r.y + r.h - 26, r.w - 80, this.pt / CARD_RETRY_AUTO);
     g.restore();
   }
 
@@ -1144,17 +1205,13 @@ export default class FinalDeMes {
     const ok = st.result === "ok";
     const a = easeOut(this.pt / 0.3);
     if (this._canRetry()) { this._drawRetryCard(g, st, a); return; }
+    const w = 1000, h = ok ? 290 : 370;
+    const x = (W - w) / 2 + 160, y = PLAY_TOP + (PLAY_H - h) / 2;
     g.save(); g.globalAlpha = a;
-    const { x, y } = this._drawOverlayPanel(g, 1000, 330);
-    if (!ok) withAlpha(g, 0.18, () => { g.fillStyle = hatch(g, C.red, null, 22, 5); rrect(g, x, y, 1000, 34, 6); g.fill(); });
-    if (ok) text(g, T("finaldemes.superat", "Nivell superat"), x + 50, y + 105, { size: 92, kind: "title", color: C.teal, maxW: 900 });
-    else wrap(g, T("finaldemes.senseMarge", "No li has pogut seguir el ritme al mercat!"), x + 50, y + 92, 900, { size: 54, kind: "title", color: C.red, lineH: 1.08, maxLines: 2 });
-    fitText(g, T("finaldemes.resultatEtapaPct", "{etapa}: {pct} des del {any}", { etapa: st.label, pct: fmtPct(st.finalPct), any: st.years[0] }),
-      x + 50, y + (ok ? 180 : 208), 900, { size: 44, weight: 700, color: st.ink });
-    const r = this.armed ? clamp(this.app.input.anyRaisedFor() / RAISE_S, 0, 1) : 0;
-    const iy = y + (ok ? 250 : 274);
-    this._drawRaiseIcon(g, x + 86, iy, 36, r);
-    text(g, T("finaldemes.aixecaMa", "Aixeca la mà"), x + 145, iy + 12, { size: 34, weight: 700, color: C.ink, maxW: 800 });
+    panel(g, x, y, w, h, {});
+    if (!ok) this._drawFailHead(g, x, y, w);
+    this._drawResultRow(g, st, x + 50, y + (ok ? 30 : 104), w - 100, ok);
+    this._drawAutoBar(g, x + 40, y + h - 26, w - 80, this.pt / (ok ? RESULT_DUR : RESULT_FAIL_DUR));
     g.restore();
   }
 
@@ -1166,7 +1223,7 @@ export default class FinalDeMes {
     text(g, T("finaldemes.final.titol", "Quant ha pujat des del {any}", { any: this.base }), m, 112,
       { size: 64, kind: "title", color: C.head, alpha: fade, maxW: W - 2 * m });
     const px = m, py = 150, pw = W - 2 * m, ph = 640;
-    const cx = px + 150, cy = py + 50, cw = pw - 150 - 470, ch = ph - 140;
+    const cx = px + 150, cy = py + 50, cw = pw - 150 - 520, ch = ph - 140;
     const y0 = Math.min(...this.stages.map((s) => s.years[0]));
     const y1 = Math.max(...this.stages.map((s) => s.lastYear));
     const X = (yr) => cx + ((yr - y0) / Math.max(1, y1 - y0)) * cw;
@@ -1200,13 +1257,20 @@ export default class FinalDeMes {
         g.setLineDash([]); g.fillStyle = st.color;
         for (let k = 0; k <= Math.floor(uTo + 1e-6); k++) marker(g, st.marker, xOf(k), yOf(k), 9);
         g.restore();
-        if (p >= 1) labels.push({ st, x: xOf(st.n - 1) + 22, y: yOf(st.n - 1) + 11, a: clamp((this.pt - FINAL_LINE_T0 - i * FINAL_LINE_GAP - FINAL_LINE_DUR) / 0.3, 0, 1) });
+        if (p >= 1) labels.push({ st, x: xOf(st.n - 1) + 22, y: yOf(st.n - 1) + 14, a: clamp((this.pt - FINAL_LINE_T0 - i * FINAL_LINE_GAP - FINAL_LINE_DUR) / 0.3, 0, 1) });
       });
+      // label = icon, then the rise (big, in the line colour), then the name (smaller)
       labels.sort((p, q) => p.y - q.y);
-      for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 44) labels[i].y = labels[i - 1].y + 44;
+      for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 56) labels[i].y = labels[i - 1].y + 56;
       for (const l of labels) {
-        const s = T("finaldemes.etiquetaFinal", "{etapa} {pct} ({any})", { etapa: l.st.label, pct: fmtPct(l.st.finalPct), any: l.st.lastYear });
-        text(g, s, l.x, l.y, { size: 32, weight: 700, color: l.st.ink, alpha: l.a, maxW: px + pw - 24 - l.x });
+        const r = 22, maxX = px + pw - 24;
+        g.save(); g.globalAlpha *= l.a;
+        drawPictoBadge(g, l.st.picto, l.x + r, l.y - 15, r, { fill: l.st.color, ink: this._badgeInk(l.st) });
+        g.restore();
+        const pct = fmtPct(l.st.finalPct), x1 = l.x + 2 * r + 12;
+        text(g, pct, x1, l.y, { size: 44, kind: "title", color: l.st.ink, alpha: l.a });
+        const x2 = x1 + measure(g, pct, 44, "title") + 14;
+        text(g, l.st.label, x2, l.y, { size: 28, weight: 700, color: C.ink, alpha: l.a, maxW: Math.max(40, maxX - x2) });
       }
       g.restore();
     });
@@ -1223,7 +1287,7 @@ export default class FinalDeMes {
     const mouse = this.app.input.usingMouse;
     const r = this.armed && this.pt > FINAL_MIN ? clamp(this.app.input.anyRaisedFor() / RAISE_S, 0, 1) : 0;
     drawFooterHint(g, T("finaldemes.final.continua", mouse ? "Mantén el clic per continuar" : "Aixeca la mà per continuar"), r,
-      { mouse, alpha: clamp((this.pt - tPhrase) / 0.5, 0, 1) });
+      { mouse, alpha: clamp((this.pt - tPhrase) / 0.5, 0, 1), waitT: this.pt - Math.max(FINAL_MIN, tPhrase) });
     this.app.drawCursors(g, { alpha: 0.6 });
   }
 

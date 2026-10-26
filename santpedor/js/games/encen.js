@@ -9,9 +9,8 @@
 // never real data.
 // All user-facing strings go through T() from textos.js (keys "encen.*", overridable in data/textos.json) and all
 // colours are derived at draw time from the switchable palette C.
-import { W, H, C, LAYOUT, text, panel, ring, hatch, Particles, clamp, easeOut, fmtNum, font, rrect, onCard, measure, fitSize as uiFit } from "../ui.js";
-import { centerText } from "../icons.js";
-import { drawRaiseIcon } from "../hand.js";
+import { W, H, C, LAYOUT, text, wrap, panel, ring, hatch, Particles, clamp, easeOut, fmtNum, font, rrect, onCard, measure, fitSize as uiFit } from "../ui.js";
+import { centerText, drawOkBadge } from "../icons.js";
 import { drawTrail } from "../trail.js";
 import { areasFromGeo, areasFromBubbles, fallbackZones, pointInArea, buildCells, cellsInCircle } from "./encen_geo.js";
 import { T } from "../textos.js";
@@ -59,7 +58,7 @@ export const TUNING = {
   spread: [0.25, 0.25, 0.25],     // contagion: warmth flowing from lit neighbour cells
   cellTarget: [720, 650, 300],    // approx. number of hex cells per level (size derived from map area)
   cellMin: 11, cellMax: 30,       // hex radius limits (px)
-  winArea: [0.60, 0.60, 0.55],    // share of the whole map that must be organised at once to win the level
+  winArea: [0.75, 0.75, 0.70],    // share of the whole map that must be organised at once to win the level
   winHyst: 0.07,                  // once the target is reached, the hold survives dips this far below it
   areaLit: 0.6,                   // fraction of an area's cells that marks one area as organised (display only)
   fewAreasLit: 0.15,              // extra lit share required on maps with fewer than ~15 areas
@@ -76,13 +75,14 @@ const TU = TUNING;
 const NLEVELS = 3;
 const LIT = 0.5;        // a cell counts as organised from half the range up: the top half is
                         // headroom that visibly cools down, so the map keeps breathing
-const HOLD_S = 3;
-const INTRO_S = 5.5, READY_S = 3.2, CARD_AUTO_S = 5, CARD_MIN_S = 0.8, RAISE_S = 0.6;
+const HOLD_S = 2;
+// The interlude already says what the game is: it opens straight on the first level card (a bit
+// longer, as it also carries the instruction). Result cards move on by themselves (no gesture).
+const READY_FIRST_S = 4.5, READY_S = 3.2, CARD_WON_S = 2.5, CARD_FAIL_S = 3.0, CARD_LAST_S = 3.5;
 // legacy data (app.data.geo.manresa/bages/catalunya) and bubble fallback
 const LEGACY_IDS = ["manresa", "bages", "catalunya"];
 const LEGACY_NAMES = [["Manresa", "barris"], ["el Bages", "municipis"], ["Catalunya", "comarques"]];
 
-const dec1 = (v) => v.toFixed(1).replace(".", ",");
 const NB = 12;  // colour buckets for batched cell fills
 // hexagon template (pointy-top, unit radius)
 const HEX = Array.from({ length: 6 }, (_, k) => [Math.cos(((60 * k - 90) * Math.PI) / 180), Math.sin(((60 * k - 90) * Math.PI) / 180)]);
@@ -163,7 +163,7 @@ export default class Encen {
     this.params = params || {};
     this.needsPlayer = true;
     this.t = 0;
-    this.phase = "intro";
+    this.phase = "ready";
     this.phaseT = 0;
     this.li = 0;
     this.level = null;
@@ -177,8 +177,6 @@ export default class Encen {
     this.levelT = 0;
     this.lastCount = null;
     this.sfxT = 0;
-    this.raiseT = 0;
-    this.raiseArmed = false;
     this.goT = 0;
     this.hands = {};
     this.pal = null;
@@ -303,7 +301,7 @@ export default class Encen {
       ? T("encen.poblacio", "{Nom} {te} {n} habitants{any}, repartits en {parts}.",
         { Nom: L.terr.cap, te: L.terr.plural ? T("encen.tenen", "tenen") : T("encen.te", "té"), n: fmtNum(sum), any: yr, parts })
       : T("encen.poblacio_zones", "Les {z} zones del mapa sumen {n} habitants{any}.", { z: A.length, n: fmtNum(sum), any: yr });
-    return { text: txt, source: src };
+    return { text: txt, source: src, sum };
   }
 
   doneTitle(L) {
@@ -338,7 +336,7 @@ export default class Encen {
     const A = this.level.areas;
     this.results[this.li] = { i: this.li, won, time: this.levelT, frac: won ? 1 : this.bestFrac,
       name: this.level.terr.name, lit: this.lit, total: A.length, area: this.area };
-    this.phase = "card"; this.phaseT = 0; this.raiseT = 0; this.raiseArmed = false;
+    this.phase = "card"; this.phaseT = 0;
     this.holdT = 0;
     if (won) {
       this.app.sfx.cheer();
@@ -398,24 +396,19 @@ export default class Encen {
       if (c !== this.lastCount) { this.lastCount = c; if (c) this.app.sfx.tick(); }
     };
     switch (this.phase) {
-      case "intro": countdown(INTRO_S); if (this.phaseT >= INTRO_S) this.startPlay(); break;
-      case "ready": countdown(READY_S); if (this.phaseT >= READY_S) this.startPlay(); break;
+      case "ready": countdown(this.readyDur()); if (this.phaseT >= this.readyDur()) this.startPlay(); break;
       case "play": this.simulate(dt); break;
-      case "card": this.updateCard(dt); break;
+      case "card": if (this.phaseT >= this.cardDur()) this.next(); break;
       default: break;
     }
   }
 
-  updateCard(dt) {
-    const raised = this.app.input.anyRaisedFor() > 0;
-    // a hand that was already up (e.g. sweeping the top of the map) must come down first
-    if (!raised) this.raiseArmed = true;
-    if (this.raiseArmed && raised && this.phaseT > CARD_MIN_S) this.raiseT += dt; else this.raiseT = 0;
-    const last = this.li >= NLEVELS - 1;
-    if (this.raiseT >= RAISE_S || this.phaseT >= CARD_AUTO_S + (last ? 1.5 : 0)) {
-      if (this.raiseT >= RAISE_S) this.app.sfx.select();
-      this.next();
-    }
+  readyDur() { return this.li === 0 ? READY_FIRST_S : READY_S; }
+
+  cardDur() {
+    if (this.li >= NLEVELS - 1) return CARD_LAST_S;
+    const r = this.results[this.li];
+    return r && r.won ? CARD_WON_S : CARD_FAIL_S;
   }
 
   // Track each hand: smoothed speed, motion trail, area under it, time spent still
@@ -563,9 +556,8 @@ export default class Encen {
     this.particles.draw(g);
     if (ph === "play" || ph === "ready") this.drawHud(g);
     if (ph === "play" || ph === "ready") this.drawBrushes(g);
-    if (ph === "play" && this.goT > 0) this.halo(g, T("encen.som_hi", "SOM-HI!"), W / 2, H * 0.55, 170, { kind: "title", color: C.red, alpha: clamp(this.goT / 0.5, 0, 1) });
-    if (ph === "intro") this.drawIntro(g);
-    else if (ph === "ready") this.drawReady(g);
+    if (ph === "play" && this.goT > 0) this.halo(g, T("encen.som_hi", "SOM-HI!"), W / 2, H * 0.55, 150, { kind: "title", color: C.teal, alpha: clamp(this.goT / 0.5, 0, 1) });
+    if (ph === "ready") this.drawReady(g);
     else if (ph === "card") this.drawCard(g);
     if (ph !== "play" && ph !== "ready") this.app.drawCursors(g);
   }
@@ -689,20 +681,24 @@ export default class Encen {
       for (const a of A) o.stroke(a.path);
     }
     this.drawRivers(o, L);
+    // labels live on their own layer, drawn after the organised-area outlines so names stay on top
+    const lb = (L.labelLayer && L.labelLayer.width === W) ? L.labelLayer : document.createElement("canvas");
+    lb.width = W; lb.height = H;
+    const lt = lb.getContext("2d");
     // labels: biggest areas first; a label that would collide with one already placed (or leave the
     // frame) tries the short name, then is hidden (the hover tooltip still names the area)
     const placed = [];
     const boxOf = (a, lab) => {
-      font(o, lab.size, "body", 700);
-      const w = Math.max(...lab.lines.map((l) => o.measureText(l).width)), h = lab.lines.length * lab.size * 1.05;
+      font(lt, lab.size, "body", 700);
+      const w = Math.max(...lab.lines.map((l) => lt.measureText(l).width)), h = lab.lines.length * lab.size * 1.05;
       return { x0: a.lx - w / 2 - 6, x1: a.lx + w / 2 + 6, y0: a.ly - h / 2 - 3, y1: a.ly + h / 2 + 3 };
     };
     const free = (b) => !placed.some((p) => b.x0 < p.x1 && b.x1 > p.x0 && b.y0 < p.y1 && b.y1 > p.y0)
       && (!F || (b.x0 >= F.x0 && b.x1 <= F.x1 && b.y0 >= F.y0 && b.y1 <= F.y1));
     const place = (a) => {
-      if (a.label === undefined) a.label = this.fitLabel(o, a);
+      if (a.label === undefined) a.label = this.fitLabel(lt, a);
       const ab = this.abbrev(a.nom);
-      if (a.labelShort === undefined) a.labelShort = ab ? this.fitLabel(o, a, ab) : null;
+      if (a.labelShort === undefined) a.labelShort = ab ? this.fitLabel(lt, a, ab) : null;
       for (const lab of [a.label, a.labelShort]) {
         if (!lab) continue;
         const b = boxOf(a, lab);
@@ -725,7 +721,7 @@ export default class Encen {
       const { size, lines, out } = a.shown;
       const lx = out ? a.lxOut : a.lx, ly = out ? a.lyOut : a.ly;
       let y = ly - ((lines.length - 1) * size * 1.05) / 2 + size * 0.36;
-      for (const ln of lines) { this.halo(o, ln, lx, y, size, { lw: Math.max(4, size * 0.22) }); y += size * 1.05; }
+      for (const ln of lines) { this.halo(lt, ln, lx, y, size, { lw: Math.max(4, size * 0.22) }); y += size * 1.05; }
     }
     // context names: small and muted, only where there is room
     for (const a of [...L.context].sort((p, q) => q.lr - p.lr)) {
@@ -734,9 +730,10 @@ export default class Encen {
       if (!lab) continue;
       const size = Math.min(lab.size, 22);
       let y = a.ly - ((lab.lines.length - 1) * size * 1.05) / 2 + size * 0.36;
-      for (const ln of lab.lines) { text(o, ln, a.lx, y, { size, weight: 700, align: "center", color: alpha(C.ink, 0.55) }); y += size * 1.05; }
+      for (const ln of lab.lines) { text(lt, ln, a.lx, y, { size, weight: 700, align: "center", color: alpha(C.ink, 0.55) }); y += size * 1.05; }
     }
     L.overlay = ov;
+    L.labelLayer = lb;
   }
 
   drawMap(g) {
@@ -781,6 +778,7 @@ export default class Encen {
       for (const a of A) if (a.lit) o.stroke(a.path);
     }
     if (key.includes("1")) g.drawImage(L.layer.lc, 0, 0, W, H);
+    if (L.labelLayer) g.drawImage(L.labelLayer, 0, 0, W, H);
     g.restore();
     // framed (cropped) view: a thin frame says «the city continues beyond this»
     if (F) { g.save(); g.strokeStyle = alpha(C.ink, 0.6); g.lineWidth = 2; g.strokeRect(F.x0, F.y0, F.x1 - F.x0, F.y1 - F.y0); g.restore(); }
@@ -832,8 +830,6 @@ export default class Encen {
       g.lineWidth = 4 + 3 * h.f; g.strokeStyle = h.f > 0.6 ? C.heatHot : C.cardInk; g.stroke();
       g.restore();
       const a = h.area >= 0 ? A[h.area] : null;
-      // «tu» only off the map: over an area the tooltip names it, and «tu» would sit on the area label
-      if (!a || this.phase !== "play") this.halo(g, T("encen.tu", "tu"), h.x, h.y + 12, 36, { kind: "title" });
       // "mou la mà!" hint when a hand rests still on an area that still needs heat
       if (h.stillT > 3) {
         const wob = 0;
@@ -850,7 +846,7 @@ export default class Encen {
       if (a && this.phase === "play") {
         const label = a.lit
           ? T("encen.tooltip_fet", "{nom} · {organitzat}", { nom: a.nom, organitzat: this.litWordOne(L) })
-          : T("encen.tooltip", "{nom} · {pct}%", { nom: a.nom, pct: Math.round(L.areaFrac[h.area] * 100) });
+          : T("encen.tooltip", "{nom}", { nom: a.nom });
         font(g, 28, "body", 700);
         const w = g.measureText(label).width + 36;
         const x = clamp(h.x - w / 2, 10, W - w - 10);
@@ -877,8 +873,11 @@ export default class Encen {
     g.fillRect(0, 140, W, 3);
     g.restore();
     text(g, L.terr.upper, 40, 92, { size: this.fitSize(g, L.terr.upper, 76, 560), kind: "title", color: C.ink });
-    const bx = 640, by = 54, bw = 800, bh = 44;
-    text(g, T("encen.adhesio", "Adhesió"), bx, 42, { size: 28, weight: 700, color: C.ink });
+    // no labels: the stretch past the target is tinted as the zone to reach, the target carries a
+    // flag, and reaching it turns the flag into the ✓ badge and the frame and % into the hot colour
+    const bx = 640, by = 44, bw = 800, bh = 56;
+    const gx = bx + bw * goal, reached = area >= goal;
+    const hot = C.heatHot || C.teal, ok = C.teal;
     // bars are white cards: hatched accent fill (state readable without colour), dark frame
     const barFill = () => hatch(g, C.heatHot || C.teal, C.heatMint || mix(C.heatMid || C.teal, C.white, 0.6), 20, 6);
     onCard(() => {
@@ -886,20 +885,29 @@ export default class Encen {
       g.fillStyle = C.card;
       rrect(g, bx, by, bw, bh, 4); g.fill();
       g.save(); g.clip();
+      g.globalAlpha = 0.22; g.fillStyle = hot; g.fillRect(gx, by, bx + bw - gx, bh);
+      g.globalAlpha = 1;
       g.fillStyle = barFill();
       g.fillRect(bx, by, bw * area, bh);
       g.restore();
       rrect(g, bx, by, bw, bh, 4);
-      g.lineWidth = 3; g.strokeStyle = C.cardLine; g.stroke();
-      // target mark: reaching it (and holding) wins the level
-      const gx = bx + bw * goal;
-      g.lineWidth = 5; g.strokeStyle = C.cardLine;
-      g.beginPath(); g.moveTo(gx, by - 8); g.lineTo(gx, by + bh + 8); g.stroke();
+      g.lineWidth = reached ? 6 : 3; g.strokeStyle = reached ? ok : C.cardLine; g.stroke();
+      g.lineWidth = 6; g.strokeStyle = C.cardLine; g.lineCap = "round";
+      g.beginPath(); g.moveTo(gx, by + 2); g.lineTo(gx, by + bh - 2); g.stroke();
       g.restore();
     });
-    text(g, T("encen.objectiu", "objectiu {n}%", { n: Math.round(goal * 100) }), bx + bw * goal, 42,
-      { size: 26, weight: 700, align: "center", color: C.ink });
-    text(g, T("encen.percent", "{n}%", { n: Math.round(area * 100) }), bx + bw + 22, by + 42, { size: 50, kind: "title", color: C.ink });
+    // target: a post with a flag on top (the ✓ badge once reached), on the header band
+    g.save();
+    g.lineCap = "round";
+    g.lineWidth = 6; g.strokeStyle = C.ink;
+    g.beginPath(); g.moveTo(gx, by - 4); g.lineTo(gx, by - (reached ? 10 : 30)); g.stroke();
+    if (reached) drawOkBadge(g, gx, by - 18, 18);
+    else {
+      g.fillStyle = hot; g.strokeStyle = C.ink; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(gx + 2, by - 30); g.lineTo(gx + 34, by - 21); g.lineTo(gx + 2, by - 12); g.closePath(); g.fill(); g.stroke();
+    }
+    g.restore();
+    text(g, T("encen.percent", "{n}%", { n: Math.round(area * 100) }), bx + bw + 22, by + 46, { size: 54, kind: "title", color: reached ? ok : C.ink });
     const lim = TU.limit[this.li];
     const left = clamp(lim - this.levelT, 0, lim);
     ring(g, 1830, 70, 44, left / lim, { color: left < 8 ? C.red : C.teal, back: pal.track, lw: 10 });
@@ -908,7 +916,7 @@ export default class Encen {
     if (this.phase !== "play") return;
     const w = 820, x = W / 2 - w / 2, y = LAYOUT.footY - 14, h = 56;   // footer centre zone, above the map credit
     const msg = this.holdT > 0
-      ? T("encen.mantenho", "Mantén-ho: {s} s", { s: dec1(Math.max(0, HOLD_S - this.holdT)) })
+      ? T("encen.mantenho", "Aguanta! {s}", { s: Math.max(1, Math.ceil(HOLD_S - this.holdT)) })
       : T("encen.comptador", "{n} / {total} {unitat} {organitzats}", { n: lit, total: A.length, unitat: L.terr.unit, organitzats: this.litWord(L) });
     onCard(() => {
       g.save();
@@ -933,29 +941,50 @@ export default class Encen {
     return true;
   }
 
-  // Overlay card: a big title, one short line, and an optional countdown (on the veiled field)
-  drawTitleCard(g, title, line, { alpha: al = 1, hot = true, countdown = null } = {}) {
+  // Overlay card (veiled field): optional small kicker, a big title, one line (two if it is long), an
+  // optional small hint, and an optional auto-advance bar at its bottom. Returns the card's bottom y.
+  drawTitleCard(g, title, line, { alpha: al = 1, y = 300, tone = "red", kicker = "", hint = "", autoK = null, size = 120 } = {}) {
+    let bottom = y;
     g.save();
     g.globalAlpha *= al;
     onCard(() => {
-      panel(g, W / 2 - 680, 290, 1360, 300, { lw: 6, stroke: hot ? C.red : C.cardLine, fill: C.card });
-      text(g, title, W / 2, 440, { size: 140, kind: "title", align: "center", color: C.red, maxW: 1280 });
-      if (line) text(g, line, W / 2, 530, { size: 46, weight: 700, align: "center", color: C.ink, maxW: 1280 });
+      const two = line && measure(g, line, 46, "body", 700) > 1280;
+      const top = kicker ? 64 : 0;
+      const ty = y + top + 150, lineY = ty + 76, hintY = lineY + (two ? 50 : 0) + 58;
+      const contentEnd = hint ? hintY : lineY + (two ? 50 : 0);
+      const h = contentEnd - y + 46 + (autoK !== null ? 30 : 0);
+      bottom = y + h;
+      panel(g, W / 2 - 680, y, 1360, h, {});
+      if (kicker) text(g, kicker, W / 2, y + 68, { size: 30, kind: "ample", align: "center", color: C.inkSoft, maxW: 1280 });
+      text(g, title, W / 2, ty, { size, kind: "title", align: "center", color: C[tone] || C.red, maxW: 1280 });
+      if (two) wrap(g, line, W / 2, lineY - 2, 1280, { size: 44, weight: 700, align: "center", color: C.ink, lineH: 1.2, maxLines: 2 });
+      else if (line) text(g, line, W / 2, lineY, { size: 46, weight: 800, align: "center", color: C.ink, maxW: 1280 });
+      if (hint) text(g, hint, W / 2, hintY, { size: 34, weight: 700, align: "center", color: C.inkSoft, maxW: 1280 });
+      if (autoK !== null) {
+        g.fillStyle = C.cardSoft; g.fillRect(W / 2 - 640, bottom - 26, 1280, 6);
+        g.fillStyle = C.cardInkSoft; g.fillRect(W / 2 - 640, bottom - 26, 1280 * clamp(autoK, 0, 1), 6);
+      }
     });
     g.restore();
-    if (countdown !== null) this.drawCountdown(g, countdown, W / 2, 720);
-  }
-  drawIntro(g) {
-    g.save(); g.fillStyle = this.pal.veil; g.fillRect(0, 0, W, H); g.restore();
-    this.drawTitleCard(g, T("encen.titol", "ENCÉN LA VAGA"), T("encen.intro", "Mou les mans sense parar per tot el mapa"), { countdown: INTRO_S });
+    return bottom;
   }
 
+  // Level card, as in «Final de mes»: «Nivell n de 3», the territory, and what it is in real numbers
   drawReady(g) {
     const L = this.level;
-    this.drawTitleCard(g, L.terr.upper, T("encen.unitats", "{n} {unitat}", { n: L.areas.length, unitat: L.terr.unit }),
-      { alpha: easeOut(this.phaseT / 0.4), countdown: READY_S });
+    if (L.popSum === undefined) L.popSum = (this.popFact(L) || {}).sum || null;
+    const parts = T("encen.unitats", "{n} {unitat}", { n: L.areas.length, unitat: L.terr.unit });
+    const line = L.popSum ? T("encen.unitats_pop", "{parts} · {hab} habitants", { parts, hab: fmtNum(L.popSum) }) : parts;
+    const bottom = this.drawTitleCard(g, L.terr.upper, line, {
+      alpha: easeOut(this.phaseT / 0.4), y: 220,
+      kicker: T("encen.nivell", "Nivell {n} de {total}", { n: this.li + 1, total: NLEVELS }),
+      hint: this.li === 0 ? T("encen.intro", "Mou les mans sense parar!") : "",
+    });
+    this.drawCountdown(g, this.readyDur(), W / 2, Math.max(720, bottom + 110));
   }
 
+  // Result card: it moves on by itself (bar at its bottom). Success in the confirm colour, as in the
+  // other games; the line says what the territory is (its people), never a contradictory count.
   drawCard(g) {
     const r = this.results[this.li];
     const L = this.level;
@@ -966,33 +995,16 @@ export default class Encen {
     g.globalAlpha = a;
     g.fillStyle = this.pal.veil; g.fillRect(0, 0, W, H);
     g.restore();
-    let title, line;
+    let title, line, tone = "red";
     if (last) { title = T("encen.final", "VAGA GENERAL!"); line = this.summary(); }
     else if (won) {
       title = this.doneTitle(L);
-      // winning no longer means every area is organised: say how many actually are
-      line = r && r.lit < r.total
-        ? T("encen.fet_linia_part", "{n} de {total} {unitat} {organitzats}", { n: r.lit, total: r.total, unitat: L.terr.unit, organitzats: this.litWord(L) })
-        : T("encen.fet_linia_tots", "{n} {unitat} {organitzats}", { n: L.areas.length, unitat: L.terr.unit, organitzats: this.litWord(L) });
-    } else { title = T("encen.falta", "ENCARA NO!"); line = T("encen.falta_linia", "Fan falta més mans. Podem ser moltes més."); }
-    this.drawTitleCard(g, title, line, { alpha: a, hot: won || last });
-    // continue: raise a hand (ring fills) or wait (thin bar)
-    g.save();
-    g.globalAlpha *= a;
-    // continue panel: icon + label centred as a row, auto-advance bar below, equal margins
-    const pw = 460, ph = 170, px = W / 2 - pw / 2, py = 640;
-    const p = clamp(this.raiseT / RAISE_S, 0, 1);
-    onCard(() => {
-      panel(g, px, py, pw, ph, { lw: 3, shadow: false });
-      const label = T("encen.aixeca", "Aixeca la mà");
-      const ls = this.fitSize(g, label, 42, pw - 160, "body", 700);
-      const rowW = 88 + 20 + measure(g, label, ls, "body", 700), rx = W / 2 - rowW / 2, cy = py + 70;
-      drawRaiseIcon(g, rx + 44, cy, 38, p, { mouse: this.app.input.usingMouse });
-      text(g, label, rx + 108, cy + ls * 0.355, { size: ls, weight: 700, color: C.ink });
-      const auto = clamp(this.phaseT / (CARD_AUTO_S + (last ? 1.5 : 0)), 0, 1);
-      g.fillStyle = C.track; g.fillRect(px + 40, py + ph - 34, pw - 80, 8);
-      g.fillStyle = C.inkSoft; g.fillRect(px + 40, py + ph - 34, (pw - 80) * auto, 8);
-    });
-    g.restore();
+      tone = "teal";
+      if (L.popSum === undefined) L.popSum = (this.popFact(L) || {}).sum || null;
+      line = L.popSum
+        ? T("encen.fet_linia_pop", "Hi viuen {n} persones", { n: fmtNum(L.popSum) })
+        : T("encen.unitats", "{n} {unitat}", { n: L.areas.length, unitat: L.terr.unit });
+    } else { title = T("encen.falta", "ENCARA NO!"); line = T("encen.falta_linia", "Fan falta més mans."); }
+    this.drawTitleCard(g, title, line, { alpha: a, tone, autoK: this.phaseT / this.cardDur() });
   }
 }

@@ -10,10 +10,13 @@ export function fraction(q, v) {
   return clamp((v - min) / (max - min), 0, 1);
 }
 
-export function fmtValue(q, v, exact = false) {
+// A guess is always shown with the same number of decimals (those of the question's step), so the
+// number never changes width while the lever moves (29,5 → 30 → 30,5 used to jump). exact: the real
+// value with its own precision (reveal). trim: drop a ",0" (static labels such as the range ends).
+export function fmtValue(q, v, exact = false, trim = false) {
   if (q.unitat === "any") return String(Math.round(v));
   let d = decimalsFor(q.pas);
-  if (Math.abs(v - Math.round(v)) < 1e-9) d = 0;
+  if (trim && Math.abs(v - Math.round(v)) < 1e-9) d = 0;
   if (exact) {
     const s = String(q.valor);
     d = s.includes(".") ? Math.min(2, s.split(".")[1].length) : 0;
@@ -29,6 +32,8 @@ export function fmtWithUnit(q, v, exact = false) {
 
 // Label helper: the real value is shown with its own precision once fully revealed
 function lab(q, v, style) { return fmtWithUnit(q, v, style === "real" && v === q.valor); }
+// …and it is the hero of the reveal: bigger than the guess and in the «LA REALITAT» red
+function labStyle(style) { return style === "real" ? { size: 64, color: C.red } : { size: 54 }; }
 
 function styleFill(g, style) {
   return style === "answer" ? hatch(g, C.blue, C.blueSoft, 16, 5) : C.red;
@@ -47,7 +52,7 @@ function calendari(g, b, v, q, style) {
   rrect(g, x, y, w, h * 0.24, [16, 16, 0, 0]); g.fill();
   for (let i = 0; i < 6; i++) { g.fillStyle = C.ink; g.beginPath(); g.arc(x + w * (0.15 + i * 0.14), y, 10, 0, Math.PI * 2); g.fill(); }
   text(g, q.unitat === "any" ? "ANY" : (q.unitat || "").toUpperCase(), x + w / 2, y + h * 0.17, { size: Math.round(h * 0.12), kind: "title", align: "center", color: C.white, maxW: w - 40 });
-  text(g, fmtValue(q, v, style === "real" && v === q.valor), x + w / 2, y + h * 0.78, { size: Math.round(h * 0.42), kind: "title", align: "center", color: C.ink, maxW: w - 50 });
+  text(g, fmtValue(q, v, style === "real" && v === q.valor), x + w / 2, y + h * 0.78, { size: Math.round(h * 0.42), kind: "title", align: "center", color: style === "real" ? C.red : C.ink, maxW: w - 50 });
 }
 
 function edifici(g, b, v, q, style) {
@@ -65,7 +70,7 @@ function edifici(g, b, v, q, style) {
   }
   const top = base - floors * fh;
   g.fillStyle = C.ink; g.beginPath(); g.moveTo(x - 14, top); g.lineTo(x + bw / 2, top - 40); g.lineTo(x + bw + 14, top); g.fill();
-  text(g, lab(q, v, style), x + bw / 2, top - 56, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), x + bw / 2, top - 56, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 // Neutral "off" colour for unlit items (empty houses, people, keys): a light tint of the ink of
@@ -96,7 +101,7 @@ function casetes(g, b, v, q, style) {
     house(g, gx + c * s / 0.86, gy + r * s / 0.86, s, i < n, style);
   }
   const per = (q.rang.max - q.rang.min) / total;
-  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 50, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 50, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
   if (pctMode) text(g, T("metafora.de_cada_100", "de cada 100 habitatges"), b.x + b.w / 2, b.y + b.h - 12, { size: 24, align: "center", color: C.inkSoft });
   else if (q.escala !== "log") text(g, T("metafora.cada_caseta", "cada caseta ≈ {n} {unitat}", { n: fmtNum(per, per < 10 ? 1 : 0), unitat: q.unitat }), b.x + b.w / 2, b.y + b.h - 12, { size: 24, align: "center", color: C.inkSoft });
 }
@@ -108,7 +113,7 @@ function pastis(g, b, v, q, style) {
   g.lineWidth = 5; g.strokeStyle = C.ink; g.stroke();
   g.fillStyle = styleFill(g, style);
   g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + pct * Math.PI * 2); g.closePath(); g.fill(); g.stroke();
-  text(g, lab(q, v, style), cx, cy + r + 62, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), cx, cy + r + 62, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 function rellotge(g, b, v, q, style) {
@@ -126,7 +131,7 @@ function rellotge(g, b, v, q, style) {
     g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + part * Math.PI * 2); g.closePath(); g.fill();
     g.lineWidth = 4; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - r * 0.8); g.stroke();
   }
-  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 30, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 30, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
   text(g, T("metafora.cada_rellotge_12_hores", "cada rellotge = 12 hores"), b.x + b.w / 2, b.y + b.h + 4, { size: 24, align: "center", color: C.inkSoft });
 }
 
@@ -157,13 +162,13 @@ function barres(g, b, v, q, style) {
       text(g, fmtNum(Math.pow(10, e)), x - 14, ty + 8, { size: 20, color: C.inkSoft, align: "right" });
     }
   } else {
-    text(g, fmtValue(q, q.rang.max), x - 14, base - hmax + 10, { size: 22, color: C.inkSoft, align: "right" });
-    text(g, fmtValue(q, q.rang.min), x - 14, base, { size: 22, color: C.inkSoft, align: "right" });
+    text(g, fmtValue(q, q.rang.max, false, true), x - 14, base - hmax + 10, { size: 22, color: C.inkSoft, align: "right" });
+    text(g, fmtValue(q, q.rang.min, false, true), x - 14, base, { size: 22, color: C.inkSoft, align: "right" });
   }
   // value label above the bar end; for negative values, just above the zero line (never on the hatch)
   const zf = q.rang.min < 0 && q.rang.max > 0 ? fraction(q, 0) : 0;
   const ly = base - Math.max(f, zf) * hmax - 18;
-  text(g, lab(q, v, style), x + bw / 2, ly, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), x + bw / 2, ly, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 // Stacks of coins: up to 4 columns of 10 coins; the top of each stack shows the € face.
@@ -200,7 +205,7 @@ function bitllets(g, b, v, q, style) {
     text(g, "€", cx, ty + ry * 0.45, { size: Math.round(ry * 1.4), weight: 700, align: "center", color: main });
     topY = Math.min(topY, ty);
   }
-  text(g, lab(q, v, style), b.x + b.w / 2, topY - ry - 22, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, topY - ry - 22, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 function persones(g, b, v, q, style) {
@@ -215,7 +220,7 @@ function persones(g, b, v, q, style) {
     g.beginPath(); g.arc(x, y, s * 0.17, 0, Math.PI * 2); g.fill();
     rrect(g, x - s * 0.24, y + s * 0.2, s * 0.48, s * 0.42, s * 0.12); g.fill();
   }
-  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 18, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 18, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 function keyIcon(g, x, y, s, on, style) {
@@ -236,7 +241,7 @@ function claus(g, b, v, q, style) {
     keyIcon(g, gx + c * s + s * 0.2, b.y + 20 + r * s + s * 0.4, s * 0.9, i < n, style);
   }
   const per = (q.rang.max - q.rang.min) / total;
-  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 50, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, b.y + b.h - 50, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
   if (q.escala !== "log") text(g, T("metafora.cada_clau", "cada clau ≈ {n} {unitat}", { n: fmtNum(per, per < 10 ? 1 : 0), unitat: q.unitat }), b.x + b.w / 2, b.y + b.h - 12, { size: 24, align: "center", color: C.inkSoft });
 }
 
@@ -369,7 +374,7 @@ function setmana(g, b, v, q, style) {
     if (hours >= (d + 1) * perDay) { g.strokeStyle = main; g.lineWidth = 3; g.strokeRect(x - 3, gy - 1, cw + 6, perDay * ch + 2); }
   }
   const ly = gy + perDay * ch;
-  text(g, lab(q, v, style), b.x + b.w / 2, ly + 58, { size: 54, kind: "title", align: "center", maxW: b.w - 24 });
+  text(g, lab(q, v, style), b.x + b.w / 2, ly + 58, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
   text(g, T("metafora.cada_casella_hora", "cada casella = 1 hora de feina"), b.x + b.w / 2, ly + 96, { size: 22, align: "center", color: C.inkSoft });
 }
 

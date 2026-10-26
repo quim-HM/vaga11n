@@ -3,16 +3,14 @@
 // next visit. Cache-first: once loaded, the installation keeps working without internet at the venue.
 // Several versions (one per locality) can live on one origin, e.g. /vaga11n/ and /vaga11n/santpedor/:
 // each one names its caches with its locality and never touches the folders of the others (SKIP).
-const VERSION = "b54e6b8ac075";
+const VERSION = "1e82b6f156e6";
 const LLOC = "valles-oriental";
 const SKIP = [];
 const ASSETS = [
 "./",
 "css/style.css",
-"data/INFORME_DADES.md",
 "data/final.json",
 "data/fonts.json",
-"data/geo/README.md",
 "data/geo/bages_municipis.json",
 "data/geo/barris/08015.json",
 "data/geo/barris/08019.json",
@@ -75,10 +73,12 @@ const ASSETS = [
 "data/geo/index.json",
 "data/geo/manresa_barris.json",
 "data/geo/ppcc.json",
+"data/geo/README.md",
 "data/geo/vistes.json",
+"data/INFORME_DADES.md",
 "data/joc2.json",
-"data/llocs/README.md",
 "data/llocs/index.json",
+"data/llocs/README.md",
 "data/llocs/valles-oriental/fonts.json",
 "data/llocs/valles-oriental/lloc.json",
 "data/llocs/valles-oriental/preguntes.json",
@@ -121,6 +121,7 @@ const ASSETS = [
 "js/link.js",
 "js/lloc.js",
 "js/main.js",
+"js/pictos.js",
 "js/qr.js",
 "js/scenes/attract.js",
 "js/scenes/credits.js",
@@ -143,11 +144,11 @@ const ASSETS = [
 "operador.html",
 "package.json",
 "paletes.html",
-"vendor/README.md",
 "vendor/mediapipe/vision_bundle.mjs",
 "vendor/mediapipe/wasm/vision_wasm_module_internal.js",
 "vendor/mediapipe/wasm/vision_wasm_module_internal.wasm",
-"vendor/qrcode/qrcode.mjs"
+"vendor/qrcode/qrcode.mjs",
+"vendor/README.md"
 ];
 const PREFIX = `vaga11n-${LLOC}-`;
 const CACHE = PREFIX + VERSION;

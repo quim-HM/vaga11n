@@ -203,8 +203,8 @@ export class App {
     } else {
       const left = Math.max(0, PAUSE_TIMEOUT_S - this.paused.t);
       const present = this.input.state.present;
-      text(g, present ? T("app.continues_tu_la_partida", "Continues tu la partida?") : T("app.on_ets", "On ets?"), W / 2, H / 2 - 150, { size: 96, kind: "title", align: "center", color: C.red, maxW: 1160 });
-      text(g, present ? T("app.aixeca_una_ma_per", "Aixeca una mà per continuar") : T("app.torna_davant_de_la", "Torna davant de la pantalla i aixeca una mà"), W / 2, H / 2 - 40, { size: 50, weight: 700, align: "center", maxW: 1160 });
+      text(g, present ? T("app.continues_tu_la_partida", "Continues tu la partida?") : T("app.on_ets", "On ets?"), W / 2, H / 2 - 150, { size: 110, kind: "title", align: "center", color: C.red, maxW: 1160 });
+      text(g, present ? T("app.aixeca_una_ma_per", "Aixeca una mà per continuar") : T("app.torna_davant_de_la", "Torna davant de la pantalla i aixeca una mà"), W / 2, H / 2 - 40, { size: 48, weight: 800, align: "center", maxW: 1160 });
       drawCountdown(g, W / 2, H / 2 + 110, left, PAUSE_TIMEOUT_S, { r: 62 });
       text(g, T("app.si_no_hi_ha", "Si no hi ha ningú, la partida s'acabarà sola."), W / 2, H / 2 + 240, { size: 32, align: "center", color: C.inkSoft, maxW: 1160 });
     }
@@ -322,7 +322,7 @@ export class App {
       if (p > 0) {
         ring(g, b.x, b.y, NAV_R + 10, p, { color: C.teal, lw: 8 });
         // label above the button, in its own corner (a white pill, legible on any surface)
-        const label = b.id === "next" ? T("app.nav.seguent", "Joc següent") : T("app.nav.anterior", "Joc anterior");
+        const label = b.id === "next" ? T("app.nav.seguent", "Següent joc") : T("app.nav.anterior", "Joc anterior");
         font(g, 26, "body", 700);
         const tw = g.measureText(label).width + 32, ph = 44, py = b.y - NAV_R - 22 - ph;
         const px = b.id === "next" ? W - LAYOUT.m - tw : LAYOUT.m;

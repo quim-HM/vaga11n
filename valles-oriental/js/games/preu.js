@@ -4,25 +4,27 @@ import { T } from "../textos.js";
 // Controls (one or two arms, standing or seated):
 //  - Lever: hand above the shoulders = the value goes up (faster the longer you hold),
 //    hand at belly height = goes down, hand at chest height or resting = holds.
-//  - Confirm: put a hand on one of the «FIXA-HO» buttons at the sides for 1.5 s (the value is
-//    frozen while a hand is there), or raise both hands for 1 s. Nothing is ever confirmed by
-//    just standing still, so players can take their time to think.
-import { W, H, C, LAYOUT, text, wrap, wrapLines, font, panel, ring, clamp, lerp, easeOut, shuffle, Particles, rrect, drawCheck, onCard } from "../ui.js";
+//  - Confirm: put a hand on one of the ✓ buttons at the sides for 1.2 s (the value is frozen while
+//    a hand is there). Nothing is ever confirmed by just standing still, so players can take their
+//    time to think, and a hand still raised from the previous screen does not move the value until
+//    it has come down once.
+import { W, H, C, LAYOUT, text, wrap, wrapLines, font, panel, ring, clamp, lerp, easeOut, shuffle, Particles, rrect, drawCheck, onCard, posterBlock } from "../ui.js";
 import { MAP, inRect } from "../input.js";
 import { drawMetaphor, fmtWithUnit } from "./metafores.js";
 import { drawCountdown } from "../countdown.js";
 import { drawOkBadge, textIcon } from "../icons.js";
 import { drawFooterHint, drawHand } from "../hand.js";
 
-const N_QUESTIONS = 5;
-const ANSWER_MAX_S = 30;
-const WARN_S = 8;              // countdown shown during the last seconds
-const CONFIRM_S = 1.5;
-const BOTH_UP_S = 1.0;
+// A round is short (3 questions); «Més preguntes» offers another one while unseen questions remain
+export const N_QUESTIONS = 3;
+const ANSWER_MAX_S = 22;
+const WARN_S = 6;              // countdown shown during the last seconds
+const CONFIRM_S = 1.2;
 const ARM_AFTER_S = 1.2;       // ignore input right after the question appears
+const LEVER_MAX_SPS = 25;      // lever speed cap (steps per second): fast, but no wild overshoot
 const REVEAL_NEXT_MIN_S = 3.0;
 const HOWTO_MIN_S = 3.5;      // the how-to card stays at least this long before a raised hand skips it
-const REVEAL_MAX_S = 40;   // players move on themselves (raise a hand / click); auto only as a safety net
+const REVEAL_MAX_S = 25;   // players move on themselves (raise a hand / click); auto only as a safety net
 const NEXT_RAISE_S = 0.6;
 const LEVER_UP = 0.45, LEVER_DOWN = -0.1, REST_Y = -0.5;
 
@@ -36,7 +38,7 @@ const BUTTONS = [{ x: 30, y: BTN_Y, ...BTN }, { x: W - 30 - BTN.w, y: BTN_Y, ...
 const REVEAL_CARD = { x: 272, y: 232, w: 636, h: 350, pad: 22, panelY: 150, panelH: 450 };
 // …and the explanation below them is set as large as it fits in the band left between the verdict
 // and the source line (which always ends on the same baseline, just above the footer prompt).
-const REV = { w: 1560, lineH: 1.2, maxLines: 4, maxSize: 60, minSize: 26, top: 112 };
+const REV = { w: 1560, lineH: 1.2, maxLines: 4, maxSize: 50, minSize: 26, top: 112 };
 const SRC = { w: 1500, size: 24, maxLines: 2, lastBaseline: 980 };
 
 function countLines(g, str, maxW, size, maxLines) {
@@ -146,7 +148,7 @@ export default class Preu {
     this.leverHeld = 0;
     this.leverDir = 0;
     this.confirmP = 0;
-    this.bothUpT = 0;
+    this.leverArmed = false;
     this.overBtn = -1;
     this.phase = "answer";
     this.t = 0;
@@ -253,19 +255,18 @@ export default class Preu {
     });
     const canConfirm = armed && (this.touched || this.t > 6);
     this.confirmP = this.overBtn >= 0 && canConfirm ? this.confirmP + dt / CONFIRM_S : Math.max(0, this.confirmP - dt * 2);
-    // Both hands up = quick confirm (two-arm players)
-    const bothUp = !inp.oneArm && inp.isRaised("l") && inp.isRaised("r");
-    this.bothUpT = bothUp && canConfirm ? this.bothUpT + dt : 0;
 
     const c = inp.primary();
-    if (armed && this.overBtn < 0 && !bothUp && c && c.hy > REST_Y) {
+    // a hand still up from «raise to continue» must leave the «up» zone once before it steers
+    if (!this.leverArmed && (!c || c.hy <= LEVER_UP)) this.leverArmed = true;
+    if (armed && this.leverArmed && this.overBtn < 0 && c && c.hy > REST_Y) {
       let dir = 0;
       if (c.hy > LEVER_UP) dir = 1; else if (c.hy < LEVER_DOWN) dir = -1;
       if (dir !== this.leverDir) { this.leverDir = dir; this.leverHeld = 0; }
       this.leverHeld += dt;
       if (dir !== 0) {
         const steps = stepsOf(q);
-        const sps = Math.min(2 + this.leverHeld * 8, 45);   // steps per second, accelerating
+        const sps = Math.min(2 + this.leverHeld * 8, LEVER_MAX_SPS);   // steps per second, accelerating
         this.tParam = clamp(this.tParam + (dir * sps * dt) / steps, 0, 1);
       }
     } else {
@@ -279,7 +280,6 @@ export default class Preu {
       this.prevValue = this.value;
     }
     if (this.confirmP >= 1) this.lock("button");
-    else if (this.bothUpT >= BOTH_UP_S) this.lock("both-up");
     else if (inp.keys.has("Space") && armed) this.lock("key");
     else if (this.t >= ANSWER_MAX_S) this.lock("timeout");
     // audible tick on each of the last seconds
@@ -320,27 +320,27 @@ export default class Preu {
   drawNextHint(g, minS) {
     if (this.t < minS) return;
     const p = clamp(this.nextT / NEXT_RAISE_S, 0, 1);
-    drawFooterHint(g, T("preu.aixeca_la_ma_per", "Aixeca la mà per continuar"), p, { mouse: this.app.input.usingMouse });
+    drawFooterHint(g, T("preu.aixeca_la_ma_per", "Aixeca la mà per continuar"), p, { mouse: this.app.input.usingMouse, waitT: this.t - minS });
   }
 
   drawHowto(g) {
     const app = this.app;
     app.drawSilhouette(g, { alpha: 0.08 });
-    text(g, T("preu.el_preu_in_just", "EL PREU (IN)JUST"), W / 2, 170, { size: 120, kind: "title", align: "center", color: C.head, maxW: W - 200 });
-    text(g, T("preu.endevina_xifres_reals_com", "Com hem arribat fins aquí?"), W / 2, 250, { size: 46, weight: 700, align: "center" });
+    text(g, T("preu.el_preu_in_just", "EL PREU (IN)JUST"), W / 2, 150, { size: 110, kind: "title", align: "center", color: C.head, maxW: W - 200 });
+    // the goal of the game was said on the interlude: here, just how to play it
+    posterBlock(g, T("preu.com_es_juga", "Com es juga"), W / 2, 252, 56, { align: "center", maxW: W - 200 });
     // three pictograms: up / down / confirm
     const items = [
       { x: 480, label: T("preu.ma_amunt", "Mà amunt"), sub: T("preu.puja__", "puja"), arm: 1 },
       { x: 960, label: T("preu.ma_a_la_panxa", "Mà a la panxa"), sub: T("preu.baixa__", "baixa"), arm: -1 },
-      { x: 1440, label: T("preu.toca_ok", "Toca {check}"), sub: T("preu.respon", "respon"), arm: 0 },
+      { x: 1440, label: T("preu.ma_quieta_ok", "Mà quieta al {check}"), sub: T("preu.respon", "respon"), arm: 0 },
     ];
     for (const it of items) onCard(() => {
-      panel(g, it.x - 220, 300, 440, 520, { lw: 3 });
+      panel(g, it.x - 220, 300, 440, 540, { lw: 3 });
       figure(g, it.x, 684, it.arm, this.t);
-      textIcon(g, it.label, it.x, 721, { size: 38, weight: 700, align: "center" });
-      textIcon(g, it.sub, it.x, 763, { size: 32, align: "center", color: it.arm > 0 ? C.red : it.arm < 0 ? C.blue : C.teal, weight: 700 });
+      textIcon(g, it.label, it.x, 734, { size: 44, weight: 800, align: "center", maxW: 400 });
+      textIcon(g, it.sub, it.x, 786, { size: 36, align: "center", color: it.arm > 0 ? C.red : it.arm < 0 ? C.blue : C.teal, weight: 800 });
     });
-    textIcon(g, T("preu.nomes_compta", "Només compta quan toques {check}"), W / 2, 880, { size: 38, align: "center", color: C.inkSoft });
     this.drawNextHint(g, HOWTO_MIN_S);
   }
 
@@ -392,12 +392,10 @@ export default class Preu {
     });
     // confirm buttons
     BUTTONS.forEach((b, k) => this.drawButton(g, b, k === this.overBtn));
-    // both hands up feedback
-    if (this.bothUpT > 0) ring(g, W / 2, Y_DOWN + 120, 50, this.bothUpT / BOTH_UP_S, { color: C.teal, lw: 14 });
     // countdown in the last seconds (campaign-style badge)
     const left = ANSWER_MAX_S - this.t;
     if (left < WARN_S) drawCountdown(g, W / 2, H - 80, left, WARN_S, { r: 58 });
-    else textIcon(g, T("preu.ho_tens", "Ho tens? Toca {check}"), W / 2, LAYOUT.navY + 12, { size: 34, weight: 700, align: "center", color: C.ink });
+    else textIcon(g, T("preu.ho_tens", "Ho tens? Mà quieta al {check}"), W / 2, LAYOUT.navY + 12, { size: 40, weight: 800, align: "center", color: C.ink });
   }
 
   drawButton(g, b, over) {
@@ -441,7 +439,7 @@ export default class Preu {
     const panelH = REVEAL_CARD.panelH + (q.escala === "log" ? 20 : 0);
     onCard(() => {
       for (const b of [bl, br]) panel(g, b.x - REVEAL_CARD.pad, REVEAL_CARD.panelY, b.w + 2 * REVEAL_CARD.pad, panelH, { lw: 3 });
-      text(g, T("preu.tu", "TU"), bl.x + bl.w / 2, 212, { size: 44, kind: "title", align: "center", color: C.blue, maxW: bl.w });
+      text(g, T("preu.tu", "LA TEVA RESPOSTA"), bl.x + bl.w / 2, 212, { size: 44, kind: "title", align: "center", color: C.blue, maxW: bl.w });
       text(g, T("preu.la_realitat", "LA REALITAT"), br.x + br.w / 2, 212, { size: 44, kind: "title", align: "center", color: C.red, maxW: br.w });
       drawMetaphor(g, q.metafora, bl, r.answer, q, "answer");
       drawMetaphor(g, q.metafora, br, prog >= 1 ? q.valor : shown, q, "real");
@@ -449,9 +447,11 @@ export default class Preu {
     if (this.t > 2.2) {
       const a = easeOut((this.t - 2.2) / 0.5);
       const diff = r.answer - q.valor;
+      // the verdict says which way the guess was off (more / less than you thought), not good/bad:
+      // for some questions a lower real figure is the worse news
       const verdict = r.points >= 95 ? T("preu.veredicte.clavat", "Clavat!")
         : r.points >= 80 ? T("preu.veredicte.aprop", "Molt a prop!")
-        : diff < 0 ? T("preu.veredicte.sota", "No ben bé!") : T("preu.veredicte.sobre", "No ben bé!");
+        : diff < 0 ? T("preu.veredicte.sota", "Més del que creies!") : T("preu.veredicte.sobre", "Menys del que creies!");
       // vertical rhythm: cards → verdict → revelation → source (small) → footer prompt.
       // The source sits on a fixed baseline above the footer prompt, so the explanation always gets
       // the same band and can be set as large as it fits in it; the verdict is then centred in
@@ -470,8 +470,10 @@ export default class Preu {
         wrap(g, q.revelacio, W / 2, revTop + fit.size * 0.74, REV.w,
           { size: fit.size, align: "center", alpha: a, maxLines: REV.maxLines, lineH: REV.lineH });
       }
-      const vy = (cardsBottom + revTop) / 2 + 64 * 0.36;   // cap height centred in the gap
-      text(g, verdict, W / 2, vy, { size: 64, kind: "title", align: "center", color: r.points >= 80 ? C.teal : C.ink, alpha: a, maxW: W - 200 });
+      // the verdict is a small campaign block: the real figure (above) and its meaning (below) lead
+      const vy = (cardsBottom + revTop) / 2 + 44 * 0.36;
+      const good = r.points >= 80;
+      posterBlock(g, verdict, W / 2, vy, 44, { align: "center", alpha: a, maxW: W - 200, bg: good ? C.okFill : C.hl, fg: good ? C.white : C.hlText });
       wrap(g, src + note, W / 2, srcTop, SRC.w, { size: SRC.size, color: C.inkSoft, alpha: a, maxLines: SRC.maxLines, align: "center", lineH: 1.2 });
     }
     this.drawNextHint(g, REVEAL_NEXT_MIN_S);

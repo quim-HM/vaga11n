@@ -56,21 +56,43 @@ export function drawHandCursor(g, x, y, { color = C.red, r = 40, alpha = 1, side
   g.restore();
 }
 
-// "Raise your hand" affordance (mouse mode: "hold the click"): a progress ring with the gesture inside
-export function drawRaiseIcon(g, cx, cy, r, progress, { mouse = false, color = C.teal, ink = C.ink } = {}) {
-  ring(g, cx, cy, r, progress, { color, lw: Math.max(8, r * 0.22) });
-  if (mouse) drawMouseIcon(g, cx, cy, r * 0.55, { color: ink });
-  else { const s = r * 0.62; drawHand(g, cx, cy + s * 0.25, s, { fill: ink, stroke: C.white, side: "r" }); }
+// "Raise your hand" affordance (mouse mode: "hold the click"): a progress ring with the gesture inside.
+// waitT = seconds the prompt has been waiting: after NUDGE_AFTER_S with no progress it starts to pulse
+// (a soft ring expanding from the icon + a gentle size breath), to catch the eye of whoever missed it.
+const NUDGE_AFTER_S = 5, NUDGE_PERIOD_S = 1.4;
+export function drawRaiseIcon(g, cx, cy, r, progress, { mouse = false, color = C.teal, ink = C.ink, waitT = 0 } = {}) {
+  let s0 = 1;
+  if (waitT > NUDGE_AFTER_S && progress <= 0) {
+    const k = ((waitT - NUDGE_AFTER_S) % NUDGE_PERIOD_S) / NUDGE_PERIOD_S;
+    g.save();
+    g.globalAlpha *= 0.7 * (1 - k);
+    g.lineWidth = Math.max(4, r * 0.12); g.strokeStyle = color;
+    g.beginPath(); g.arc(cx, cy, r * (1 + 0.9 * k), 0, Math.PI * 2); g.stroke();
+    g.restore();
+    s0 = 1 + 0.08 * Math.sin(k * Math.PI * 2);
+  }
+  ring(g, cx, cy, r * s0, progress, { color, lw: Math.max(8, r * 0.22) });
+  if (mouse) drawMouseIcon(g, cx, cy, r * 0.55 * s0, { color: ink });
+  else { const s = r * 0.62 * s0; drawHand(g, cx, cy + s * 0.25, s, { fill: ink, stroke: C.white, side: "r" }); }
 }
 // Footer prompt («Aixeca la mà per continuar»): icon + label as one group, optically centred in the
 // footer's centre zone (the corners belong to the ◀ ▶ shortcuts)
-export function drawFooterHint(g, label, progress, { mouse = false, size = 34, alpha = 1 } = {}) {
+export function drawFooterHint(g, label, progress, { mouse = false, size = 34, alpha = 1, waitT = 0 } = {}) {
   const r = 28, gap = 18;
   const tw = measure(g, label, size, "body", 700);
   const x0 = W / 2 - (2 * r + gap + tw) / 2, cy = LAYOUT.navY;
   g.save();
   g.globalAlpha *= alpha;
-  drawRaiseIcon(g, x0 + r, cy, r, progress, { mouse });
+  drawRaiseIcon(g, x0 + r, cy, r, progress, { mouse, waitT });
   text(g, label, x0 + 2 * r + gap, cy + size * 0.355, { size, weight: 700, color: C.ink });
   g.restore();
 }
+
+// Thin bar that fills while a screen waits: it moves on by itself when full (nothing ever blocks)
+export function drawAutoBar(g, x, y, w, k, { back = C.track, fill = C.inkSoft } = {}) {
+  g.save();
+  g.fillStyle = back; g.fillRect(x, y, w, 6);
+  g.fillStyle = fill; g.fillRect(x, y, w * clamp01(k), 6);
+  g.restore();
+}
+const clamp01 = (k) => (k < 0 ? 0 : k > 1 ? 1 : k);
