@@ -85,8 +85,9 @@ const ONE_ARM_EXTRA = 40;                   // assist: wider corridor in one-arm
 // break the two-hand steering pose four times per game. Long enough to read the figure.
 const RESULT_DUR = 4.0;
 const RESULT_FAIL_DUR = 4.5;
-const CARD_RETRY_AUTO = 9;  // a lost level offers a retry: longer, and it carries on by itself
-const CARD_DWELL = 1.0;     // hold a hand over an option for this long to pick it
+const CARD_RETRY_AUTO = 12; // a lost level offers a retry: longer, and it carries on by itself
+const CARD_DWELL = 1.8;     // hold a hand over an option for this long to pick it
+const CARD_PICK_MIN = 2.5;  // reading time before an option can be picked
 const RAISE_S = 0.6;
 const NODATA_DUR = 3;
 // End screen: all lines revealed one after another, then the campaign line
@@ -407,6 +408,7 @@ export default class FinalDeMes {
     if (ok) this.fx.burst(PLAYER_X, this.py, 14, [C.mustard, st.color]);
     this.armed = false;
     this.btnP = { retry: 0, next: 0 };
+    this.btnArmed = { retry: false, next: false };
     this.pt = 0;
     this.phase = "card";   // after the last stage card comes the end screen (all lines together)
   }
@@ -533,7 +535,7 @@ export default class FinalDeMes {
   }
 
   // Called by the app when play resumes after the pause: the hand raised to resume must come down
-  onResume() { this.armed = false; this.raiseT = 0; }
+  onResume() { this.armed = false; this.raiseT = 0; this.btnArmed = { retry: false, next: false }; }
 
   update(dt) {
     if (this.finished) return;
@@ -589,15 +591,20 @@ export default class FinalDeMes {
     return !!st && st.result === "fail" && !st.retried;
   }
 
-  // The two options on the card: hold a hand over one (or click it in mouse mode)
+  // The two options on the card: hold a hand over one (or click it in mouse mode). Guarded against
+  // picking by accident with the hands still in the steering pose: nothing counts during the reading
+  // time, and a hand that was already over an option when the card appeared has to leave it first.
   _pickOnCard(dt) {
     const r = this._cardRects();
     const cs = this.app.input.cursors();
+    this.btnArmed = this.btnArmed || { retry: false, next: false };
     for (const k of ["retry", "next"]) {
       const b = r[k];
       const over = cs.some((c) => inRect(c, b.x, b.y, b.w, b.h));
-      this.btnP[k] = clamp(this.btnP[k] + (over ? dt / CARD_DWELL : -dt * 2), 0, 1);
-      if (this.app.input.consumeClick(b.x, b.y, b.w, b.h)) this.btnP[k] = 1;
+      if (!over) this.btnArmed[k] = true;
+      const counts = over && this.btnArmed[k] && this.pt > CARD_PICK_MIN;
+      this.btnP[k] = clamp(this.btnP[k] + (counts ? dt / CARD_DWELL : -dt * 2), 0, 1);
+      if (this.app.input.consumeClick(b.x, b.y, b.w, b.h) && this.pt > CARD_PICK_MIN) this.btnP[k] = 1;
       if (this.btnP[k] >= 1) return k;
     }
     return null;

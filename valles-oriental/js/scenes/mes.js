@@ -1,5 +1,5 @@
 // After a round of «El preu (in)just»: play another round (unseen questions) or move on.
-// Hand: hold over a button 1.2 s · mouse: click · auto-continues to the next game (bar at the bottom).
+// Hand: hold over a button 2 s (after a short reading time) · mouse: click · auto-continues to the next game (bar at the bottom).
 import { W, H, C, LAYOUT, text, clamp, easeOut, campaignButton } from "../ui.js";
 import { T } from "../textos.js";
 import { inRect } from "../input.js";
@@ -7,8 +7,12 @@ import { GAMES } from "../app.js";
 import { drawAutoBar } from "../hand.js";
 import { N_QUESTIONS } from "../games/preu.js";
 
-const DWELL_S = 1.2;
-const AUTO_S = 10;
+// Guarded against choosing by accident (the buttons are big and central, and the hands are often
+// already there): a reading time first, a hand already over a button must leave it before it counts,
+// and a longer hold than elsewhere.
+const DWELL_S = 2.0;
+const MIN_S = 2.5;
+const AUTO_S = 12;
 
 export default class Mes {
   constructor(app) {
@@ -17,12 +21,15 @@ export default class Mes {
     this.t = 0;
     this.left = app.remainingQuestions();
     this.buttons = [
-      { id: "mes", x: 260, y: 470, w: 640, h: 300, p: 0 },
-      { id: "seguent", x: 1020, y: 470, w: 640, h: 300, p: 0 },
+      { id: "mes", x: 260, y: 470, w: 640, h: 300, p: 0, armed: false },
+      { id: "seguent", x: 1020, y: 470, w: 640, h: 300, p: 0, armed: false },
     ];
   }
 
   enter() {}
+
+  // the hand raised to resume from the pause must leave the buttons before it counts
+  onResume() { for (const b of this.buttons) { b.armed = false; b.p = 0; } }
 
   choose(id) {
     if (this.done) return;
@@ -39,10 +46,12 @@ export default class Mes {
     const inp = this.app.input;
     const cs = inp.cursors();
     for (const b of this.buttons) {
-      const over = this.t > 0.8 && cs.some((c) => inRect(c, b.x, b.y, b.w, b.h));
+      const inside = cs.some((c) => inRect(c, b.x, b.y, b.w, b.h));
+      if (!inside) b.armed = true;
+      const over = inside && b.armed && this.t > MIN_S;
       b.p = over ? b.p + dt / DWELL_S : Math.max(0, b.p - dt * 2);
       b.over = over;
-      const clicked = inp.usingMouse && inp.consumeClick(b.x, b.y, b.w, b.h);
+      const clicked = inp.usingMouse && this.t > MIN_S && inp.consumeClick(b.x, b.y, b.w, b.h);
       if (b.p >= 1 || clicked) return this.choose(b.id);
     }
     if (this.t > AUTO_S) this.choose("seguent");
