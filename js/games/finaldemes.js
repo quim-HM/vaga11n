@@ -29,15 +29,13 @@ const DEFAULT_CFG = {
   etapes: [
     { serie: "salari_catalunya", etiqueta: "Salaris" },
     { serie: "ipc_catalunya_aliments", etiqueta: "Cistella" },
-    { opcions: [
-      { serie: "lloguer_manresa", etiqueta: "Lloguer a Manresa" },
-      { serie: "lloguer_catalunya", etiqueta: "Lloguer a Catalunya" },
-    ] },
+    { serie: "lloguer_catalunya", etiqueta: "Lloguer a Catalunya" },
     { serie: "preu_habitatge_catalunya", etiqueta: "Preu de l'habitatge" },
   ],
 };
 
-// Subject phrases for the facts: [fallback text, plural]
+// Subject phrases for the facts: [fallback text, plural]. A series can bring its own phrase
+// (series.json → "subjecte", "subjecte_plural"), which is how locality series add theirs.
 const SUBJ = {
   salari_catalunya: ["el salari brut mitjà a Catalunya", false],
   renda_llar_manresa: ["la renda neta mitjana per llar a Manresa", false],
@@ -166,7 +164,10 @@ function tag(g, str, x, y, textColor, borderColor, { size = 28, align = "left" }
   text(g, str, x0 + 10, y - size / 2 + 6 + size * 0.355, { size, weight: 700, color: textColor });
 }
 
-async function loadConfig() {
+// Stages: the locality's (lloc.json → joc2, already loaded in app.data.joc2) or data/joc2.json
+async function loadConfig(data) {
+  const own = data && data.joc2;
+  if (own && Array.isArray(own.etapes) && own.etapes.length) return { ...DEFAULT_CFG, ...own };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 1500);
   try {
@@ -219,7 +220,7 @@ export default class FinalDeMes {
     this.graceT = 0;
     this.marge = 1;
     this.stageDur = STAGE_MAX;
-    this.cfgPromise = loadConfig();
+    this.cfgPromise = loadConfig(app.data);
   }
 
   // --- data -------------------------------------------------------------
@@ -363,7 +364,7 @@ export default class FinalDeMes {
   _score() { return this.totalTime > 0 ? Math.round(clamp((100 * this.insideTime) / this.totalTime, 0, 100)) : 0; }
 
   _factFor(st) {
-    const [subjFb, plural] = SUBJ[st.id] || [`«${st.label}»`, false];
+    const [subjFb, plural] = st.s && st.s.subjecte ? [st.s.subjecte, !!st.s.subjecte_plural] : SUBJ[st.id] || [`«${st.label}»`, false];
     const subj = T(`finaldemes.subjecte.${st.id}`, subjFb);
     const r = Math.round(st.finalPct);
     const vars = { pct: fmtNum(Math.abs(r)) };

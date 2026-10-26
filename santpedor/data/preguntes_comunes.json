@@ -1,0 +1,212 @@
+[
+  {
+    "id": "sobrecarrega_llogaters_mercat_espanya",
+    "enunciat": "El 2025, quin percentatge de persones de lloguer a preu de mercat a l'Estat dedica més del 40 % dels ingressos a l'habitatge?",
+    "unitat": "%",
+    "valor": 26.8,
+    "any_referencia": 2025,
+    "ambit": "Espanya",
+    "font_id": "eurostat_ilc_lvho07c",
+    "definicio": "Taxa de sobrecàrrega per costos d'habitatge (Eurostat): percentatge de població que viu en llars on els costos totals de l'habitatge superen el 40 % de la renda disponible (tots dos nets d'ajuts a l'habitatge). Grup: llogaters a preu de mercat.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 80
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "persones",
+    "revelacio": "Un 26,8 %: més d'1 de cada 4 (a la UE, un 18,6 %). Entre qui té el pis ja pagat, només un 1,9 %.",
+    "nota": "Dada estatal: aquest conjunt de dades d'Eurostat és per països i no s'ha trobat una dada equivalent per a Catalunya. Mesura persones, no llars. 'Pis ja pagat' = propietaris sense hipoteca ni préstec; amb hipoteca, 3,4 %. L'any és el de l'enquesta (EU-SILC); els ingressos corresponen a l'any anterior.",
+    "nota_curta": "Dada estatal d'Eurostat; mesura persones que destinen més del 40 % de la renda a l'habitatge."
+  },
+  {
+    "id": "edat_emancipacio",
+    "enunciat": "Segons les dades del 2025, a quina edat marxen de casa dels pares, de mitjana, els joves de l'Estat?",
+    "unitat": "anys",
+    "valor": 30.2,
+    "any_referencia": 2025,
+    "ambit": "Espanya",
+    "font_id": "eurostat_yth_demo_030",
+    "definicio": "Edat mitjana estimada en què les persones joves deixen la llar dels pares (Eurostat, yth_demo_030, a partir de l'enquesta de forces de treball).",
+    "confianca": "alta",
+    "rang": {
+      "min": 18,
+      "max": 40
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "calendari",
+    "revelacio": "Als 30,2 anys, gairebé 4 anys més tard que la mitjana de la UE (26,3). El 2008 era als 28,4.",
+    "nota": "Estimació d'Eurostat; no hi ha la dada per a Catalunya en aquest conjunt de dades. Diferència amb la UE: 3,9 anys.",
+    "nota_curta": "Estimació d'Eurostat per a l'Estat espanyol."
+  },
+  {
+    "id": "salari_real_catalunya",
+    "enunciat": "Descomptant la pujada dels preus, en quin percentatge ha canviat el poder de compra del sou mitjà a Catalunya entre 2008 i 2024?",
+    "unitat": "%",
+    "valor": -0.5,
+    "any_referencia": 2024,
+    "ambit": "Catalunya",
+    "font_id": "ine_eaes",
+    "definicio": "Càlcul propi: (salari 2024 / salari 2008) / (IPC 2024 / IPC 2008) − 1. Guany brut mitjà anual per persona treballadora (INE, EAES): 23.375,54 € → 31.730,05 €; IPC general de Catalunya, mitjana anual (INE).",
+    "confianca": "mitjana",
+    "rang": {
+      "min": -20,
+      "max": 40
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "barres",
+    "revelacio": "Un 0,5 % menys: el sou ha pujat un 35,7 % i els preus, un 36,5 %. En poder de compra, és pràcticament el sou de fa 16 anys.",
+    "nota": "Salari mitjà brut (la mitjana pot amagar diferències entre salaris alts i baixos). Deflactat amb l'IPC general de Catalunya; sèries a series/salari_catalunya.csv i series/ipc_catalunya_general.csv.",
+    "nota_curta": "Càlcul propi: salari mitjà brut de l'INE dividit per l'IPC de Catalunya."
+  },
+  {
+    "id": "carro_aliments_catalunya",
+    "enunciat": "Un carro d'aliments i begudes que el 2019 costava 100 € a Catalunya, quant costa segons les dades del 2025?",
+    "unitat": "€",
+    "valor": 134.86,
+    "any_referencia": 2025,
+    "ambit": "Catalunya",
+    "font_id": "ine_ipc",
+    "definicio": "Càlcul propi: 100 € × IPC 2025 / IPC 2019 del grup 'aliments i begudes no alcohòliques', mitjanes anuals, Catalunya (INE, base 2025 = 100): 100 × 100,000 / 74,151.",
+    "confianca": "alta",
+    "rang": {
+      "min": 80,
+      "max": 200
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "carro",
+    "revelacio": "134,86 €: un 34,9 % més, mentre que l'IPC general ha pujat un 20,6 %. El sou mitjà català, del 2019 al 2024, un 22,2 %.",
+    "nota": "Mesura els preus d'una mateixa cistella, no la despesa real de les llars. No inclou begudes alcohòliques. Salari: guany brut mitjà anual (INE, EAES, font ine_eaes), 25.968,20 € (2019) → 31.730,05 € (2024); 2024 és l'últim any publicat.",
+    "nota_curta": "Índex de preus (IPC) de l'INE; el salari mitjà arriba fins al 2024, últim any publicat."
+  },
+  {
+    "id": "jornada_8_hores_canadenca",
+    "enunciat": "En quin any es va aconseguir la jornada laboral de 8 hores?",
+    "unitat": "any",
+    "valor": 1919,
+    "any_referencia": 1919,
+    "ambit": "Espanya",
+    "font_id": "treball_canadenca",
+    "definicio": "Reial decret que fixa la jornada màxima legal en vuit hores diàries o quaranta-vuit setmanals en tots els treballs, a partir de l'1 d'octubre de 1919, publicat a la Gaceta de Madrid núm. 94, de 4 d'abril de 1919 (BOE-A-1919-2254). El Departament d'Empresa i Treball el vincula a la vaga de La Canadenca, que 'va suposar la conquesta de la jornada de treball de 8 hores'.",
+    "confianca": "alta",
+    "rang": {
+      "min": 1890,
+      "max": 2010
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "calendari",
+    "revelacio": "El 1919, després de la vaga de La Canadenca, que va durar un mes i mig. El 1983 va arribar la setmana de 40 hores; el manifest de l'11N en reclama 35.",
+    "nota": "Vaga de La Canadenca: conflicte dirigit per la CNT que va començar a Camarasa i es va estendre a Lleida i Barcelona; segons el Departament d'Empresa i Treball va durar 'un mes i mig' (font treball_canadenca). Decret: títol i data de publicació a la col·lecció històrica del BOE (font boe_gaceta_1919); el web del Departament diu que es va publicar el 3 d'abril, però la Gaceta de Madrid que el recull és la del 4 d'abril de 1919. 40 hores: Llei 4/1983 (pregunta jornada_40_hores). Reivindicació de l'11N: el manifest de la campanya «Viure ens costa la vida» demana la 'reducció de la jornada laboral a 35 hores setmanals' (font vagageneral_manifest). No s'ha verificat en fonts oficials la xifra de 44 dies de vaga. L'enunciat es refereix a la llei estatal (abans d'aquest decret hi havia hagut jornades de 8 hores en alguns oficis i convenis, que no s'han verificat aquí).",
+    "nota_curta": "Decret a la Gaceta de Madrid (4-4-1919), aplicable des de l'1-10-1919: 8 hores al dia o 48 a la setmana."
+  },
+  {
+    "id": "jornada_40_hores",
+    "enunciat": "Des de quin any la jornada laboral màxima a l'Estat és de 40 hores setmanals?",
+    "unitat": "any",
+    "valor": 1983,
+    "any_referencia": 1983,
+    "ambit": "Espanya",
+    "font_id": "boe_llei_4_1983",
+    "definicio": "Llei 4/1983, de 29 de juny, de fixació de la jornada màxima legal en quaranta hores (BOE-A-1983-18136), en vigor des del 30-7-1983. Text vigent: Estatut dels Treballadors, art. 34.1 ('cuarenta horas semanales de trabajo efectivo de promedio en cómputo anual'), versió consolidada actualitzada el 21-10-2026.",
+    "confianca": "alta",
+    "rang": {
+      "min": 1940,
+      "max": 2026
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "calendari",
+    "revelacio": "Del 1983. 43 anys després, la llei encara diu 40 hores, i reduir-la és una de les demandes de l'11N.",
+    "nota": "La Llei 4/1983 va ser derogada el 1995 pel Reial decret legislatiu 1/1995 (Estatut dels Treballadors); el màxim de 40 hores setmanals és el que fixa avui l'article 34.1 de l'Estatut vigent (font boe_estatut_treballadors). Els convenis col·lectius poden fixar jornades més curtes. Reivindicació de l'11N: 'reducció de la jornada laboral a 35 hores setmanals' (manifest de la campanya, font vagageneral_manifest).",
+    "nota_curta": "Màxim legal (Estatut dels Treballadors); els convenis poden fixar jornades més curtes."
+  },
+  {
+    "id": "riquesa_10pc_mes_ric",
+    "enunciat": "Segons les dades del 2025, quin percentatge de la riquesa de les llars de l'Estat té el 10 % de llars més riques?",
+    "unitat": "%",
+    "valor": 54.7,
+    "any_referencia": 2025,
+    "ambit": "Espanya",
+    "font_id": "ecb_dwa",
+    "definicio": "Riquesa neta del decil 10 / riquesa neta total de les llars (sector S14), 2025-Q4. Comptes distributius de riquesa (DWA) del BCE i els bancs centrals nacionals; càlcul propi a partir dels imports en euros.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 100
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "pastis",
+    "revelacio": "El 54,7 %, més de la meitat (el 2011, el 48,0 %). La meitat de llars amb menys patrimoni en té només el 7,7 %.",
+    "nota": "Estadística experimental, amb valors estimats (marca 'E'). Dades del 4t trimestre de 2025 i de 2011. Riquesa = actius (habitatge, dipòsits, accions...) menys deutes.",
+    "nota_curta": "Estadística experimental del BCE i el Banc d'Espanya; riquesa = béns menys deutes."
+  },
+  {
+    "id": "rescat_anys_despesa_habitatge",
+    "enunciat": "El rescat bancari va costar 71.833 milions d'€. A quants anys de tota la despesa pública en habitatge de l'Estat equival?",
+    "unitat": "anys",
+    "valor": 20.0,
+    "any_referencia": 2021,
+    "ambit": "Espanya",
+    "font_id": "tcu_reestructuracio_2023",
+    "definicio": "Càlcul propi: cost estimat del procés de reestructuració bancària a 31-12-2021 segons el Tribunal de Comptes (71.833 M€) / despesa de totes les administracions públiques en habitatge el 2023 (Eurostat, COFOG 06.1 + 10.6: 2.961 + 627 = 3.588 M€).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 60
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "barres",
+    "revelacio": "Uns 20 anys, al ritme del 2023 (3.588 milions l'any). Només la part del FROB, sense el fons que paguen els bancs, ja en són 14.",
+    "nota": "Estimació no definitiva del Tribunal de Comptes (informe aprovat el 27-4-2023), que la presenta com a cost dels recursos públics del procés: 50.622 M€ del FROB, 21.273 M€ del Fons de Garantia de Dipòsits (FGDEC, que es finança amb aportacions de les entitats de crèdit) i −62 M€ del Banc d'Espanya. Recursos públics compromesos 2009–2021: 123.005 M€. FROB sol: 50.622 / 3.588 = 14,1 anys. Despesa en habitatge: font eurostat_cofog_habitatge (2023, últim any definitiu).",
+    "nota_curta": "Cost estimat pel Tribunal de Comptes (inclou el fons de garantia dels bancs); habitatge: despesa del 2023."
+  },
+  {
+    "id": "catalunya_banc_recuperat",
+    "enunciat": "Catalunya Banc (Caixa Catalunya, Tarragona i Manresa) va rebre 12.052 milions públics. De cada 100 €, quants se n'han recuperat?",
+    "unitat": "€",
+    "valor": 6.49,
+    "any_referencia": 2015,
+    "ambit": "Catalunya",
+    "font_id": "frob_xifres_entitats",
+    "definicio": "Càlcul propi: recuperat / injectat × 100 = 782 / 12.052 × 100. Ajuts del FROB a Catalunya Banc en accions, participacions preferents o CoCos (pàgina 'Cifras por entidades' del FROB, consultada el 25-10-2026).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 30
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "6,49 €: 782 milions de 12.052. Del conjunt de la banca rescatada pel FROB, se n'ha recuperat el 13,5 %.",
+    "nota": "No inclou 524 M€ en esquemes de protecció d'actius i garanties. La desinversió del FROB a Catalunya Banc va acabar el 2015 amb la venda de l'entitat al BBVA (font frob_nota_cx_2015). Total FROB: 7.644 M€ recuperats de 56.545 M€ injectats; el percentatge global podria créixer amb la venda de la participació a BFA/CaixaBank, valorada en 15.467 M€ (comptes del FROB de 2025).",
+    "nota_curta": "Ajuts del FROB en capital; no inclou garanties. Catalunya Banc es va vendre al BBVA el 2015."
+  },
+  {
+    "id": "cartera_hipotecaria_cx_blackstone",
+    "enunciat": "El 2014 Blackstone va comprar hipoteques de Catalunya Banc. Per cada 100 € que es devien, quant va pagar?",
+    "unitat": "€",
+    "valor": 56.56,
+    "any_referencia": 2014,
+    "ambit": "Catalunya",
+    "font_id": "frob_nota_cx_2014",
+    "definicio": "Càlcul propi: aportació de Blackstone / valor nominal de la cartera × 100 = 3.615 / 6.392 × 100 (nota de premsa del FROB del 17-7-2014). Valor nominal: import dels préstecs, sense descomptar les provisions.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 100
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "pastis",
+    "revelacio": "56,56 €: 3.615 milions per préstecs de 6.392. El FROB, que és públic, hi va aportar 572 milions més.",
+    "nota": "La cartera tenia 2.205 M€ de provisions i es va transferir a un fons de titulització per 4.187 M€ (valor en llibres). En la formalització (2015) l'aportació del FROB es va fixar en 524,9 M€ (font frob_nota_cx_2015). Segons el FROB, va ser la venda de cartera de crèdit hipotecari més gran registrada fins aleshores a Europa.",
+    "nota_curta": "Valor nominal = deute pendent; la cartera tenia provisions per possibles pèrdues."
+  }
+]

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Paletes de color · 11N</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  html, body { overflow: auto; cursor: default; background: #fff; }
+  body { margin: 0; font-family: Archivo, sans-serif; }
+  #sheet { display: block; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<canvas id="sheet"></canvas>
+<script type="module">
+// Contact sheet of the 4 colour themes: start screen, a «El preu (in)just» reveal and the final
+// screen, plus the semantic colour roles of each theme. Open /paletes.html to compare them.
+import { loadTexts } from "./js/textos.js";
+import { loadData } from "./js/data.js";
+import { applyTheme, THEMES } from "./js/temes.js";
+import { C, onPage } from "./js/ui.js";
+import { Input } from "./js/input.js";
+import { App } from "./js/app.js";
+import Attract from "./js/scenes/attract.js";
+import Preu from "./js/games/preu.js";
+import Final from "./js/scenes/final.js";
+
+await Promise.all([document.fonts.load('900 80px "Arial Black"'), document.fonts.load('400 40px "Archivo"'), document.fonts.load('700 40px "Archivo"')]);
+await loadTexts();
+const data = await loadData();
+const stage = document.createElement("canvas");
+stage.id = "stage";
+stage.style.display = "none";
+document.body.appendChild(stage);
+const app = new App(stage, new Input({ sim: true }), data);
+app.session.results = { preu: { score: 72 }, finaldemes: { score: 55 }, encen: { score: 80 } };
+const q = data.preguntes.find((x) => x.id === "pujada_preu_habitatge_catalunya") || data.preguntes[0];
+
+const names = Object.keys(THEMES);
+const cw = 640, ch = 360, pad = 24, head = 64, sw = 440;
+const out = document.getElementById("sheet");
+out.width = pad + 3 * (cw + pad) + sw;
+out.height = pad + names.length * (ch + head + pad);
+const o = out.getContext("2d");
+o.fillStyle = "#fff"; o.fillRect(0, 0, out.width, out.height);
+const off = document.createElement("canvas"); off.width = 1920; off.height = 1080;
+const g = off.getContext("2d");
+const qr = new Image(); qr.src = "img/qr.png"; await qr.decode().catch(() => null);
+
+for (let i = 0; i < names.length; i++) {
+  applyTheme(names[i]);
+  const y0 = pad + i * (ch + head + pad);
+  o.fillStyle = "#111"; o.font = "900 30px \"Arial Black\"";
+  o.fillText(`${i + 1}. ${THEMES[names[i]].nom}   (${names[i]})`, pad, y0 + 38);
+  const scenes = [];
+  const a = new Attract(app); a.t = 1; scenes.push(a);
+  const p = new Preu(app); p.questions = [q]; p.i = 0; p.results = [{ q, answer: q.rang.min + (q.rang.max - q.rang.min) * 0.3, points: 45 }]; p.phase = "reveal"; p.t = 6; scenes.push(p);
+  const f = new Final(app, {}); f.t = 6; scenes.push(f);
+  scenes.forEach((s, j) => {
+    // as app.draw: games on the calm play surface, poster screens on the campaign field
+    onPage(s.calm ? "calm" : "bg", () => { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = C.paper; g.fillRect(0, 0, 1920, 1080); s.draw(g); });
+    o.drawImage(off, pad + j * (cw + pad), y0 + head, cw, ch);
+    o.strokeStyle = "#bbb"; o.lineWidth = 1; o.strokeRect(pad + j * (cw + pad), y0 + head, cw, ch);
+  });
+  // semantic roles: background, text on background, cards, data, heat ramp, buttons, poster screens
+  const keys = [["paper", "camp"], ["calm.paper", "fons de joc"], ["ink", "text fons"], ["inkSoft", "text fons 2"], ["head", "titulars"], ["card", "targeta"], ["cardInk", "text targeta"], ["cardInkSoft", "text targ. 2"], ["cardLine", "vora targ."],
+    ["blue", "TU"], ["red", "REALITAT"], ["teal", "confirmar"], ["heatCold", "calor 0"], ["heatMid", "calor 60 %"], ["heatHot", "calor 100 %"], ["btn", "botó"], ["btnText", "text botó"], ["btnHot", "botó actiu"],
+    ["field", "camp cartell"], ["fieldInk", "tinta camp"], ["titleBg", "bloc títol"], ["disc", "disc"], ["titleFg", "títol"], ["daltBg", "franja lema"], ["ctaBg", "crida"], ["band", "banda"], ["hl", "ressalt"]];
+  const val = (k) => (k.startsWith("calm.") ? (THEMES[names[i]].calm || {})[k.slice(5)] || C[k.slice(5)] : C[k]);
+  keys.forEach(([k, label], j) => {
+    const x = pad + 3 * (cw + pad) + (j % 3) * 146, y = y0 + head + Math.floor(j / 3) * 40;
+    if (val(k)) { o.fillStyle = val(k); o.fillRect(x, y, 34, 34); }
+    o.strokeStyle = "#999"; o.strokeRect(x, y, 34, 34);
+    if (!val(k)) { o.beginPath(); o.moveTo(x, y + 34); o.lineTo(x + 34, y); o.stroke(); }
+    o.fillStyle = "#222"; o.font = "700 14px Archivo"; o.fillText(label, x + 42, y + 14);
+    o.fillStyle = "#777"; o.font = "12px Archivo"; o.fillText(val(k) || "—", x + 42, y + 30);
+  });
+}
+document.title = "Paletes de color · 11N (fet)";
+</script>
+</body>
+</html>

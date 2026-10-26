@@ -1,5 +1,5 @@
 {
-  "_nota": "Textos de la pantalla final i d'atracció. Lemes de la campanya (vagageneral.org). Per mostrar el canal de difusió: posa l'enllaç a difusio.url i executa tools\\make_qr.py. «anim»: frases breus del manifest de vagageneral.org per a la pantalla final.",
+  "_nota": "Textos de la pantalla final i d'atracció, comuns a totes les versions. Lemes de la campanya (vagageneral.org). Cada versió pot canviar-ne qualsevol camp a data/llocs/<id>/lloc.json → final (p. ex. el canal de difusió: difusio.url, subtitol, mostrar). El QR es genera a partir de l'enllaç. «anim»: frases breus del manifest de vagageneral.org per a la pantalla final.",
   "lemes": {
     "dalt": "VIURE ENS COSTA LA VIDA",
     "titol": "VAGA GENERAL",
@@ -7,10 +7,9 @@
     "crida": "Ni salaris per terra ni habitatge pels núvols."
   },
   "difusio": {
-    "titol": "Canal de difusió",
-    "subtitol": "@COMITE_23N_BAGES",
-    "url": "https://t.me/COMITE_23N_BAGES",
-    "qr": "img/qr.png",
+    "titol": "Participa",
+    "subtitol": "vagageneral.org/participa",
+    "url": "https://vagageneral.org/participa",
     "mostrar": true
   },
   "anim": {

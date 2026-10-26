@@ -1,0 +1,128 @@
+[
+  {
+    "id": "lloguer_mitja_valles_oriental",
+    "enunciat": "Segons les dades del 2025, quin és el lloguer mitjà mensual d'un contracte nou al Vallès Oriental?",
+    "unitat": "€/mes",
+    "valor": 786.75,
+    "any_referencia": 2025,
+    "ambit": "Vallès Oriental",
+    "font_id": "incasol_fiances_supramunicipal",
+    "definicio": "Renda mitjana dels contractes d'habitatge nous amb fiança dipositada a l'INCASÒL durant tot l'any (període gener-desembre), comarca del Vallès Oriental: dada comarcal publicada per la font (4.741 contractes el 2025).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 1600
+    },
+    "pas": 20,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "786,75 €: un 57,6 % més que el 2014, quan era de 499,30 €. La mitjana catalana és de 872,02 €.",
+    "nota": "Només contractes nous; no inclou els lloguers de contractes antics ni despeses com subministraments o comunitat. 2025: 4.741 contractes (la suma dels quatre trimestres coincideix). 2014 és l'any amb el lloguer nou més baix des del 2007; la sèrie comarcal comença el 2005, amb molts menys contractes registrats (1.270 el 2005), i el mínim absolut és el 2005 (483,23 €). Euros corrents: entre 2014 i 2025 l'IPC general de Catalunya (mitjana anual) va pujar un 26,4 % (font ine_ipc). La mitjana catalana del 2025 té una discrepància interna en el recompte de contractes (vegeu la sèrie lloguer_catalunya).",
+    "nota_curta": "Només contractes nous amb fiança dipositada; no inclou despeses ni lloguers antics."
+  },
+  {
+    "id": "lloguer_vs_renda_valles_oriental",
+    "enunciat": "Segons les dades del 2023, quin percentatge de la renda anual per habitant del Vallès Oriental costa un any de lloguer d'un contracte nou?",
+    "unitat": "%",
+    "valor": 43.6,
+    "any_referencia": 2023,
+    "ambit": "Vallès Oriental",
+    "font_id": "idescat_rfdbc",
+    "definicio": "Càlcul propi: lloguer mitjà mensual dels contractes nous × 12 / renda familiar disponible bruta per habitant × 100 = 744,61 € × 12 / 20.515 € × 100. Lloguer: fiances INCASÒL, comarca, 2023. Renda: Idescat, renda familiar disponible bruta territorial (revisió 2024), comarca, 2023.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 100
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "pastis",
+    "revelacio": "El 43,6 %: més de 4 de cada 10 euros. Un any de lloguer són 8.935 € i la renda per habitant, 20.515 €. A Catalunya, el 48,2 %.",
+    "nota": "La renda disponible per habitant reparteix la renda de totes les llars entre tota la població (també infants i gent gran): és la referència d'una persona que visqués sola amb la renda mitjana; en una llar amb més ingressos el pes del lloguer és menor. Renda de 2023 provisional (Idescat, dades actualitzades el 29-4-2026). Evolució de la ràtio: 41,9 % el 2010, mínim de 36,6 % el 2015 i 43,6 % el 2023. Catalunya, mateix càlcul: 835,22 € × 12 / 20.789 €. No s'ha fet la pregunta de variació (lloguer contra renda) perquè el resultat depèn molt de l'any de partida: del 2010 al 2023, lloguer +28,5 % i renda per habitant +23,5 %; del 2015 al 2023, +45,2 % i +22,0 %.",
+    "nota_curta": "Renda disponible bruta per habitant (Idescat, 2023, provisional) i lloguer dels contractes nous."
+  },
+  {
+    "id": "hores_setmana_smi_lloguer_valles_oriental",
+    "enunciat": "Segons les dades del 2025, quantes hores a la setmana cal treballar amb el salari mínim només per pagar el lloguer al Vallès Oriental?",
+    "unitat": "hores",
+    "valor": 22.8,
+    "any_referencia": 2025,
+    "ambit": "Vallès Oriental",
+    "font_id": "incasol_fiances_supramunicipal",
+    "definicio": "Càlcul propi: hores setmanals = lloguer setmanal / preu de l'hora de salari mínim. Lloguer setmanal = 786,75 €/mes × 12 / 52 = 181,56 € (lloguer mitjà dels contractes nous de 2025 a la comarca, fiances INCASÒL). Hora d'SMI = 1.184 € × 14 pagues / 2.080 h (40 h × 52 setmanes) = 7,97 €/h bruts (Real Decreto 87/2025, BOE-A-2025-2576). Resultat: 22,8 h, el 57,0 % d'una setmana de 40 hores.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 56
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "setmana",
+    "revelacio": "Unes 23 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
+    "nota": "Salari mínim brut (abans de cotitzacions i retencions; amb el net calen més hores), 14 pagues i 2.080 h retribuïdes l'any. Lloguer mitjà dels contractes nous amb fiança dipositada a l'INCASÒL (no inclou lloguers antics ni despeses). Catalunya, mateix mètode: 872,02 € × 12 / 52 / 7,97 €/h = 25,3 h; el lloguer mitjà català del 2025 té una discrepància interna en el recompte de contractes (vegeu la sèrie lloguer_catalunya). El 2014 amb el salari mínim (645,30 €/mes) en calien 26,5: des d'aleshores l'SMI ha pujat més que el lloguer nou (fonts boe_smi i boe_smi_2025).",
+    "nota_curta": "Salari mínim brut del 2025 (14 pagues, 40 h setmanals) i lloguer mitjà dels contractes nous del 2025."
+  },
+  {
+    "id": "habitatges_buits_valles_oriental",
+    "enunciat": "Segons l'últim cens (2021), quin percentatge d'habitatges del Vallès Oriental està buit?",
+    "unitat": "%",
+    "valor": 5.8,
+    "any_referencia": 2021,
+    "ambit": "Vallès Oriental",
+    "font_id": "ine_censo2021_us",
+    "definicio": "Habitatges buits / habitatges totals: 9.896 / 171.866, suma dels 32 municipis de la comarca que surten a la taula 59531 de l'INE (Cens 2021, 'Viviendas según su intensidad de uso'; l'INE els classifica a partir del consum elèctric).",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 20
+    },
+    "pas": 0.2,
+    "escala": "lineal",
+    "metafora": "casetes",
+    "revelacio": "El 5,8 % (a Catalunya, el 10,7 %): 9.896 habitatges, més que tots els contractes de lloguer nous signats a la comarca el 2021 (7.097).",
+    "nota": "La taula no inclou 6 dels 38 municipis de la comarca (Campins, Fogars de Montclús, Montseny, Santa Maria de Martorelles, Tagamanent, Vilalba Sasserra), que sumen 3.458 habitants de 429.598 (0,8 %, padró 2025, font idescat_padro). Mètode basat en el consum elèctric: els trams de la taula (baix consum; ús esporàdic entre 251 i 750 kWh/any) indiquen que els 'buits' són habitatges amb consum anual molt baix, però no s'ha consultat el document metodològic. Un habitatge buit no vol dir necessàriament disponible per llogar (obres, herències, venda, mal estat...). Dades actualitzades per l'INE el 22-11-2024; data de referència del cens: 2021. Contractes nous del 2021: fiances INCASÒL, comarca (font incasol_fiances_supramunicipal); 9.896 / 7.097 = 1,39.",
+    "nota_curta": "Estimació de l'INE pel consum elèctric; buit no vol dir disponible per llogar."
+  },
+  {
+    "id": "hpo_acabats_valles_oriental",
+    "enunciat": "Entre 2013 i 2025, quants habitatges de protecció oficial s'han acabat al Vallès Oriental?",
+    "unitat": "habitatges",
+    "valor": 336,
+    "any_referencia": 2025,
+    "ambit": "Vallès Oriental",
+    "font_id": "gencat_hpo",
+    "definicio": "Suma dels habitatges amb protecció oficial acabats (amb qualificació definitiva) als 38 municipis de la comarca (composició d'Idescat), anys 2013 a 2025 (Generalitat de Catalunya, conjunt de dades v8i4-fa4q). Mitjanes anuals: càlcul propi.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 800
+    },
+    "pas": 10,
+    "escala": "lineal",
+    "metafora": "edifici",
+    "revelacio": "336 en 13 anys. Del 2002 al 2012 se n'havien acabat 1.727. El Pla territorial d'habitatge (2024) en fixa 2.982 per al 2025–2029 a 17 municipis de la comarca.",
+    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Mitjana anual a la comarca: 157 (2002–2012) i 26 (2013–2025); a tot Catalunya, 5.425 i 1.438. 2013–2025: Mollet del Vallès 99, les Franqueses del Vallès 76, Granollers 52; 23 dels 38 municipis, cap. El conjunt de dades assigna també a la comarca Aiguafreda (0 acabats 2013–2025), que segons Idescat i el registre d'ens locals és d'Osona: no s'hi ha comptat (font gencat_ens_locals). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), suma dels nous habitatges destinats a polítiques socials a promoure el primer quinquenni (2025–2029) als 17 municipis de la comarca que tenen objectius de solidaritat urbana (Granollers 571, Mollet del Vallès 328, Parets del Vallès 240, Montornès del Vallès 193, la Llagosta 192, les Franqueses del Vallès 182, Canovelles 158, Caldes de Montbui 154, la Garriga 153, Sant Celoni 146, la Roca del Vallès 143, Cardedeu 141, Sant Fost de Campsentelles 111, Lliçà de Vall 89, Llinars del Vallès 82, Martorelles 76, Montmeló 23); els altres municipis de la comarca no en tenen. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social), de manera que la comparació és orientativa. No s'ha revisat l'estat dels plans locals d'habitatge dels municipis.",
+    "nota_curta": "Habitatges amb protecció oficial acabats, de lloguer i de venda; suma dels municipis de la comarca."
+  },
+  {
+    "id": "llancaments_partits_judicials_granollers_mollet",
+    "enunciat": "Quants desnonaments s'han executat el 2025 als jutjats de Granollers i Mollet del Vallès?",
+    "unitat": "desnonaments",
+    "valor": 247,
+    "any_referencia": 2025,
+    "ambit": "Partits judicials de Granollers i Mollet del Vallès",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Llançaments practicats (desnonaments executats; CGPJ, taula OUJII021) als òrgans de primera instància i d'instrucció dels partits judicials de Granollers i Mollet del Vallès (Granollers: jutjats de primera instància núm. 1 a 10 i d'instrucció núm. 1 a 4; Mollet del Vallès: places 1 a 5 de la secció civil i d'instrucció). El CGPJ compta un llançament per immoble amb canvi de possessió.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 600
+    },
+    "pas": 10,
+    "escala": "lineal",
+    "metafora": "claus",
+    "revelacio": "247: gairebé 5 cada setmana, i 3 de cada 4 provenen d'un lloguer. Del 2013 al 2025, 7.286: més d'un cada dia.",
+    "nota": "L'àmbit són els dos partits judicials, que no coincideixen exactament amb la comarca: el de Granollers té 35 municipis i el de Mollet, 7; hi són els 38 municipis del Vallès Oriental (31 i 7) i, a més, Aiguafreda (Osona), Castellterçol (Moianès), Granera (Moianès), Sant Quirze Safaja (Moianès) (font gencat_partits_judicials). Inclou també immobles no residencials. 2025: Granollers 215, Mollet 32; 189 per la Llei d'arrendaments urbans (76,5 %), 35 per execució hipotecària, 23 altres. Per setmana: 247 / 52 = 4,8; per dia: 7.286 / 4.748 dies = 1,53. La xifra anual ha baixat des dels 815 del 2013. Sèrie disponible des del 2013. El CGPJ etiqueta els òrgans de Mollet com a places de la secció civil i d'instrucció del tribunal d'instància (un sol codi per òrgan a tota la sèrie); no s'ha comprovat si el canvi d'organització judicial del 2025 afecta el recompte d'aquell any.",
+    "nota_curta": "Partits judicials de Granollers i Mollet, no exactament la comarca; inclou locals i altres immobles."
+  }
+]

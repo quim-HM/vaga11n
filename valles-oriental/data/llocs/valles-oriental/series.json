@@ -1,0 +1,18 @@
+[
+  {
+    "id": "lloguer_valles_oriental",
+    "titol": "Lloguer mitjà dels contractes nous al Vallès Oriental",
+    "unitat": "€/mes",
+    "ambit": "Vallès Oriental (comarca)",
+    "font_id": "incasol_fiances_supramunicipal",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, comarca del Vallès Oriental (codi de comarca 41). Valor anual: període gener-desembre publicat per la font. 2026: només el primer trimestre (gener-març).",
+    "confianca": "alta",
+    "notes": "Valors anuals publicats directament per a l'agregat 'gener-desembre' (no calculats a partir dels trimestres). Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous signats en l'any. Sèrie comarcal des del 2005. Contractes el 2025: 4.741 (coincideix amb la suma dels quatre trimestres). 2026 és parcial (només gener-març, 1.123 contractes). Delimitació comarcal segons la font; no s'ha verificat si els anys anteriors a la creació del Moianès (2015), que va treure municipis al Vallès Oriental, s'han recalculat amb la delimitació actual.",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "llocs/valles-oriental/series/lloguer_valles_oriental.csv",
+    "subjecte": "el lloguer mitjà dels contractes nous al Vallès Oriental",
+    "etiqueta": "Lloguer al Vallès Oriental"
+  }
+]

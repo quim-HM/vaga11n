@@ -6,6 +6,7 @@ import { drawHandCursor } from "./hand.js";
 import { sfx, setMuted, isMuted } from "./audio.js";
 import { applyTheme } from "./temes.js";
 import { drawCountdown } from "./countdown.js";
+import { llocQuery, scoped } from "./lloc.js";
 
 // Titles are getters so data/textos.json overrides (loaded after module evaluation) apply
 export const GAMES = [
@@ -368,7 +369,10 @@ export class App {
     else if (k === "j") this.startSession();
     else if (k === "f") { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch((err) => console.warn(err)); }
     else if (k === "h") document.body.classList.toggle("show-cursor");
-    else if (k === "o") window.open(`operador.html${location.search.includes("servidor") ? "?servidor=1" : ""}`, "vaga11n-operador");
+    else if (k === "o") {
+      const q = [location.search.includes("servidor") ? "servidor=1" : "", llocQuery()].filter(Boolean).join("&");
+      window.open(`operador.html${q ? "?" + q : ""}`, scoped("vaga11n-operador"));
+    }
     else return;
     e.preventDefault();
   }

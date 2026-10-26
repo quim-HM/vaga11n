@@ -1,0 +1,46 @@
+{
+  "_nota": "Versió del Vallès Oriental (comarca). Format: data/llocs/README.md. Les preguntes, sèries i fonts locals les genera tools/build_lloc_valles_oriental.py; decisions a docs/llocs/valles-oriental_preguntes.md. La resta d'aquest fitxer s'edita a mà.",
+  "id": "valles-oriental",
+  "nom": "Vallès Oriental",
+  "tipus": "comarca",
+  "codis": {
+    "idescat_comarca": "41",
+    "comarca": "valles-oriental",
+    "provincia": "08",
+    "partit_judicial": ["Granollers", "Mollet del Vallès"]
+  },
+  "joc1": {
+    "comunes": "totes",
+    "excloure": []
+  },
+  "joc2": {
+    "_nota": "Configuració de «Final de mes» (vegeu data/llocs/manresa/lloc.json).",
+    "any_base": 2015,
+    "ordenar_per_pujada": true,
+    "etapes": [
+      { "serie": "salari_catalunya", "etiqueta": "Salaris" },
+      { "serie": "ipc_catalunya_aliments", "etiqueta": "Cistella" },
+      { "opcions": [
+        { "serie": "lloguer_valles_oriental", "etiqueta": "Lloguer al Vallès Oriental" },
+        { "serie": "lloguer_catalunya", "etiqueta": "Lloguer a Catalunya" }
+      ] },
+      { "serie": "preu_habitatge_catalunya", "etiqueta": "Preu de l'habitatge" }
+    ]
+  },
+  "joc3": {
+    "_nota": "Versió comarcal: el joc comença pels municipis del Vallès Oriental, després Catalunya i els Països Catalans. A la pàgina d'operador es pot posar Mollet del Vallès (barris) com a primer nivell.",
+    "ciutat": "",
+    "comarca": "valles-oriental",
+    "final": "ppcc"
+  },
+  "final": {
+    "difusio": {
+      "_nota": "La comarca té diversos comitès de vaga (Cardedeu, Granollers, la Garriga, la Roca del Vallès, Llinars del Vallès, Sant Celoni, Vilamajor, Mollet–Santa Perpètua, Palautordera, Vallromanes…) i cap canal comú a vagageneral.org (consulta 26-10-2026, còpia a data/raw/llocs/valles-oriental/vagageneral_participa.html): l'enllaç du al mapa de comitès de la campanya.",
+      "titol": "Comitès de vaga",
+      "subtitol": "Vallès Oriental · vagageneral.org/participa",
+      "url": "https://vagageneral.org/participa",
+      "mostrar": true
+    }
+  },
+  "textos": {}
+}

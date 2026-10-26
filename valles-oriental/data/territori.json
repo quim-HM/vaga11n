@@ -1,0 +1,322 @@
+{
+  "notes": "Coordenades aproximades, només per a un mapa estilitzat. Manresa: mitjana ponderada per població dels punts OSM/Nominatim de cada barri (font osm_nominatim, secundària). Bages: mitjana ponderada per població de les coordenades municipals d'Idescat (EMEX). Catalunya: coordenades del municipi de referència indicat (no és un centroide).",
+  "nivells": [
+    {
+      "id": "manresa",
+      "titol": "Manresa",
+      "font_id_coordenades": "osm_nominatim",
+      "notes": "18 barris oficials de l'Ajuntament de Manresa agrupats en 8 zones (agrupació pròpia per proximitat). Població: padró per barris de l'Ajuntament, any 2023 (camp ANY_CURS); la suma (80208) és el total municipal d'aquell any segons aquesta font.",
+      "zones": [
+        {
+          "id": "centre_historic",
+          "nom": "Centre històric i Passeig",
+          "lat": 41.7266,
+          "lon": 1.8247,
+          "poblacio": 10988,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-02 Antic",
+            "B-03 Passeig i Rodalies"
+          ]
+        },
+        {
+          "id": "nord",
+          "nom": "Poble Nou i Mion–Puigberenguer–Miralpeix",
+          "lat": 41.7386,
+          "lon": 1.8246,
+          "poblacio": 11231,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-07 Poble Nou",
+            "B-06 Mion - Puigberenguer - Miralpeix"
+          ]
+        },
+        {
+          "id": "nord_est",
+          "nom": "Carretera de Santpedor i el Guix",
+          "lat": 41.7375,
+          "lon": 1.8345,
+          "poblacio": 14331,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-08 Carretera de Santpedor",
+            "B-16 Guix - Pujada Roja"
+          ]
+        },
+        {
+          "id": "oest",
+          "nom": "Valldaura i Plaça Catalunya–Saldes",
+          "lat": 41.7275,
+          "lon": 1.8181,
+          "poblacio": 14534,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-01 Valldaura",
+            "B-05 Plaça Catalunya - Barriada Saldes"
+          ]
+        },
+        {
+          "id": "remei_escodines",
+          "nom": "Vic–Remei i les Escodines",
+          "lat": 41.7271,
+          "lon": 1.834,
+          "poblacio": 12056,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-04 Vic - Remei",
+            "B-11 Escodines"
+          ]
+        },
+        {
+          "id": "est",
+          "nom": "Sagrada Família, Font dels Capellans i Viladordis",
+          "lat": 41.726,
+          "lon": 1.8415,
+          "poblacio": 10967,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-09 Sagrada Família",
+            "B-10 Font dels Capellans",
+            "B-13 Viladordis"
+          ]
+        },
+        {
+          "id": "sud",
+          "nom": "Balconada, Sant Pau i Cal Gravat",
+          "lat": 41.7161,
+          "lon": 1.8404,
+          "poblacio": 3963,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-12 Balconada",
+            "B-14 Sant Pau",
+            "B-18 Cal Gravat"
+          ]
+        },
+        {
+          "id": "sud_oest",
+          "nom": "Pare Ignasi Puig i rodalia (Farreres, Suanya, l'Oller...)",
+          "lat": 41.7155,
+          "lon": 1.8046,
+          "poblacio": 2138,
+          "any_poblacio": 2023,
+          "font_id": "manresa_poblacio_barris",
+          "barris": [
+            "B-15 Pare Ignasi Puig",
+            "B-17 Farreres-Suanya-Comtals-Sta.Caterina-L'Oller-Guia"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bages",
+      "titol": "El Bages",
+      "font_id_coordenades": "idescat_emex",
+      "notes": "Els 30 municipis de la comarca del Bages (Idescat) agrupats en 7 zones (agrupació pròpia). Població: padró municipal a 1 de gener de 2025 (Idescat).",
+      "zones": [
+        {
+          "id": "manresa",
+          "nom": "Manresa",
+          "lat": 41.7287,
+          "lon": 1.8273,
+          "poblacio": 80974,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Manresa"
+          ]
+        },
+        {
+          "id": "cardener_oest",
+          "nom": "Sant Joan de Vilatorrada i l'oest",
+          "lat": 41.7368,
+          "lon": 1.7779,
+          "poblacio": 19851,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Sant Joan de Vilatorrada",
+            "Callús",
+            "Sant Salvador de Guardiola",
+            "Rajadell",
+            "Fonollosa",
+            "Aguilar de Segarra",
+            "Castellfollit del Boix"
+          ]
+        },
+        {
+          "id": "suria_cardona",
+          "nom": "Súria i Cardona (nord-oest)",
+          "lat": 41.8648,
+          "lon": 1.724,
+          "poblacio": 11394,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Súria",
+            "Cardona",
+            "Sant Mateu de Bages"
+          ]
+        },
+        {
+          "id": "llobregat_nord",
+          "nom": "Sallent, Balsareny i Navàs (nord)",
+          "lat": 41.8654,
+          "lon": 1.9012,
+          "poblacio": 19775,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Sallent",
+            "Balsareny",
+            "Navàs",
+            "Gaià",
+            "Avinyó",
+            "Sant Feliu Sasserra"
+          ]
+        },
+        {
+          "id": "pla_de_bages",
+          "nom": "Sant Fruitós, Santpedor i Castellnou",
+          "lat": 41.7726,
+          "lon": 1.8573,
+          "poblacio": 18550,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Sant Fruitós de Bages",
+            "Santpedor",
+            "Castellnou de Bages"
+          ]
+        },
+        {
+          "id": "navarcles_artes",
+          "nom": "Navarcles, Artés i l'est",
+          "lat": 41.7557,
+          "lon": 1.9173,
+          "poblacio": 17138,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Navarcles",
+            "Artés",
+            "Talamanca",
+            "Mura",
+            "Pont de Vilomara i Rocafort, el"
+          ]
+        },
+        {
+          "id": "sud",
+          "nom": "Sant Vicenç de Castellet i el sud",
+          "lat": 41.6522,
+          "lon": 1.8569,
+          "poblacio": 20295,
+          "any_poblacio": 2025,
+          "font_id": "idescat_padro",
+          "municipis": [
+            "Sant Vicenç de Castellet",
+            "Castellbell i el Vilar",
+            "Monistrol de Montserrat",
+            "Marganell",
+            "Castellgalí"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "catalunya",
+      "titol": "Catalunya",
+      "font_id_coordenades": "idescat_emex",
+      "notes": "Els 8 àmbits funcionals del Pla territorial general (Idescat), que es corresponen amb les vegueries. Població estimada a 1 de gener de 2025 (estimacions de població d'Idescat; el padró ja no es publica per àmbits des de 2023); total Catalunya 8124126.",
+      "zones": [
+        {
+          "id": "ambit_metropolita",
+          "nom": "Àmbit metropolità (Barcelona)",
+          "lat": 41.3835,
+          "lon": 2.1784,
+          "poblacio": 5138392,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Barcelona"
+        },
+        {
+          "id": "comarques_gironines",
+          "nom": "Comarques Gironines",
+          "lat": 41.9838,
+          "lon": 2.821,
+          "poblacio": 814218,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Girona"
+        },
+        {
+          "id": "camp_de_tarragona",
+          "nom": "Camp de Tarragona",
+          "lat": 41.1175,
+          "lon": 1.2521,
+          "poblacio": 564162,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Tarragona"
+        },
+        {
+          "id": "terres_de_lebre",
+          "nom": "Terres de l'Ebre",
+          "lat": 40.8121,
+          "lon": 0.5233,
+          "poblacio": 190648,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Tortosa"
+        },
+        {
+          "id": "ponent",
+          "nom": "Ponent (Lleida)",
+          "lat": 41.6192,
+          "lon": 0.6259,
+          "poblacio": 381531,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Lleida"
+        },
+        {
+          "id": "comarques_centrals",
+          "nom": "Comarques Centrals",
+          "lat": 41.7287,
+          "lon": 1.8273,
+          "poblacio": 432380,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Manresa"
+        },
+        {
+          "id": "alt_pirineu_aran",
+          "nom": "Alt Pirineu i Aran",
+          "lat": 42.3584,
+          "lon": 1.4628,
+          "poblacio": 77215,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Seu d'Urgell, la"
+        },
+        {
+          "id": "penedes",
+          "nom": "Penedès",
+          "lat": 41.3465,
+          "lon": 1.7014,
+          "poblacio": 525580,
+          "any_poblacio": 2025,
+          "font_id": "idescat_estimacions_poblacio",
+          "municipi_referencia_coordenades": "Vilafranca del Penedès"
+        }
+      ]
+    }
+  ]
+}

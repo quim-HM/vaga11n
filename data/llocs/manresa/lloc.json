@@ -1,0 +1,47 @@
+{
+  "_nota": "Versió de Manresa. Format: data/llocs/README.md. Les preguntes i fonts locals les genera tools/build_data.py (cadena fins a build_data_3.py); la resta d'aquest fitxer s'edita a mà.",
+  "id": "manresa",
+  "nom": "Manresa",
+  "tipus": "municipi",
+  "codis": {
+    "ine": "08113",
+    "idescat": "081136",
+    "comarca": "bages",
+    "provincia": "08",
+    "partit_judicial": "Manresa"
+  },
+  "joc1": {
+    "comunes": "totes",
+    "excloure": []
+  },
+  "joc2": {
+    "_nota": "Configuració de «Final de mes». any_base: any de referència (variació 0 %). etapes: sèries de data/series.json o de series.json d'aquesta carpeta; 'opcions' = alternatives per ordre de preferència (es fa servir la primera que tingui dades a l'any base i almenys 5 anys seguits). Si ordenar_per_pujada és true, les etapes s'ordenen per la variació final, de menys a més.",
+    "any_base": 2015,
+    "ordenar_per_pujada": true,
+    "etapes": [
+      { "serie": "salari_catalunya", "etiqueta": "Salaris" },
+      { "serie": "ipc_catalunya_aliments", "etiqueta": "Cistella" },
+      { "opcions": [
+        { "serie": "lloguer_manresa", "etiqueta": "Lloguer a Manresa" },
+        { "serie": "lloguer_catalunya", "etiqueta": "Lloguer a Catalunya" }
+      ] },
+      { "serie": "preu_habitatge_catalunya", "etiqueta": "Preu de l'habitatge" }
+    ]
+  },
+  "joc3": {
+    "_nota": "Territoris d'«Encén la vaga» (ids de data/geo/index.json). ciutat = \"\": sense barris, comença per la comarca.",
+    "ciutat": "08113",
+    "comarca": "bages",
+    "final": "ppcc"
+  },
+  "final": {
+    "difusio": {
+      "titol": "Canal de difusió",
+      "subtitol": "@COMITE_23N_BAGES",
+      "url": "https://t.me/COMITE_23N_BAGES",
+      "qr": "img/qr.png",
+      "mostrar": true
+    }
+  },
+  "textos": {}
+}

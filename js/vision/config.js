@@ -33,10 +33,10 @@ export const DEFAULTS = {
     min_cutoff: 1.6,
     beta: 0.6,
   },
+  // ciutat / comarca / final of «Encén la vaga»: the locality's defaults (data/llocs/<id>/lloc.json →
+  // joc3) are passed to loadConfig() as `base`; ciutat = "" starts the game at the comarca
   joc: {
     tema: "blau-groc-mes",
-    ciutat: "08113",
-    comarca: "bages",
     final: "ppcc",
   },
 };
@@ -73,10 +73,12 @@ export function applyUpdate(cfg, update) {
   return applied;
 }
 
-export function loadConfig(storage) {
+// key: localStorage key (one per locality, see web/js/lloc.js); base: defaults of this version
+export function loadConfig(storage, key = STORAGE_KEY, base = null) {
   const cfg = clone(DEFAULTS);
+  if (base) applyUpdate(cfg, base);
   try {
-    const saved = storage && storage.getItem(STORAGE_KEY);
+    const saved = storage && storage.getItem(key);
     if (saved) applyUpdate(cfg, JSON.parse(saved));
   } catch (e) {
     console.warn("[config] ignoring invalid saved configuration", e);
@@ -84,13 +86,13 @@ export function loadConfig(storage) {
   return cfg;
 }
 
-export function saveConfig(cfg, storage) {
+export function saveConfig(cfg, storage, key = STORAGE_KEY) {
   const subset = {};
   for (const [section, keys] of Object.entries(EDITABLE)) {
     subset[section] = {};
     for (const k of keys) if (cfg[section] && k in cfg[section]) subset[section][k] = cfg[section][k];
   }
-  storage.setItem(STORAGE_KEY, JSON.stringify(subset));
+  storage.setItem(key, JSON.stringify(subset));
 }
 
 export function publicConfig(cfg) {

@@ -6,12 +6,13 @@ import { loadTexts } from "./textos.js";
 import { applyTheme, DEFAULT_THEME } from "./temes.js";
 import { LocalHost } from "./host.js";
 import { WsLink } from "./link.js";
+import { scoped } from "./lloc.js";
 
 // ?servidor=1: legacy mode, the Python server (python -m vaga11n) runs the camera and the pose model.
 // Otherwise everything runs in this page: camera, pose model (MediaPipe in a worker) and settings.
-function createLink(params) {
+function createLink(params, data) {
   if (params.has("servidor")) return new WsLink(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
-  const host = new LocalHost({ sim: params.has("sim") });
+  const host = new LocalHost({ sim: params.has("sim"), final: data.final, joc: (data.lloc && data.lloc.joc3) || null });
   host.start().catch((e) => console.error("[vaga11n] host", e));
   return host;
 }
@@ -37,7 +38,7 @@ async function boot() {
   const data = await loadData();
   applyTheme(params.get("tema") || DEFAULT_THEME);
   await data.loadGeoLevels({});
-  const input = new Input({ sim: params.has("sim"), link: createLink(params) });
+  const input = new Input({ sim: params.has("sim"), link: createLink(params, data) });
   const app = new App(canvas, input, data);
   input.onServerMessage = (msg) => app.onServerMessage(msg);
   window.app = app; // handy for debugging from the console

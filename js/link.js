@@ -4,8 +4,9 @@
 // - ChannelLink: the operator page talking to the game window through a BroadcastChannel.
 // Every link exposes subscribe(fn) and send(obj); messages are plain objects. Pseudo-messages
 // {type:"_open"} / {type:"_close"} report the connection state.
+import { scoped } from "./lloc.js";
 
-export const CHANNEL = "vaga11n";
+export const CHANNEL = scoped("vaga11n");
 
 export class WsLink {
   constructor(url) {

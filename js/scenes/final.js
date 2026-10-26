@@ -12,12 +12,21 @@ function onField(fn) {
 }
 import { GAMES } from "../app.js";
 import { T } from "../textos.js";
+import { qrDataURL } from "../qr.js";
 
 const DUR_FULL = 30;
 const DUR_SHORT = 8;
 const RESTART_AFTER_S = 8;
 
 let qrImg = null;
+// The QR is drawn from the link (each locality has its own); a fixed image (qr) is only a fallback
+function qrSource(dif) {
+  if (dif.qr_propi) return dif.qr_propi;
+  if (dif.url) {
+    try { return qrDataURL(dif.url); } catch (e) { console.warn("QR", e); }
+  }
+  return dif.qr || null;
+}
 function loadQr(src) {
   if (!src) return;
   qrImg = new Image();
@@ -36,7 +45,7 @@ export default class Final {
     this.short = this.reason === "timeout" && this.played.length === 0;
     this.cfg = app.data.final || {};
     const dif = this.cfg.difusio || {};
-    loadQr(dif.qr_propi || dif.qr);
+    loadQr(qrSource(dif));
   }
 
   enter() {

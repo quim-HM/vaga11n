@@ -1,0 +1,107 @@
+[
+  {
+    "id": "lloguer_mitja_santpedor",
+    "enunciat": "Segons les dades del 2025, quin és el lloguer mitjà mensual d'un contracte nou a Santpedor?",
+    "unitat": "€/mes",
+    "valor": 594.03,
+    "any_referencia": 2025,
+    "ambit": "Santpedor",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana dels contractes d'habitatge nous amb fiança dipositada a l'INCASÒL durant tot l'any (període gener-desembre), municipi de Santpedor (codi 08192): 594,03 € amb 82 contractes. Comparació: Bages 566,26 € (2.627 contractes) i Catalunya 872,02 € (font incasol_fiances_supramunicipal). Mitjanes de 3 anys: renda de tots els contractes del trienni = Σ(renda × contractes) / Σ contractes.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 1200
+    },
+    "pas": 20,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "594,03 €. Al Bages, 566,26 €; a Catalunya, 872,02 €. La mitjana 2023–2025 és un 43,0 % més alta que la del 2014–2016, el trienni més barat.",
+    "nota": "Només contractes nous; no inclou els lloguers de contractes antics ni despeses com subministraments o comunitat. Mostra petita: 82 contractes el 2025 (101 el 2024, 100 el 2023); el valor anual oscil·la (592,84 €, 545,77 € i 594,03 €). Per això la variació es calcula amb mitjanes de 3 anys: 403,06 € (2014–2016, 363 contractes) i 576,39 € (2023–2025, 283 contractes). 2014–2016 és el trienni amb el lloguer nou més baix de la sèrie (des del 2007). Euros corrents: entre els mateixos triennis l'IPC general de Catalunya (mitjana anual) va pujar un 23,4 % (font ine_ipc). La mitjana catalana del 2025 té una discrepància interna en el recompte de contractes (vegeu series.json).",
+    "nota_curta": "Només contractes nous amb fiança dipositada (82 a Santpedor el 2025); no inclou despeses ni lloguers antics."
+  },
+  {
+    "id": "hores_setmana_smi_lloguer_santpedor",
+    "enunciat": "Segons les dades del 2025, quantes hores a la setmana cal treballar amb el salari mínim només per pagar el lloguer a Santpedor?",
+    "unitat": "hores",
+    "valor": 17.2,
+    "any_referencia": 2025,
+    "ambit": "Santpedor",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Càlcul propi: hores setmanals = lloguer setmanal / preu de l'hora de salari mínim. Lloguer setmanal = 594,03 €/mes × 12 / 52 = 137,08 € (lloguer mitjà dels contractes nous de 2025 a Santpedor, fiances INCASÒL). Hora d'SMI = 1.184 € × 14 pagues / 2.080 h (40 h × 52 setmanes) = 7,97 €/h bruts (Real Decreto 87/2025, BOE-A-2025-2576). Resultat: 17,2 h, el 43,0 % d'una setmana de 40 hores.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 56
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "setmana",
+    "revelacio": "Unes 17 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
+    "nota": "Salari mínim brut (abans de cotitzacions i retencions; amb el net calen més hores), 14 pagues i 2.080 h retribuïdes l'any. Lloguer mitjà dels contractes nous amb fiança dipositada a l'INCASÒL (no inclou lloguers antics ni despeses). Mostra petita: 82 contractes el 2025 (101 el 2024, 100 el 2023); el valor anual oscil·la (592,84 €, 545,77 € i 594,03 €). Amb la mitjana 2023–2025 (576,39 €) en surten 16,7 h, el mateix tram. Mateix mètode: Bages (566,26 €) 16,4 h; Catalunya (872,02 €) 25,3 h; el lloguer mitjà català del 2025 té una discrepància interna en el recompte de contractes (vegeu series.json). Fonts boe_smi i boe_smi_2025.",
+    "nota_curta": "Salari mínim brut del 2025 (14 pagues, 40 h setmanals) i lloguer mitjà dels contractes nous del 2025."
+  },
+  {
+    "id": "habitatges_buits_santpedor",
+    "enunciat": "Segons l'últim cens (2021), quin percentatge d'habitatges de Santpedor està buit?",
+    "unitat": "%",
+    "valor": 7.9,
+    "any_referencia": 2021,
+    "ambit": "Santpedor",
+    "font_id": "ine_censo2021_us",
+    "definicio": "Habitatges buits / habitatges totals: 258 / 3.282 (INE, Cens 2021, taula 59531 'Viviendas según su intensidad de uso', fila '08192 Santpedor'; l'INE els classifica a partir del consum elèctric).",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 30
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "casetes",
+    "revelacio": "El 7,9 % (a Catalunya, el 10,7 %): 258 habitatges. Són gairebé el doble dels contractes de lloguer nous signats a Santpedor el 2021 (140).",
+    "nota": "Mètode basat en el consum elèctric: els trams de la taula (baix consum; ús esporàdic entre 251 i 750 kWh/any) indiquen que els 'buits' són habitatges amb consum anual molt baix, però no s'ha consultat el document metodològic. Un habitatge buit no vol dir necessàriament disponible per llogar (obres, herències, venda, mal estat...). Dades actualitzades per l'INE el 22-11-2024; data de referència del cens: 2021. Bages (suma dels 21 municipis de la comarca que surten a la taula, de 30): 10.724 de 87.788, el 12,2 %. Contractes nous del 2021 a Santpedor: fiances INCASÒL (font incasol_fiances_municipis); 258 / 140 = 1,84.",
+    "nota_curta": "Estimació de l'INE pel consum elèctric; buit no vol dir disponible per llogar."
+  },
+  {
+    "id": "hpo_acabats_bages",
+    "enunciat": "Entre 2013 i 2025, quants habitatges de protecció oficial s'han acabat a tot el Bages, la comarca de Santpedor?",
+    "unitat": "habitatges",
+    "valor": 158,
+    "any_referencia": 2025,
+    "ambit": "Bages",
+    "font_id": "gencat_hpo",
+    "definicio": "Suma dels habitatges amb protecció oficial acabats (amb qualificació definitiva) als 30 municipis del Bages, anys 2013 a 2025 (Generalitat de Catalunya, conjunt de dades v8i4-fa4q; composició comarcal segons Idescat, EMEX). Mitjanes anuals: càlcul propi.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 400
+    },
+    "pas": 5,
+    "escala": "lineal",
+    "metafora": "edifici",
+    "revelacio": "158 en 13 anys, uns 12 l'any. Del 2002 al 2012 se n'havien acabat 2.045, uns 186 l'any. A Santpedor, 2 des del 2013.",
+    "nota": "S'ha pujat a la comarca perquè a Santpedor les xifres són massa petites per entendre-les: 2 acabats entre 2013 i 2025 i 17 entre 2002 i 2012. Del total del Bages entre 2013 i 2025, 107 són de Manresa. Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Tall: 2013, primer any complet després del rescat bancari del 2012. Santpedor no té objectius de solidaritat urbana al Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024); segons el mateix Pla, el registre de sol·licitants d'habitatge protegit tenia 38 sol·licituds de Santpedor el 2019 (mitjana 2017–2019: 33). No s'ha comprovat si Santpedor té un Pla local d'habitatge vigent.",
+    "nota_curta": "Suma dels 30 municipis del Bages; inclou HPO de lloguer i de venda."
+  },
+  {
+    "id": "llancaments_partit_judicial_manresa",
+    "enunciat": "Quants desnonaments s'han executat el 2025 als jutjats de Manresa, dels quals depèn Santpedor?",
+    "unitat": "desnonaments",
+    "valor": 249,
+    "any_referencia": 2025,
+    "ambit": "Partit judicial de Manresa",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Llançaments practicats (desnonaments executats; CGPJ, taula OUJII021) als jutjats de primera instància i instrucció núm. 1 a 8 de Manresa. El CGPJ compta un llançament per immoble amb canvi de possessió. Santpedor pertany al partit judicial de Manresa (codi 0802) segons la relació de municipis i partits judicials del Departament de Justícia (font gencat_partits_judicials).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 600
+    },
+    "pas": 10,
+    "escala": "lineal",
+    "metafora": "claus",
+    "revelacio": "249: gairebé 5 cada setmana, i 8 de cada 10 provenen d'un lloguer. Del 2013 al 2025, 4.808: més d'un cada dia.",
+    "nota": "L'àmbit és el partit judicial de Manresa (35 municipis, entre els quals Santpedor), no el municipi: el CGPJ no publica aquesta dada per municipis. Inclou també immobles no residencials. 2025: 198 per la Llei d'arrendaments urbans (79,5 %), 33 per execució hipotecària, 18 altres. Per setmana: 249 / 52 = 4,8; per dia: 4.808 / 4.748 dies = 1,01. La xifra anual ha baixat des dels 590 del 2013. Sèrie disponible des del 2013.",
+    "nota_curta": "Partit judicial de Manresa, del qual depèn Santpedor; inclou també locals i altres immobles."
+  }
+]

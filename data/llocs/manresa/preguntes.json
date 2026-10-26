@@ -1,0 +1,128 @@
+[
+  {
+    "id": "lloguer_mitja_manresa",
+    "enunciat": "Segons les dades del 2025, quin és el lloguer mitjà mensual d'un contracte nou a Manresa?",
+    "unitat": "€/mes",
+    "valor": 584.65,
+    "any_referencia": 2025,
+    "ambit": "Manresa",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana dels contractes d'habitatge nous amb fiança dipositada a l'INCASÒL durant tot l'any (període gener-desembre).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 1200
+    },
+    "pas": 20,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "584,65 €: un 70,5 % més que el 2014, quan era de 342,88 €. La mitjana catalana és de 872,02 €.",
+    "nota": "Només contractes nous; no inclou els lloguers de contractes antics ni despeses com subministraments o comunitat. 2014 és l'any amb el lloguer nou més baix de la sèrie (des del 2007). Euros corrents: entre 2014 i 2025 l'IPC general de Catalunya (mitjana anual) va pujar un 26,4 % (font ine_ipc). La mitjana catalana del 2025 té una discrepància interna en el recompte de contractes (vegeu series.json).",
+    "nota_curta": "Només contractes nous amb fiança dipositada; no inclou despeses ni lloguers antics."
+  },
+  {
+    "id": "lloguer_vs_renda_manresa",
+    "enunciat": "Del 2015 al 2024, la renda de les llars de Manresa ha pujat un 32 %. I el lloguer dels contractes nous, en quin percentatge ha pujat?",
+    "unitat": "%",
+    "valor": 60.3,
+    "any_referencia": 2024,
+    "ambit": "Manresa",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Càlcul propi: (lloguer 2024 / lloguer 2015 − 1) × 100 = (552,77 / 344,90 − 1) × 100; lloguer mitjà mensual dels contractes nous (fiances INCASÒL). Renda: renda neta mitjana per llar (INE, ADRH), 29.551 € (2015) → 38.934 € (2024), +31,8 %.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 120
+    },
+    "pas": 2,
+    "escala": "lineal",
+    "metafora": "barres",
+    "revelacio": "Un 60,3 %, gairebé el doble: de 344,90 € a 552,77 € al mes. Els preus en general (IPC de Catalunya) han pujat un 23,6 %.",
+    "nota": "El període 2015–2024 és el que cobreix l'Atles de renda de l'INE (any de meritació de la renda; font ine_adrh). La renda inclou totes les llars (propietàries i llogateres); el lloguer, només els contractes nous de cada any. Euros corrents. IPC general de Catalunya, mitjana anual (font ine_ipc).",
+    "nota_curta": "Euros corrents; renda neta de totes les llars (INE) i lloguer dels contractes nous."
+  },
+  {
+    "id": "hores_setmana_smi_lloguer_manresa",
+    "enunciat": "Segons les dades del 2025, quantes hores a la setmana cal treballar amb el salari mínim només per pagar el lloguer a Manresa?",
+    "unitat": "hores",
+    "valor": 16.9,
+    "any_referencia": 2025,
+    "ambit": "Manresa",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Càlcul propi: hores setmanals = lloguer setmanal / preu de l'hora de salari mínim. Lloguer setmanal = 584,65 €/mes × 12 / 52 = 134,92 € (lloguer mitjà dels contractes nous de 2025, fiances INCASÒL). Hora d'SMI = 1.184 € × 14 pagues / 2.080 h (40 h × 52 setmanes) = 7,97 €/h bruts (Real Decreto 87/2025, BOE-A-2025-2576). Resultat: 16,9 h, el 42,3 % d'una setmana de 40 hores.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 56
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "setmana",
+    "revelacio": "Unes 17 hores: tot el dilluns, tot el dimarts i una estona del dimecres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
+    "nota": "Salari mínim brut (abans de cotitzacions i retencions; amb el net calen més hores), 14 pagues i 2.080 h retribuïdes l'any. Lloguer mitjà dels contractes nous amb fiança dipositada a l'INCASÒL (no inclou lloguers antics ni despeses). Catalunya, mateix mètode: 872,02 € × 12 / 52 / 7,97 €/h = 25,3 h; el lloguer mitjà català del 2025 té una discrepància interna en el recompte de contractes (vegeu series.json). Amb els ingressos mitjans del treball declarats a l'IRPF a Manresa (29.221 €, 2024; inclouen sous, atur i pensions; fonts aeat_irpf_municipis i boe_lirpf) en calen unes 9,6 a la setmana. El 2014 amb el salari mínim en calien 18,2: des d'aleshores l'SMI ha pujat més que el lloguer nou (fonts boe_smi i boe_smi_2025).",
+    "nota_curta": "Salari mínim brut del 2025 (14 pagues, 40 h setmanals) i lloguer mitjà dels contractes nous del 2025."
+  },
+  {
+    "id": "habitatges_buits_manresa",
+    "enunciat": "Segons l'últim cens (2021), quin percentatge d'habitatges de Manresa està buit?",
+    "unitat": "%",
+    "valor": 13.7,
+    "any_referencia": 2021,
+    "ambit": "Manresa",
+    "font_id": "ine_censo2021_us",
+    "definicio": "Habitatges buits / habitatges totals: 5.517 / 40.136 (INE, Cens 2021, taula 59531 'Viviendas según su intensidad de uso'; l'INE els classifica a partir del consum elèctric).",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 60
+    },
+    "pas": 0.5,
+    "escala": "lineal",
+    "metafora": "casetes",
+    "revelacio": "El 13,7 % (a Catalunya, el 10,7 %): 5.517 habitatges. Són el triple dels contractes de lloguer nous signats a Manresa el 2021 (1.814).",
+    "nota": "Mètode basat en el consum elèctric: els trams de la taula (baix consum; ús esporàdic entre 251 i 750 kWh/any) indiquen que els 'buits' són habitatges amb consum anual molt baix, però no s'ha consultat el document metodològic. Un habitatge buit no vol dir necessàriament disponible per llogar (obres, herències, venda, mal estat...). Dades actualitzades per l'INE el 22-11-2024; data de referència del cens: 2021. Contractes nous del 2021: fiances INCASÒL (font incasol_fiances_municipis); 5.517 / 1.814 = 3,04.",
+    "nota_curta": "Estimació de l'INE pel consum elèctric; buit no vol dir disponible per llogar."
+  },
+  {
+    "id": "hpo_acabats_manresa",
+    "enunciat": "Entre 2013 i 2025, quants habitatges de protecció oficial s'han acabat a Manresa?",
+    "unitat": "habitatges",
+    "valor": 107,
+    "any_referencia": 2025,
+    "ambit": "Manresa",
+    "font_id": "gencat_hpo",
+    "definicio": "Suma dels habitatges amb protecció oficial acabats (amb qualificació definitiva) al municipi de Manresa, anys 2013 a 2025 (Generalitat de Catalunya, conjunt de dades v8i4-fa4q). Mitjanes anuals: càlcul propi.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 400
+    },
+    "pas": 5,
+    "escala": "lineal",
+    "metafora": "edifici",
+    "revelacio": "107 en 13 anys. El Pla territorial d'habitatge (2024) en fixa 495 per al 2025–2029; el Pla Local d'Habitatge vigent és encara el 2017–2022.",
+    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Les xifres d'un sol municipi depenen de poques promocions i varien molt d'un any a l'altre. Entre 2002 i 2012 se n'havien acabat 935 (uns 85 l'any). A tot Catalunya: 5.425 acabats l'any de mitjana (2002–2012) i 1.438 (2013–2025). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), objectius de solidaritat urbana de Manresa: 2.871 habitatges destinats a polítiques socials de 31.302 principals (9,2 %) a la situació inicial; nous a promoure per quinquenni (2025–2029, 2030–2034, 2035–2039, 2040–2044): 495, 981, 1.187, 260 (total 2.923), per arribar al 15 % de l'article 73 de la Llei 18/2007. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social, allotjaments dotacionals o habitatges cedits en masoveria urbana), de manera que la comparació és orientativa. Registre de sol·licitants d'habitatge protegit a Manresa (dades del Pla): 1.153 el 2019 (mitjana 2017–2019: 958). Pla Local d'Habitatge: segons la llista oficial «Plans vigents de l'Ajuntament de Manresa» (font manresa_plans_vigents, fitxer modificat el 31-07-2026, consultat el 25-10-2026), el pla d'habitatge vigent és el 2017-2022, aprovat el 15-06-2017; a data de consulta no se n'ha aprovat cap de nou (la llista no n'inclou cap de posterior). El mateix pla preveia una vigència de sis anys des de l'aprovació, és a dir, fins al 15-06-2023 (font manresa_plh_2017_2022).",
+    "nota_curta": "Objectiu del Pla territorial (Decret 408/2024). PLH: llista de plans vigents de l'Ajuntament, consulta 25-10-2026."
+  },
+  {
+    "id": "llancaments_partit_judicial_manresa",
+    "enunciat": "Quants desnonaments s'han executat el 2025 als jutjats de Manresa?",
+    "unitat": "desnonaments",
+    "valor": 249,
+    "any_referencia": 2025,
+    "ambit": "Partit judicial de Manresa",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Llançaments practicats (desnonaments executats; CGPJ, taula OUJII021) als jutjats de primera instància i instrucció núm. 1 a 8 de Manresa. El CGPJ compta un llançament per immoble amb canvi de possessió.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 600
+    },
+    "pas": 10,
+    "escala": "lineal",
+    "metafora": "claus",
+    "revelacio": "249: gairebé 5 cada setmana, i 8 de cada 10 provenen d'un lloguer. Del 2013 al 2025, 4.808: més d'un cada dia.",
+    "nota": "L'àmbit és el partit judicial (Manresa i els municipis que en depenen), no només el municipi. Inclou també immobles no residencials. 2025: 198 per la Llei d'arrendaments urbans (79,5 %), 33 per execució hipotecària, 18 altres. Per setmana: 249 / 52 = 4,8; per dia: 4.808 / 4.748 dies = 1,01. La xifra anual ha baixat des dels 590 del 2013. Sèrie disponible des del 2013.",
+    "nota_curta": "Partit judicial de Manresa, no només el municipi; inclou també locals i altres immobles."
+  }
+]

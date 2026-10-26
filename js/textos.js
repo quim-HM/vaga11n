@@ -19,6 +19,11 @@ export async function loadTexts() {
   }
 }
 
+// Locality overrides (data/llocs/<id>/lloc.json → textos) win over data/textos.json
+export function addTexts(extra) {
+  if (extra && typeof extra === "object") overrides = { ...overrides, ...extra };
+}
+
 export function T(key, fallback = "", vars = null) {
   const has = (k) => Object.prototype.hasOwnProperty.call(overrides, k) && typeof overrides[k] === "string";
   let s = mouseMode && has(key + ".ratoli") ? overrides[key + ".ratoli"] : has(key) ? overrides[key] : fallback;

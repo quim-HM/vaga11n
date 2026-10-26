@@ -1,7 +1,11 @@
-// Offline copy of the game (service worker). tools/build_web.py fills in VERSION and ASSETS when it
-// builds dist/; a new build changes VERSION, so browsers fetch the new files on the next visit.
-// Cache-first: once loaded, the installation keeps working without internet at the venue.
-const VERSION = "336d511ec3fe";
+// Offline copy of the game (service worker). tools/build_web.py fills in VERSION, LLOC, SKIP and
+// ASSETS when it builds dist/; a new build changes VERSION, so browsers fetch the new files on the
+// next visit. Cache-first: once loaded, the installation keeps working without internet at the venue.
+// Several versions (one per locality) can live on one origin, e.g. /vaga11n/ and /vaga11n/santpedor/:
+// each one names its caches with its locality and never touches the folders of the others (SKIP).
+const VERSION = "01d0778f2b06";
+const LLOC = "manresa";
+const SKIP = ["santpedor", "valles-oriental"];
 const ASSETS = [
 "./",
 "css/style.css",
@@ -73,7 +77,13 @@ const ASSETS = [
 "data/geo/vistes.json",
 "data/INFORME_DADES.md",
 "data/joc2.json",
-"data/preguntes.json",
+"data/llocs/index.json",
+"data/llocs/manresa/fonts.json",
+"data/llocs/manresa/lloc.json",
+"data/llocs/manresa/preguntes.json",
+"data/llocs/manresa/series.json",
+"data/llocs/README.md",
+"data/preguntes_comunes.json",
 "data/series/despesa_aliments_llar_catalunya.csv",
 "data/series/ipc_catalunya_aliments.csv",
 "data/series/ipc_catalunya_general.csv",
@@ -108,6 +118,7 @@ const ASSETS = [
 "js/icons.js",
 "js/input.js",
 "js/link.js",
+"js/lloc.js",
 "js/main.js",
 "js/qr.js",
 "js/scenes/attract.js",
@@ -137,7 +148,10 @@ const ASSETS = [
 "vendor/qrcode/qrcode.mjs",
 "vendor/README.md"
 ];
-const CACHE = `vaga11n-${VERSION}`;
+const PREFIX = `vaga11n-${LLOC}-`;
+const CACHE = PREFIX + VERSION;
+// caches of the first published version (before localities): "vaga11n-<12 hex>"
+const LEGACY = /^vaga11n-[0-9a-f]{12}$/;
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
@@ -150,14 +164,23 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith("vaga11n-") && k !== CACHE) await caches.delete(k);
+    for (const k of await caches.keys()) if ((k.startsWith(PREFIX) && k !== CACHE) || LEGACY.test(k)) await caches.delete(k);
     await self.clients.claim();
   })());
 });
 
+// Requests inside this version's folder, excluding the sub-folders of other versions
+function ours(url) {
+  if (url.origin !== self.location.origin) return false;
+  const scope = new URL(self.registration.scope).pathname;
+  if (!url.pathname.startsWith(scope)) return false;
+  const rest = url.pathname.slice(scope.length);
+  return !SKIP.some((d) => rest === d || rest.startsWith(d + "/"));
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  if (req.method !== "GET" || !ours(new URL(req.url))) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(req, { ignoreSearch: true });

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "incasol_fiances_municipis",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica (Secretaria d'Habitatge) / INCASÒL",
+    "titol": "Preu mitjà del lloguer d'habitatges per municipi (fiances de lloguer dipositades a l'INCASÒL) – conjunt de dades qww9-bvhh",
+    "titol_curt": "Fiances de lloguer per municipi (INCASÒL)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/qww9-bvhh.csv?codi_territorial=08192&$limit=5000&$order=any,periode",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Conjunt de dades actualitzat el 30-7-2026; última dada: 1r trimestre de 2026. Descripció oficial: explotació estadística censal del registre de fiances de lloguer dipositades a l'INCASÒL (contractes nous). Santpedor: 82 contractes el 2025. Còpia: data/raw/llocs/santpedor/fiances_santpedor.csv (metadades: data/raw/llocs/santpedor/fiances_municipis_metadades.json)."
+  },
+  {
+    "id": "ine_censo2021_us",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Censo de Población y Viviendas 2021 – Viviendas según su intensidad de uso (taula 59531)",
+    "titol_curt": "Cens 2021: habitatges segons l'ús (INE)",
+    "url": "https://www.ine.es/jaxi/files/tpx/es/csv_bdsc/59531.csv?nocab=1",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Fitxer complet tal com es va baixar (6,35 MB; SHA-256 8fccd6713f3940a01e3a74c0394a93f5395500257ad328415c301afc6d0ef7af), desat comprimit amb gzip: data/raw/llocs/santpedor/ine_censo2021_59531.csv.gz. Files usades: '08192 Santpedor', '09 Cataluña' i els municipis del Bages. Nota de la taula: dades actualitzades el 22-11-2024. Pàgina de consulta: https://www.ine.es/jaxi/Tabla.htm?tpx=59531&L=0"
+  },
+  {
+    "id": "ine_adrh",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Atlas de Distribución de Renta de los Hogares – Indicadores de renta media y mediana (Barcelona, taula 30896); sèrie ADRH101922 'Santpedor. Renta neta media por hogar'",
+    "titol_curt": "Atles de distribució de la renda de les llars (INE)",
+    "url": "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/ADRH101922?nult=30",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Sèrie municipal localitzada filtrant la taula 30896 pel municipi (https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/30896?tv=19:5368&nult=20; existeix a més la del districte 01, ADRH71308). També s'ha baixat ADRH101923 (renda neta mitjana per persona). Còpies: data/raw/llocs/santpedor/ine_adrh_santpedor_hogar.json, ine_adrh_santpedor_persona.json i ine_adrh_30896_santpedor_municipi.json. No s'usa en cap pregunta de Santpedor (vegeu docs/llocs/santpedor_preguntes.md, plantilla C2)."
+  },
+  {
+    "id": "gencat_ptsh_2024",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica",
+    "titol": "Pla territorial sectorial d'habitatge de Catalunya (octubre 2024), aprovat pel Decret 408/2024, de 22 d'octubre",
+    "titol_curt": "Pla territorial sectorial d'habitatge 2024 (Generalitat)",
+    "url": "https://www.gencat.cat/territori/transparencia/normativa_tramit/pla-territorial-sectorial-habitatge/20241011-pla-territorial-sectorial-habitatge.pdf",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Santpedor no figura a la taula d'objectius quinquennals de solidaritat urbana. Taula del registre de sol·licitants d'habitatge amb protecció oficial: Santpedor, població 7.554, sistema urbà Pla del Bages, 38 sol·licituds el 2019 i 33 de mitjana 2017–2019. El PDF original fa 165 MB: es conserva el text complet extret (data/raw/pdf/gencat_ptsh_2024.txt) i un extracte de pàgines (data/raw/pdf/gencat_ptsh_2024_extracte.pdf)."
+  },
+  {
+    "id": "gencat_partits_judicials",
+    "organisme": "Generalitat de Catalunya – Departament de Justícia i Qualitat Democràtica (Catàleg Tècnic de Dades)",
+    "titol": "Relació Municipis i Partit Judicial de Catalunya (conjunt de dades 772x-hgsh) i Partits judicials de Catalunya (95tc-3cti)",
+    "titol_curt": "Partits judicials per municipi (Departament de Justícia)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/772x-hgsh.csv?$limit=5000",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Santpedor (codi Idescat 081923) pertany al partit judicial 2, Manresa (codi CTEAJE 0802, seu al municipi 081136), que agrupa 35 municipis. Dades actualitzades el 2021-09-22. Llista de partits: https://analisi.transparenciacatalunya.cat/resource/95tc-3cti.csv?$limit=5000. Còpies: data/raw/llocs/santpedor/gencat_municipis_partit_judicial.csv, gencat_partits_judicials.csv i les metadades *_metadades.json."
+  }
+]

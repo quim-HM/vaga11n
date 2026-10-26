@@ -2,7 +2,8 @@
 <html lang="ca">
 <head>
 <meta charset="utf-8">
-<title>Operador · 11N</title>
+  <meta name="vaga11n-lloc" content="manresa">
+<title>Operador · 11N · Manresa</title>
 <style>
   @font-face { font-family: "Archivo"; src: url("fonts/Archivo-Variable.ttf") format("truetype"); font-weight: 100 900; font-stretch: 62% 125%; }
   body { font-family: "Archivo", Arial, sans-serif; background: #FFFFFF; color: #14183D; margin: 0; padding: 16px 24px; }
@@ -25,7 +26,7 @@
 </style>
 </head>
 <body>
-<h1>Pàgina d'operador · calibratge i depuració</h1>
+<h1>Pàgina d'operador · calibratge i depuració<span id="llocNom" style="color:#C8102E"></span></h1>
 <p style="margin:0 0 12px">La imatge de la càmera només es mostra aquí, es processa en memòria i no es desa enlloc. Tanca aquesta pàgina durant el funcionament normal.
 <span class="local-only">Aquesta pàgina parla amb la finestra del joc oberta en aquest mateix navegador (tecla <kbd>O</kbd> al joc).</span></p>
 <div class="row">
@@ -87,7 +88,7 @@
       <option value="groc-vermell-mes">Groc i vermell · camp groc (com el cartell)</option>
       <option value="groc-vermell-menys">Groc i vermell · paper i disc del logo</option>
     </select>
-    <label>Ciutat (nivell 1 d'«Encén la vaga»)</label>
+    <label>Ciutat (nivell 1 d'«Encén la vaga»; sense ciutat: comarca → Catalunya → territori final)</label>
     <select id="ciutat"></select>
     <label>Comarca (nivell 2)</label>
     <select id="comarca"></select>
@@ -124,6 +125,8 @@
 // Two modes: in-browser (default) talks to the game window through a BroadcastChannel; ?servidor=1
 // talks to the Python server (python -m vaga11n) through its WebSocket, as before.
 import { ChannelLink, WsLink } from "./js/link.js";
+import { LLOC_DIR } from "./js/lloc.js";
+import { loadFinalConfig } from "./js/data.js";
 
 const $ = (id) => document.getElementById(id);
 const SERVER = new URLSearchParams(location.search).has("servidor");
@@ -146,6 +149,7 @@ async function loadGeoIndex() {
     const idx = await (await fetch("data/geo/index.json", { cache: "no-store" })).json();
     const fill = (id, list) => { $(id).innerHTML = (list || []).map((x) => `<option value="${x.id}">${x.nom}${x.n ? " (" + x.n + ")" : ""}</option>`).join(""); };
     fill("ciutat", idx.ciutats); fill("comarca", idx.comarques); fill("final", idx.final);
+    $("ciutat").insertAdjacentHTML("afterbegin", '<option value="">(cap: comença per la comarca)</option>');
     // choosing a city pre-selects its comarca (still editable)
     $("ciutat").addEventListener("change", () => {
       const c = (idx.ciutats || []).find((x) => x.id === $("ciutat").value);
@@ -163,7 +167,7 @@ function showDifusio(d) {
 }
 async function loadDifusio() {
   try {
-    const f = await (await fetch("data/final.json", { cache: "no-store" })).json();
+    const f = await loadFinalConfig();
     showDifusio(f.difusio || {});
   } catch (e) { console.warn(e); }
 }
@@ -230,6 +234,9 @@ $("saveDif").addEventListener("click", () => {
   if (SERVER) setTimeout(loadDifusio, 600);
 });
 loadGeoIndex().then(() => send({ cmd: "get_config" }));
+fetch(`${LLOC_DIR}lloc.json`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((l) => {
+  if (l && l.nom) { $("llocNom").textContent = ` · ${l.nom}`; document.title = `Operador · 11N · ${l.nom}`; }
+}).catch((e) => console.warn("lloc.json", e));
 if (SERVER) {
   loadDifusio();
   $("video").src = "debug.mjpg";

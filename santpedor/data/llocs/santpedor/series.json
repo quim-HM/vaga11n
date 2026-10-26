@@ -1,0 +1,16 @@
+[
+  {
+    "id": "lloguer_santpedor",
+    "titol": "Lloguer mitjà dels contractes nous a Santpedor (mitjana de 3 anys)",
+    "unitat": "€/mes",
+    "ambit": "Santpedor",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, municipi de Santpedor (codi 08192), en mitjana mòbil de 3 anys: el valor de cada any és la renda mitjana de tots els contractes signats aquell any i els dos anteriors, Σ(renda anual × contractes) / Σ contractes, a partir de les dades anuals 'gener-desembre' publicades per la font. Primer valor: 2009 (2007–2009).",
+    "confianca": "mitjana",
+    "notes": "Mitjana de 3 anys perquè Santpedor té pocs contractes l'any (entre 49 i 154; 82 el 2025) i el valor anual oscil·la. Cada punt agrupa com a mínim 275 contractes. Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous. No s'inclou el 2026 (només el primer trimestre, 18 contractes). La sèrie compartida lloguer_bages (comarca) és l'alternativa amb mostra gran.",
+    "anys_parcials": [],
+    "fitxer": "llocs/santpedor/series/lloguer_santpedor.csv",
+    "subjecte": "el lloguer mitjà dels contractes nous a Santpedor (mitjana de 3 anys)",
+    "etiqueta": "Lloguer a Santpedor"
+  }
+]

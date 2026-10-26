@@ -1,0 +1,160 @@
+[
+  {
+    "id": "lloguer_manresa",
+    "titol": "Lloguer mitjà dels contractes nous a Manresa",
+    "unitat": "€/mes",
+    "ambit": "Manresa",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, municipi de Manresa (codi 08113). Valor anual: període gener-desembre publicat per la font. 2026: només el primer trimestre (gener-març).",
+    "confianca": "alta",
+    "notes": "Valors anuals publicats directament per a l'agregat 'gener-desembre' (no calculats a partir dels trimestres). Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous signats en l'any. El conjunt de dades municipal comença el 2007 per a Manresa. Contractes el 2025: 1468. 2026 és parcial (només gener-març, 373 contractes).",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/lloguer_manresa.csv"
+  },
+  {
+    "id": "lloguer_bages",
+    "titol": "Lloguer mitjà dels contractes nous al Bages",
+    "unitat": "€/mes",
+    "ambit": "Bages (comarca)",
+    "font_id": "incasol_fiances_supramunicipal",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, comarca del Bages. Valor anual: període gener-desembre publicat per la font. 2026: només el primer trimestre.",
+    "confianca": "alta",
+    "notes": "Valors anuals publicats directament per a l'agregat 'gener-desembre' (no calculats a partir dels trimestres). Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous signats en l'any. Contractes el 2025: 2627 (coincideix amb la suma dels quatre trimestres). Delimitació comarcal segons la font; no s'ha verificat si els anys anteriors a la creació del Moianès (2015) s'han recalculat amb la delimitació comarcal actual.",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/lloguer_bages.csv"
+  },
+  {
+    "id": "lloguer_catalunya",
+    "titol": "Lloguer mitjà dels contractes nous a Catalunya",
+    "unitat": "€/mes",
+    "ambit": "Catalunya",
+    "font_id": "incasol_fiances_supramunicipal",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, total de Catalunya. Valor anual: període gener-desembre publicat per la font. 2026: només el primer trimestre.",
+    "confianca": "mitjana",
+    "notes": "Valors anuals publicats directament per a l'agregat 'gener-desembre' (no calculats a partir dels trimestres). Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous signats en l'any.  ATENCIÓ: per al 2025 l'agregat anual publicat indica 80.309 contractes, però la suma dels quatre trimestres és 108.057 i la mitjana ponderada dels trimestres dona 860,67 €/mes (vs. 872,02 € publicat). S'ha mantingut el valor anual publicat; la discrepància s'hauria de confirmar amb la Secretaria d'Habitatge.",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/lloguer_catalunya.csv"
+  },
+  {
+    "id": "renda_llar_manresa",
+    "titol": "Renda neta mitjana per llar a Manresa",
+    "unitat": "€/any",
+    "ambit": "Manresa",
+    "font_id": "ine_adrh",
+    "definicio": "Renda neta mitjana anual per llar (€), municipi de Manresa. INE, Atles de distribució de la renda de les llars (ADRH), sèrie ADRH102076. L'any és el de meritació de la renda (dades fiscals), no el de publicació.",
+    "confianca": "alta",
+    "notes": "Renda neta mitjana per persona 2024: 15632 € (sèrie ADRH102077). Primer any disponible: 2015.",
+    "anys_parcials": [],
+    "fitxer": "series/renda_llar_manresa.csv"
+  },
+  {
+    "id": "salari_catalunya",
+    "titol": "Guany mitjà anual per persona treballadora a Catalunya",
+    "unitat": "€/any",
+    "ambit": "Catalunya",
+    "font_id": "ine_eaes",
+    "definicio": "Guany brut mitjà anual per persona treballadora (dones i homes), Catalunya. INE, Enquesta anual d'estructura salarial, taula 28191, sèrie EAES687 (mitjana).",
+    "confianca": "alta",
+    "notes": "Mediana a la mateixa taula (sèrie EAES684). Últim any publicat: 2024. Salari brut, inclou pagues extraordinàries.",
+    "anys_parcials": [],
+    "fitxer": "series/salari_catalunya.csv"
+  },
+  {
+    "id": "ipc_catalunya_general",
+    "titol": "Preus de consum a Catalunya: índex general (IPC)",
+    "unitat": "índex (base 2025 = 100)",
+    "ambit": "Catalunya",
+    "font_id": "ine_ipc",
+    "definicio": "Mitjana anual de l'índex general de preus de consum (IPC), Catalunya, base 2025 = 100. INE, taula 76150, sèrie IPC319789. 2026: mitjana pròpia dels mesos publicats (gener-setembre, sèrie mensual IPC294108), any parcial.",
+    "confianca": "alta",
+    "notes": "Variació anual publicada a la sèrie IPC319788 (p. ex. 2022: +8,0 %). Els índexs d'anys anteriors a la base estan enllaçats per l'INE.",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/ipc_catalunya_general.csv"
+  },
+  {
+    "id": "ipc_catalunya_aliments",
+    "titol": "Preus dels aliments i begudes no alcohòliques (IPC)",
+    "unitat": "índex (base 2025 = 100)",
+    "ambit": "Catalunya",
+    "font_id": "ine_ipc",
+    "definicio": "Mitjana anual de l'índex de preus de consum (IPC) del grup aliments i begudes no alcohòliques (ECOICOP v2), Catalunya, base 2025 = 100. INE, taula 76150, sèrie IPC319791. 2026: mitjana pròpia de gener-setembre (sèrie mensual IPC294112), any parcial.",
+    "confianca": "alta",
+    "notes": "Variació anual publicada a la sèrie IPC319790 (2022: +10,3 %; 2023: +10,6 %).",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/ipc_catalunya_aliments.csv"
+  },
+  {
+    "id": "smi",
+    "titol": "Salari mínim interprofessional mensual",
+    "unitat": "€/mes (14 pagues)",
+    "ambit": "Espanya",
+    "font_id": "boe_smi",
+    "definicio": "Quantia mensual del salari mínim interprofessional (SMI) en 14 pagues, fixada pel reial decret anual corresponent. Per a cada any, el valor del decret que fixa l'SMI d'aquell any.",
+    "confianca": "alta",
+    "notes": "2021: el decret fixa 965 € amb efectes de l'1 de setembre al 31 de desembre de 2021; de gener a agost es va mantenir la quantia de 2020 (950 €) per pròrroga (no s'ha consultat el text de la pròrroga). No s'han pogut localitzar amb l'API del BOE els decrets anteriors a 2011, per això la sèrie comença el 2011 (2005–2010 queden sense dada). Detall dels decrets: 2011: 641,40 € (Real Decreto 1795/2010, BOE-A-2010-20150); 2012: 641,40 € (Real Decreto 1888/2011, BOE-A-2011-20645, vigència de l1 de gener – 31 de desembre de 2012); 2013: 645,30 € (Real Decreto 1717/2012, BOE-A-2012-15766, vigència de l1 de gener – 31 de desembre de 2013); 2014: 645,30 € (Real Decreto 1046/2013, BOE-A-2013-13764, vigència de l1 de gener – 31 de desembre de 2014); 2015: 648,60 € (Real Decreto 1106/2014, BOE-A-2014-13518, vigència de l1 de gener – 31 de desembre de 2015); 2016: 655,20 € (Real Decreto 1171/2015, BOE-A-2015-14273, vigència de l1 de gener – 31 de desembre de 2016); 2017: 707,70 € (Real Decreto 742/2016, BOE-A-2016-12598); 2018: 735,90 € (Real Decreto 1077/2017, BOE-A-2017-15848); 2019: 900,00 € (Real Decreto 1462/2018, BOE-A-2018-17773, vigència de l1 de gener – 31 de desembre de 2019); 2020: 950,00 € (Real Decreto 231/2020, BOE-A-2020-1652, vigència de l1 de gener – 31 de desembre de 2020); 2021: 965,00 € (Real Decreto 817/2021, BOE-A-2021-15770, vigència de l1 de setembre – 31 de desembre de 2021); 2022: 1.000,00 € (Real Decreto 152/2022, BOE-A-2022-2851, vigència de l1 de gener – 31 de desembre de 2022); 2023: 1.080,00 € (Real Decreto 99/2023, BOE-A-2023-3982, vigència de l1 de gener – 31 de desembre de 2023); 2024: 1.134,00 € (Real Decreto 145/2024, BOE-A-2024-2251); 2025: 1.184,00 € (Real Decreto 87/2025, BOE-A-2025-2576, vigència de l1 de gener – 31 de desembre de 2025); 2026: 1.221,00 € (Real Decreto 126/2026, BOE-A-2026-3815, vigència de l1 de gener – 31 de desembre de 2026)",
+    "anys_parcials": [],
+    "fitxer": "series/smi.csv"
+  },
+  {
+    "id": "despesa_aliments_llar_catalunya",
+    "titol": "Despesa mitjana per llar en aliments i begudes no alcohòliques a Catalunya",
+    "unitat": "€/any",
+    "ambit": "Catalunya",
+    "font_id": "ine_epf",
+    "definicio": "Despesa mitjana anual per llar (€ corrents) en el grup aliments i begudes no alcohòliques, Catalunya. INE, Enquesta de pressupostos familiars (base 2016), taula 73991, sèrie EPF565481.",
+    "confianca": "alta",
+    "notes": "Sèrie base 2016 (2016 en endavant); les dades 2006–2015 (base 2006) no s'hi han inclòs per canvi de metodologia.",
+    "anys_parcials": [],
+    "fitxer": "series/despesa_aliments_llar_catalunya.csv"
+  },
+  {
+    "id": "llancaments_pj_manresa",
+    "titol": "Llançaments practicats al partit judicial de Manresa",
+    "unitat": "llançaments/any",
+    "ambit": "Partit judicial de Manresa",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Total de llançaments practicats pels jutjats de primera instància i instrucció núm. 1 a 8 de Manresa (suma dels 8 òrgans). CGPJ, base de dades d'estadística judicial (PC-Axis), taula OUJII021 (llançaments practicats).",
+    "confianca": "alta",
+    "notes": "La variable no té dades (zeros) abans del 2013 per a aquests òrgans, per això la sèrie comença el 2013. Desglossament 2025: execució hipotecària 33, Llei d'arrendaments urbans 198, altres 18. Un llançament per immoble (inclou immobles no residencials).",
+    "anys_parcials": [],
+    "fitxer": "series/llancaments_pj_manresa.csv"
+  },
+  {
+    "id": "preu_habitatge_catalunya",
+    "titol": "Preu de l'habitatge a Catalunya: índex general (IPV)",
+    "unitat": "índex (base 2025 = 100)",
+    "ambit": "Catalunya",
+    "font_id": "ine_ipv",
+    "definicio": "Mitjana anual de l'índex de preus d'habitatge (IPV) general (habitatge nou i de segona mà), Catalunya. INE, taula 80271, sèrie IPV1220. L'INE publica actualment l'índex en base 2025 = 100 (no 2015 = 100). 2026: mitjana pròpia dels 2 trimestres publicats (sèrie trimestral IPV1594), any parcial.",
+    "confianca": "alta",
+    "notes": "Índex de preus de compravenda (transaccions); no mesura el preu en euros. Variació anual publicada a la sèrie IPV1223 (p. ex. 2012: -15,8 %, 2025: +11,3 %). Primer any disponible: 2007.",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/preu_habitatge_catalunya.csv"
+  },
+  {
+    "id": "preu_habitatge_manresa",
+    "titol": "Valor taxat mitjà de l'habitatge lliure a Manresa",
+    "unitat": "€/m²",
+    "ambit": "Manresa",
+    "font_id": "mivau_valor_tasat",
+    "definicio": "Valor taxat mitjà de l'habitatge lliure (total, qualsevol antiguitat) a Manresa, en €/m². Ministeri d'Habitatge i Agenda Urbana, taula de municipis de més de 25.000 habitants. Valor anual: mitjana simple dels quatre trimestres (càlcul propi). 2026: només els trimestres publicats, any parcial.",
+    "confianca": "mitjana",
+    "notes": "Basat en taxacions (no en preus de venda); entre 95 i 504 taxacions per trimestre a Manresa. La mitjana anual no està ponderada pel nombre de taxacions. El format de la taula canvia el 2010 (vegeu data/raw/extract_pdf_xls.py).",
+    "anys_parcials": [
+      2026
+    ],
+    "fitxer": "series/preu_habitatge_manresa.csv"
+  }
+]

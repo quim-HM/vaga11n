@@ -1,0 +1,90 @@
+[
+  {
+    "id": "incasol_fiances_supramunicipal",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica (Secretaria d'Habitatge) / INCASÒL",
+    "titol": "Preu mitjà del lloguer d'habitatges per àmbits supramunicipals – conjunt de dades hepw-33ik",
+    "titol_curt": "Fiances de lloguer per comarca i Catalunya (INCASÒL)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/hepw-33ik.csv?ambit_territorial=Comarca&nom_territori=Vall%C3%A8s%20Oriental&$limit=5000&$order=any,periode",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Conjunt de dades actualitzat el 30-7-2026; última dada: 1r trimestre de 2026. Comarca del Vallès Oriental (codi 41), sèrie des del 2005. També s'usa el total de Catalunya (?ambit_territorial=Catalunya, consultat el 25-10-2026). Còpies: data/raw/llocs/valles-oriental/fiances_valles_oriental.csv (metadades: data/raw/llocs/valles-oriental/fiances_supramunicipal_metadades.json) i data/raw/fiances_catalunya.csv. Discrepància detectada en el recompte anual de contractes de Catalunya 2025 (vegeu la sèrie lloguer_catalunya)."
+  },
+  {
+    "id": "idescat_rfdbc",
+    "organisme": "Institut d'Estadística de Catalunya (Idescat)",
+    "titol": "Renda disponible bruta de les llars territorial. RFDB i RFDB per habitant. Revisió estadística 2024 (API de taules v2, rfdbc/21181/25017)",
+    "titol_curt": "Renda disponible de les llars per comarca (Idescat)",
+    "url": "https://api.idescat.cat/taules/v2/rfdbc/21181/25017/com/data?lang=ca",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Comarques i Aran i total de Catalunya (…/cat/data?lang=ca), 2010–2023; 2023 provisional. Indicador: renda familiar disponible bruta per habitant (€). Dades actualitzades el 29-4-2026. Còpies: data/raw/llocs/valles-oriental/idescat_rfdbc_21181_com.json i data/raw/llocs/valles-oriental/idescat_rfdbc_21181_cat.json."
+  },
+  {
+    "id": "ine_censo2021_us",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Censo de Población y Viviendas 2021 – Viviendas según su intensidad de uso (taula 59531)",
+    "titol_curt": "Cens 2021: habitatges segons l'ús (INE)",
+    "url": "https://www.ine.es/jaxi/files/tpx/es/csv_bdsc/59531.csv?nocab=1",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Fitxer complet tal com s'ha descarregat, comprimit amb gzip: data/raw/llocs/valles-oriental/ine_censo2021_59531.csv.gz. Hi surten 32 dels 38 municipis del Vallès Oriental. Nota de la taula: dades actualitzades el 22-11-2024. Pàgina de consulta: https://www.ine.es/jaxi/Tabla.htm?tpx=59531&L=0"
+  },
+  {
+    "id": "idescat_comarques",
+    "organisme": "Institut d'Estadística de Catalunya (Idescat)",
+    "titol": "El municipi en xifres (EMEX) – arbre de territoris: comarques i municipis (API EMEX v1, nodes)",
+    "titol_curt": "Composició municipal de les comarques (Idescat)",
+    "url": "https://api.idescat.cat/emex/v1/nodes.json?lang=ca",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Comarca del Vallès Oriental, codi 41: 38 municipis (codis de 6 dígits). Composició usada per sumar les dades municipals (cens, HPO, PTSH). Còpia: data/raw/llocs/valles-oriental/idescat_emex_nodes.json."
+  },
+  {
+    "id": "gencat_partits_judicials",
+    "organisme": "Generalitat de Catalunya – Departament de Justícia i Qualitat Democràtica",
+    "titol": "Relació Municipis i Partit Judicial de Catalunya (conjunt de dades 772x-hgsh) i Partits judicials de Catalunya (95tc-3cti)",
+    "titol_curt": "Municipis de cada partit judicial (Generalitat)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/772x-hgsh.csv?$limit=5000",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Partit judicial de Granollers (identificador 3, codi CTEAJE 0803): 35 municipis; Mollet del Vallès (22, 0822): 7. Dades actualitzades el 22-9-2021. Taula de partits: https://analisi.transparenciacatalunya.cat/resource/95tc-3cti.csv?$limit=5000. Còpies: data/raw/llocs/valles-oriental/gencat_municipis_partit_judicial.csv, data/raw/llocs/valles-oriental/gencat_partits_judicials.csv (i metadades .json)."
+  },
+  {
+    "id": "cgpj_pxweb_llancaments",
+    "organisme": "Consejo General del Poder Judicial (CGPJ) – Estadística Judicial",
+    "titol": "Base de datos de la Estadística Judicial (PC-Axis): 'Lanzamientos practicados. Juzgados de Primera Instancia e Instrucción' (taula OUJII021)",
+    "titol_curt": "Llançaments practicats per jutjat (CGPJ)",
+    "url": "https://www6.poderjudicial.es/PXWeb-2025-v1/pxweb/es/10.-Juzgados%20de%20Primera%20Instancia%20e%20Instrucci%C3%B3n/-/OUJII021.px/",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Selecció: anys 2013–2025, tots els òrgans amb codi de partit judicial 0803 (Granollers: 14 òrgans, primera instància i instrucció) i 0822 (Mollet del Vallès: 5), els 4 tipus de procediment. El PxWeb només mostra 1.000 files per pantalla: consulta en dos trams d'anys amb el formulari (script data/raw/llocs/valles-oriental/cgpj_pxweb_query_vo.py; resultats a data/raw/llocs/valles-oriental/cgpj_pxweb_OUJII021_granollers_mollet_2013_2019.html i …_2020_2025.html). Valors 0 abans de 2013 (variable no disponible)."
+  },
+  {
+    "id": "gencat_ptsh_2024",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica",
+    "titol": "Pla territorial sectorial d'habitatge de Catalunya (octubre 2024), aprovat pel Decret 408/2024, de 22 d'octubre",
+    "titol_curt": "Pla territorial sectorial d'habitatge 2024 (Generalitat)",
+    "url": "https://www.gencat.cat/territori/transparencia/normativa_tramit/pla-territorial-sectorial-habitatge/20241011-pla-territorial-sectorial-habitatge.pdf",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Taula d'objectius quinquennals de solidaritat urbana per municipi (quinquennis 2025–2044): hi surten 17 municipis del Vallès Oriental, que sumen 2.982 nous habitatges destinats a polítiques socials a promoure el 2025–2029. El PDF original fa 165 MB: es conserva el text complet extret (data/raw/pdf/gencat_ptsh_2024.txt) i un extracte de pàgines (data/raw/pdf/gencat_ptsh_2024_extracte.pdf). Aprovació i tipologia d'habitatges: https://habitatge.gencat.cat/ca/ambits/pla-territorial-sectorial-dhabitatge/ (còpia: data/raw/web/gencat_ptsh_pagina.html)."
+  },
+  {
+    "id": "gencat_ens_locals",
+    "organisme": "Generalitat de Catalunya – Departament de la Presidència (Direcció General d'Administració Local)",
+    "titol": "Dades generals dels ens locals de Catalunya (conjunt de dades 6nei-4b44)",
+    "titol_curt": "Registre d'ens locals de Catalunya (Generalitat)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/6nei-4b44.json?$where=starts_with(codi_ens,'0801420')&$select=codi_ens,municipi,comarca,codcomarca,partit_judicial,data_actualitzacio",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Consulta d'Aiguafreda: comarca Osona, partit judicial Granollers. Serveix per aclarir que el conjunt de dades d'HPO (gencat_hpo, camp comarca_2023, actualitzat el 2026-03-18) l'assigna al Vallès Oriental. Còpia: data/raw/llocs/valles-oriental/gencat_ens_locals_aiguafreda.json."
+  }
+]

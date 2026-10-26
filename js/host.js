@@ -1,11 +1,13 @@
 // In-browser replacement for the Python server (vaga11n/server.py): owns the configuration, runs the
 // vision loop and answers the same commands. The game window talks to it directly; operator windows
 // (operador.html) reach it through a BroadcastChannel on the same origin.
-import { applyUpdate, loadConfig, publicConfig, saveConfig } from "./vision/config.js";
+import { applyUpdate, loadConfig, publicConfig, saveConfig, STORAGE_KEY } from "./vision/config.js";
 import { CHANNEL } from "./link.js";
 import { qrDataURL } from "./qr.js";
+import { scoped } from "./lloc.js";
 
-const DIFUSIO_KEY = "vaga11n.difusio";
+const CONFIG_KEY = scoped(STORAGE_KEY);
+const DIFUSIO_KEY = scoped("vaga11n.difusio");
 const OPERATOR_TIMEOUT_MS = 5000;
 
 function storage() {
@@ -13,10 +15,13 @@ function storage() {
 }
 
 export class LocalHost {
-  constructor({ sim = false } = {}) {
+  // final: final-screen config (data/final.json + locality overrides); joc: the locality's
+  // «Encén la vaga» defaults (lloc.json → joc3), overridden by the operator's saved settings
+  constructor({ sim = false, final = null, joc = null } = {}) {
     this.mode = sim ? "sim" : "camera";
     this.store = storage();
-    this.cfg = loadConfig(this.store);
+    this.final = final;
+    this.cfg = loadConfig(this.store, CONFIG_KEY, joc ? { joc } : null);
     this.subs = new Set();
     this.vision = null;
     this.operatorUntil = 0;
@@ -84,7 +89,7 @@ export class LocalHost {
       if (fromOperator) this._toOperator(msg); else for (const fn of this.subs) fn(msg);
     } else if (kind === "config") {
       const applied = applyUpdate(this.cfg, cmd.set || {});
-      if (cmd.save && this.store) saveConfig(this.cfg, this.store);
+      if (cmd.save && this.store) saveConfig(this.cfg, this.store, CONFIG_KEY);
       this._applyRuntime(applied);
       this._publish({ ...this._configMsg(), applied }, true);
     } else if (kind === "difusio") {
@@ -108,14 +113,22 @@ export class LocalHost {
 
   // --- broadcast channel link + QR on the final screen (data/final.json -> difusio) -------------
   async _loadDifusio() {
-    let base = {};
-    try {
-      const r = await fetch("data/final.json", { cache: "no-store" });
-      if (r.ok) base = (await r.json()).difusio || {};
-    } catch (e) {
-      console.warn("final.json", e);
+    let base = (this.final && this.final.difusio) || null;
+    if (!base) {
+      try {
+        const r = await fetch("data/final.json", { cache: "no-store" });
+        if (r.ok) base = (await r.json()).difusio || {};
+      } catch (e) {
+        console.warn("final.json", e);
+      }
     }
-    this.difusio = { url: base.url || null, mostrar: base.mostrar !== false && !!base.url, qr: base.qr || null, local: false };
+    base = base || {};
+    // the QR is drawn from the link, so each locality's link gets its own code (img/qr.png is a fallback)
+    let qr = base.qr || null;
+    if (base.url) {
+      try { qr = qrDataURL(base.url); } catch (e) { console.warn("QR", e); }
+    }
+    this.difusio = { url: base.url || null, mostrar: base.mostrar !== false && !!base.url, qr, local: false };
     try {
       const saved = this.store && JSON.parse(this.store.getItem(DIFUSIO_KEY) || "null");
       if (saved && typeof saved === "object") this._setDifusio(saved.url, saved.mostrar, false);

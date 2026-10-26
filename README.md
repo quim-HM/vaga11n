@@ -1,6 +1,10 @@
 # 11N · Vaga general: joc interactiu amb webcam
 
-**Juga-hi: <https://quim-hm.github.io/vaga11n/>**
+**Juga-hi** (una versió per localitat: mateix joc, preguntes, tendències, mapes i contacte d'aquí):
+
+- **Manresa**: <https://quim-hm.github.io/vaga11n/>
+- **Santpedor**: <https://quim-hm.github.io/vaga11n/santpedor/>
+- **Vallès Oriental**: <https://quim-hm.github.io/vaga11n/valles-oriental/>
 
 Joc per a una persona que es juga amb el cos davant d'una webcam: tres minijocs sobre l'habitatge, els salaris i el cost de la vida, amb dades oficials i la font de cada xifra. Uns 4 minuts per partida.
 

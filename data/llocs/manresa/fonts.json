@@ -1,0 +1,46 @@
+[
+  {
+    "id": "manresa_poblacio_barris",
+    "organisme": "Ajuntament de Manresa – Dades obertes",
+    "titol": "Habitants per barri (poblacio_per_barris.csv)",
+    "titol_curt": "Habitants per barri (Ajuntament de Manresa)",
+    "url": "https://dadesobertes.seu-e.cat/csv/manresa/poblacio_per_barris.csv",
+    "data_consulta": "2026-10-25",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "18 barris oficials (B-01 a B-18), anys 2018–2023 (camp ANY_CURS). Llistat de barris confirmat amb el conjunt 'Divisions territorials' (https://dadesobertes.seu-e.cat/csv/manresa/divisions_territorials.csv). Fitxa: https://seu-e.cat/ca/web/manresa/dades-obertes/-/dadesobertes/dataset/manresa-habitants-per-barri/resource/0a4ea152-49ca-429c-a0e2-77e5a476a67a"
+  },
+  {
+    "id": "osm_nominatim",
+    "organisme": "OpenStreetMap (servei Nominatim)",
+    "titol": "Geocodificació dels barris de Manresa",
+    "titol_curt": "Coordenades de barris (OpenStreetMap)",
+    "url": "https://nominatim.openstreetmap.org/search?q=Valldaura%2C%20Manresa&format=json&limit=3&countrycodes=es",
+    "data_consulta": "2026-10-25",
+    "tipus": "secundària",
+    "llicencia": "ODbL 1.0 (dades © col·laboradors d'OpenStreetMap)",
+    "notes": "Una consulta per barri; resultats a data/raw/nominatim_barris_manresa.txt. Coordenades aproximades (punt representatiu del límit administratiu o del lloc OSM), només per a ús en un mapa estilitzat."
+  },
+  {
+    "id": "manresa_plans_vigents",
+    "organisme": "Ajuntament de Manresa – Transparència",
+    "titol": "Plans vigents de l'Ajuntament de Manresa (plans_vigents_de_lajuntament_de_manresa.xlsx), enllaçat des de «Plans i programes municipals»",
+    "titol_curt": "Plans vigents de l'Ajuntament de Manresa",
+    "url": "https://web.manresa.cat/media/docs/docsArticle/37/plans_vigents_de_lajuntament_de_manresa.xlsx",
+    "data_consulta": "2026-10-25",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Fila «Pla Local d'Habitatge»: document plh_2017_2022.pdf, elaborat el juny de 2017, data d'aprovació 15-06-2017 (valor de sèrie d'Excel 42901), dates del pla vigent 2017-2022; és l'únic pla d'habitatge de la llista. Fitxer modificat el 31-07-2026. Pàgina que l'enllaça: https://www.manresa.cat/transparencia/menu/37-plans-i-programes-municipals (còpia: data/raw/web/manresa_transparencia_plans_municipals.html). Còpia del fitxer: data/raw/web/manresa_plans_vigents.xlsx."
+  },
+  {
+    "id": "manresa_plh_2017_2022",
+    "organisme": "Ajuntament de Manresa (redacció: GMG Plans i Projectes, amb la Diputació de Barcelona)",
+    "titol": "Pla Local d'Habitatge de Manresa 2017-2022 (juny 2017)",
+    "titol_curt": "Pla Local d'Habitatge de Manresa 2017–2022",
+    "url": "https://web.manresa.cat/media/docs/docsArticle/13383/plh_2017_2022.pdf",
+    "data_consulta": "2026-10-25",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Apartat 0.6: «El Pla Local d'Habitatge de Manresa tindrà un període de vigència de sis anys a partir de la data de la seva aprovació». El PDF original fa 13 MB: es conserva el text extret (data/raw/pdf/manresa_plh_2017_2022.txt) i un extracte de pàgines (data/raw/pdf/manresa_plh_2017_2022_extracte.pdf)."
+  }
+]
