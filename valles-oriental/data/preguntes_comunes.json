@@ -11,7 +11,7 @@
     "confianca": "alta",
     "rang": {
       "min": 0,
-      "max": 80
+      "max": 100
     },
     "pas": 1,
     "escala": "lineal",
@@ -43,7 +43,7 @@
   },
   {
     "id": "salari_real_catalunya",
-    "enunciat": "Descomptant la pujada dels preus, en quin percentatge ha canviat el poder adquisitiu del sou mitjà a Catalunya entre 2008 i 2024?",
+    "enunciat": "Del 2008 al 2024, el sou mitjà a Catalunya ha pujat un 36 %. Descomptant la pujada dels preus, quant ha canviat el poder adquisitiu?",
     "unitat": "%",
     "valor": -0.5,
     "any_referencia": 2024,
@@ -56,9 +56,10 @@
       "max": 40
     },
     "pas": 1,
+    "linia_base": 36,
     "escala": "lineal",
     "metafora": "barres",
-    "revelacio": "Un 0,5 % menys: el sou ha pujat un 35,7 % i els preus, un 36,5 %. En poder adquisitiu, és pràcticament el sou de fa 16 anys.",
+    "revelacio": "Un 0,5 % menys: els preus han pujat un 36,5 %, una mica més que el sou. En poder adquisitiu, és pràcticament el sou de fa 16 anys.",
     "nota": "Salari mitjà brut (la mitjana pot amagar diferències entre salaris alts i baixos). Deflactat amb l'IPC general de Catalunya; sèries a series/salari_catalunya.csv i series/ipc_catalunya_general.csv.",
     "nota_curta": "Càlcul propi: salari mitjà brut de l'INE dividit per l'IPC de Catalunya."
   },
@@ -180,9 +181,10 @@
     "confianca": "alta",
     "rang": {
       "min": 0,
-      "max": 30
+      "max": 100
     },
     "pas": 1,
+    "linia_base": 100,
     "escala": "lineal",
     "metafora": "bitllets",
     "revelacio": "6,49 €: 782 milions de 12.052. Del conjunt de la banca rescatada pel FROB, se n'ha recuperat el 13,5 %.",

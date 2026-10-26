@@ -85,12 +85,13 @@ function valueAt(q, t) {
 
 // Where the lever starts. By default at the bottom of the scale, but a question with a neutral
 // point starts there instead, so the answer can move either way from «no change»: ranges that cross
-// zero start at zero (e.g. the change in purchasing power) and a question can name its own baseline
-// with "linia_base" (e.g. the 100 € the 2019 shopping trolley cost).
+// zero start at zero and a question can name its own baseline with "linia_base" — a reference the
+// statement gives (the 100 € the 2019 trolley cost, the nominal wage rise, the income rise) or the
+// whole amount (100 € of every 100 € rescued), even at the top of the range.
 function startParam(q) {
   const { min, max } = q.rang;
   const base = Number.isFinite(q.linia_base) ? q.linia_base : (min < 0 && max > 0 ? 0 : null);
-  if (base === null || base <= min || base >= max) return 0;
+  if (base === null || base <= min || base > max) return 0;
   if (q.escala === "log" && min > 0) return clamp(Math.log(base / min) / Math.log(max / min), 0, 1);
   return clamp((base - min) / (max - min), 0, 1);
 }

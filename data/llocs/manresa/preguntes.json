@@ -35,6 +35,7 @@
       "max": 120
     },
     "pas": 2,
+    "linia_base": 32,
     "escala": "lineal",
     "metafora": "barres",
     "revelacio": "Un 60,3 %, gairebé el doble: de 344,90 € a 552,77 € al mes. Els preus en general (IPC de Catalunya) han pujat un 23,6 %.",
