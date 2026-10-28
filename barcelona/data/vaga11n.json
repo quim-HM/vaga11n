@@ -1,0 +1,194 @@
+{
+  "data_consulta": "2026-10-25",
+  "nota_editorial": "Descripció basada només en les pàgines de la campanya «Viure ens costa la vida» (vagageneral.org). Per decisió editorial, no s'hi recullen posicions de CCOO ni d'UGT.",
+  "data": "2026-11-11",
+  "dia_setmana": "dimecres",
+  "data_font_ids": [
+    "vagageneral_inici"
+  ],
+  "nom_campanya": "Viure ens costa la vida",
+  "plataforma": "Ens costa la vida – Plataforma per una feina i una casa dignes",
+  "plataforma_font_ids": [
+    "vagageneral_avis_legal"
+  ],
+  "abast": "Catalunya: la campanya recull assemblees obertes i convocatòries arreu de Catalunya",
+  "abast_font_ids": [
+    "vagageneral_convocatories"
+  ],
+  "convocants": [
+    {
+      "nom": "Sindicat de Llogateres de Catalunya (SLC)",
+      "rol": "Impulsa la plataforma «Ens costa la vida»",
+      "font_ids": [
+        "vagageneral_participa",
+        "vagageneral_avis_legal"
+      ]
+    },
+    {
+      "nom": "Confederació Sindical d’Habitatge de Catalunya (COSHAC)",
+      "rol": "Impulsa la plataforma «Ens costa la vida»",
+      "font_ids": [
+        "vagageneral_participa",
+        "vagageneral_avis_legal"
+      ]
+    },
+    {
+      "nom": "Confederació General del Treball (CGT)",
+      "rol": "Impulsa la plataforma «Ens costa la vida»",
+      "font_ids": [
+        "vagageneral_participa",
+        "vagageneral_avis_legal"
+      ]
+    }
+  ],
+  "altres_organitzacions_plataforma": [
+    {
+      "nom": "Sindicat d’Habitatge Socialista de Catalunya (SHSC)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Plataforma d’Afectats per la Hipoteca (PAH)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Solidaritat Obrera",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Intersindical Alternativa de Catalunya (IAC)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Confederació Nacional del Treball (CNT)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Sindicat de Comissions de Base (CO.BAS)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "Coordinadora Obrera Sindical (COS)",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "nom": "La Intersindical – Confederació Sindical Catalana",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    }
+  ],
+  "altres_organitzacions_nota": "Organitzacions que apareixen al peu del web sota «La Plataforma per una feina i una casa dignes està impulsada per:» (logotips amb enllaç). Les dades de contacte i de protecció de dades del web només esmenten SLC, COSHAC i CGT.",
+  "reivindicacions": [
+    {
+      "num": 1,
+      "text": "Baixada dels preus de lloguer",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 2,
+      "text": "Prohibició de desnonaments sense alternativa i contractes indefinits",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 3,
+      "text": "Expropiació d'habitatges de bancs i fons volotors",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 4,
+      "text": "Construcció d'un parc públic d'habitatge",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 5,
+      "text": "Reconeixement dels drets sindicals",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 6,
+      "text": "Augment del Salari Mínim Interprofessional (SMI) fins als 1.600€ i pensió mínima igual al SMI",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 7,
+      "text": "Reducció de la jornada laboral a 35 hores setmanals",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 8,
+      "text": "Increment dels salaris amb la pèrdua efectiva de poder adquisitiu",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    },
+    {
+      "num": 9,
+      "text": "Defensa de tots els serveis públics",
+      "font_ids": [
+        "vagageneral_manifest"
+      ]
+    }
+  ],
+  "reivindicacions_nota": "Títols literals del manifest (la reivindicació 3 hi apareix escrita «fons volotors»).",
+  "lema": "Ni salaris per terra ni habitatge pels núvols. Vaga general!",
+  "lema_font_ids": [
+    "vagageneral_manifest"
+  ],
+  "fets_context": [
+    {
+      "text": "A 25-10-2026, el web de la campanya comptava 95 comitès de vaga, 61 assemblees obertes i 47 altres convocatòries.",
+      "font_ids": [
+        "vagageneral_participa"
+      ]
+    }
+  ],
+  "no_verificat": [
+    "Durada i horari de la vaga: no consten a les pàgines de la campanya consultades.",
+    "Serveis mínims i registre formal de la convocatòria: no consten a les pàgines de la campanya consultades.",
+    "Convocatòries concretes a Manresa i al Bages: no se n'han trobat a la pàgina de convocatòries en la data de consulta."
+  ],
+  "cta": {
+    "titol": "11N: vaga general",
+    "subtitol": "Dimecres 11 de novembre de 2026. «Viure ens costa la vida»: per una feina i una casa dignes.",
+    "detalls": [
+      "Impulsada per la plataforma «Ens costa la vida»: Sindicat de Llogateres, COSHAC i CGT, amb comitès de vaga arreu de Catalunya.",
+      "Demandes: baixada dels lloguers, prou desnonaments sense alternativa, parc públic d'habitatge, salari mínim de 1.600 € i jornada de 35 hores.",
+      "Ni salaris per terra ni habitatge pels núvols."
+    ],
+    "font_ids": [
+      "vagageneral_manifest",
+      "vagageneral_participa",
+      "vagageneral_convocatories",
+      "vagageneral_inici"
+    ],
+    "nota": "Text informatiu i no signat. Només inclou fets que consten a les pàgines de la campanya."
+  }
+}

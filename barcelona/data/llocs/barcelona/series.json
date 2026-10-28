@@ -1,0 +1,16 @@
+[
+  {
+    "id": "lloguer_barcelona",
+    "titol": "Lloguer mitjà dels contractes nous a Barcelona",
+    "unitat": "€/mes",
+    "ambit": "Barcelona",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana mensual (€) dels contractes nous de lloguer d'habitatge amb fiança dipositada a l'INCASÒL, municipi de Barcelona (codi 08019). Valor anual: període gener-desembre publicat per la font.",
+    "confianca": "alta",
+    "notes": "Valors anuals publicats directament per a l'agregat 'gener-desembre' (no calculats a partir dels trimestres). Estadística censal de les fiances de lloguer dipositades a l'INCASÒL: només contractes nous signats en l'any. Sèrie municipal des del 2007. Contractes el 2025: 30.789 (coincideix amb la suma dels quatre trimestres). No s'inclou el 2026 (només el primer trimestre, 8.156 contractes).",
+    "anys_parcials": [],
+    "fitxer": "llocs/barcelona/series/lloguer_barcelona.csv",
+    "subjecte": "el lloguer mitjà dels contractes nous a Barcelona",
+    "etiqueta": "Lloguer a Barcelona"
+  }
+]

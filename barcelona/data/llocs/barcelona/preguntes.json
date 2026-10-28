@@ -1,0 +1,129 @@
+[
+  {
+    "id": "lloguer_mitja_barcelona",
+    "enunciat": "Segons les dades del 2025, quin és el lloguer mitjà mensual d'un contracte nou a Barcelona?",
+    "unitat": "€/mes",
+    "valor": 1134.61,
+    "any_referencia": 2025,
+    "ambit": "Barcelona",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Renda mitjana dels contractes d'habitatge nous amb fiança dipositada a l'INCASÒL durant tot l'any (període gener-desembre), municipi de Barcelona (codi 08019): 1.134,61 € amb 30.789 contractes. Comparació: 2013, 681,56 €; Catalunya 2025, 872,02 € (font incasol_fiances_supramunicipal). Variació: (1.134,61 / 681,56 − 1) × 100.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 2400
+    },
+    "pas": 20,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "1.134,61 €: un 66,5 % més que el 2013, l'any més barat des del 2007. La mitjana catalana és de 872,02 €.",
+    "nota": "Només contractes nous; no inclou els lloguers de contractes antics ni despeses com subministraments o comunitat. Sèrie municipal des del 2007. 2013 és el mínim de la sèrie, després de la baixada que va seguir el màxim d'abans de la crisi (813,02 € el 2008): respecte del 2008, la pujada és d'un 39,6 %. Euros corrents: entre el 2013 i el 2025 l'IPC general de Catalunya (mitjana anual) va pujar un 26,6 % (font ine_ipc). 2024: 1.147,22 €. Contractes nous amb fiança: 57.158 el 2021 i 30.789 el 2025. La mitjana catalana del 2025 té una discrepància interna en el recompte de contractes (vegeu la sèrie lloguer_catalunya).",
+    "nota_curta": "Només contractes nous amb fiança dipositada (30.789 a Barcelona el 2025); no inclou despeses ni lloguers antics."
+  },
+  {
+    "id": "lloguer_vs_renda_barcelona",
+    "enunciat": "Del 2015 al 2024, la renda de les llars de Barcelona ha pujat un 37 %. I el lloguer dels contractes nous, en quin percentatge ha pujat?",
+    "unitat": "%",
+    "valor": 56.1,
+    "any_referencia": 2024,
+    "ambit": "Barcelona",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Càlcul propi: (lloguer 2024 / lloguer 2015 − 1) × 100 = (1.147,22 / 734,94 − 1) × 100; lloguer mitjà mensual dels contractes nous (fiances INCASÒL). Renda: renda neta mitjana per llar (INE, ADRH, sèrie ADRH102264), 36.477 € (2015) → 49.915 € (2024), +36,8 %.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 90
+    },
+    "pas": 2,
+    "linia_base": 37,
+    "escala": "lineal",
+    "metafora": "barres",
+    "revelacio": "Un 56,1 %, una vegada i mitja el que ha pujat la renda: de 734,94 € a 1.147,22 € al mes. Els preus en general (IPC de Catalunya) han pujat un 23,6 %.",
+    "nota": "El període 2015–2024 és el que cobreix l'Atles de renda de l'INE (any de meritació de la renda; font ine_adrh). La renda inclou totes les llars (propietàries i llogateres); el lloguer, només els contractes nous de cada any. Euros corrents. IPC general de Catalunya, mitjana anual (font ine_ipc). Ràtio: 56,1 / 36,8 = 1,52.",
+    "nota_curta": "Euros corrents; renda neta de totes les llars (INE) i lloguer dels contractes nous."
+  },
+  {
+    "id": "hores_setmana_smi_lloguer_barcelona",
+    "enunciat": "Segons les dades del 2025, quantes hores a la setmana cal treballar amb el salari mínim només per pagar el lloguer a Barcelona?",
+    "unitat": "hores",
+    "valor": 32.9,
+    "any_referencia": 2025,
+    "ambit": "Barcelona",
+    "font_id": "incasol_fiances_municipis",
+    "definicio": "Càlcul propi: hores setmanals = lloguer setmanal / preu de l'hora de salari mínim. Lloguer setmanal = 1.134,61 €/mes × 12 / 52 = 261,83 € (lloguer mitjà dels contractes nous de 2025 a Barcelona, fiances INCASÒL). Hora d'SMI = 1.184 € × 14 pagues / 2.080 h (40 h × 52 setmanes) = 7,97 €/h bruts (Real Decreto 87/2025, BOE-A-2025-2576). Resultat: 32,9 h, el 82,1 % d'una setmana de 40 hores.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 56
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "setmana",
+    "revelacio": "Unes 33 hores: fins divendres, només per al lloguer. A Catalunya (872 €/mes), unes 25: fins dijous.",
+    "nota": "Salari mínim brut (abans de cotitzacions i retencions; amb el net calen més hores), 14 pagues i 2.080 h retribuïdes l'any. Lloguer mitjà dels contractes nous amb fiança dipositada a l'INCASÒL (no inclou lloguers antics ni despeses). Catalunya, mateix mètode: 872,02 € × 12 / 52 / 7,97 €/h = 25,3 h. La mitjana catalana del 2025 té una discrepància interna en el recompte de contractes (vegeu la sèrie lloguer_catalunya). Fonts boe_smi i boe_smi_2025.",
+    "nota_curta": "Salari mínim brut del 2025 (14 pagues, 40 h setmanals) i lloguer mitjà dels contractes nous del 2025."
+  },
+  {
+    "id": "habitatges_buits_barcelona",
+    "enunciat": "Segons l'últim cens (2021), quin percentatge d'habitatges de Barcelona està buit?",
+    "unitat": "%",
+    "valor": 9.3,
+    "any_referencia": 2021,
+    "ambit": "Barcelona",
+    "font_id": "ine_censo2021_us",
+    "definicio": "Habitatges buits / habitatges totals: 75.488 / 808.751 (INE, Cens 2021, taula 59531 'Viviendas según su intensidad de uso', fila '08019 Barcelona'; l'INE els classifica a partir del consum elèctric).",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 30
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "casetes",
+    "revelacio": "El 9,3 % (a Catalunya, el 10,7 %): 75.488 habitatges, més que tots els contractes de lloguer nous signats a Barcelona el 2021 (57.158).",
+    "nota": "Mètode basat en el consum elèctric: els trams de la taula (baix consum; ús esporàdic entre 251 i 750 kWh/any) indiquen que els 'buits' són habitatges amb consum anual molt baix, però no s'ha consultat el document metodològic. Un habitatge buit no vol dir necessàriament disponible per llogar (obres, herències, venda, mal estat...). Dades actualitzades per l'INE el 22-11-2024; data de referència del cens: 2021. Contractes nous del 2021 a Barcelona: fiances INCASÒL (font incasol_fiances_municipis); 75.488 / 57.158 = 1,32.",
+    "nota_curta": "Estimació de l'INE pel consum elèctric; buit no vol dir disponible per llogar."
+  },
+  {
+    "id": "hpo_acabats_barcelona",
+    "enunciat": "Entre 2013 i 2025, quants habitatges de protecció oficial s'han acabat a Barcelona?",
+    "unitat": "habitatges",
+    "valor": 5696,
+    "any_referencia": 2025,
+    "ambit": "Barcelona",
+    "font_id": "gencat_hpo",
+    "definicio": "Suma dels habitatges amb protecció oficial acabats (amb qualificació definitiva) al municipi de Barcelona (codi Idescat 080193), anys 2013 a 2025 (Generalitat de Catalunya, conjunt de dades v8i4-fa4q). Mitjanes anuals: càlcul propi.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 12000
+    },
+    "pas": 100,
+    "escala": "lineal",
+    "metafora": "edifici",
+    "revelacio": "5.696, uns 438 l'any; del 2002 al 2012, uns 1.145 l'any. Del 2025 al 2029, la Generalitat en demana 3.397 l'any a Barcelona.",
+    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Tall: 2013, primer any complet després del rescat bancari del 2012. 2002–2012: 12.590 acabats a Barcelona. A tot Catalunya: 5.425 acabats l'any de mitjana (2002–2012) i 1.438 (2013–2025). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), objectius de solidaritat urbana de Barcelona: 46.976 habitatges destinats a polítiques socials de 738.280 principals (6,4 %) a la situació inicial; nous a promoure per quinquenni (2025–2029, 2030–2034, 2035–2039, 2040–2044): 16.983, 32.076, 35.333, 5.467 (total 89.859), per arribar al 15 % de l'article 73 de la Llei 18/2007. Primer quinquenni: 16.983 en 5 anys, 3.397 l'any de mitjana. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social, allotjaments dotacionals o habitatges cedits en masoveria urbana), de manera que la comparació és orientativa. Registre de sol·licitants d'habitatge protegit a Barcelona (dades del Pla): 42.941 el 2019 (mitjana 2017–2019: 39.602). No s'ha revisat l'estat del pla local d'habitatge de l'Ajuntament.",
+    "nota_curta": "Tota la ciutat; inclou HPO de lloguer i de venda. Pla territorial (Decret 408/2024): comparació orientativa."
+  },
+  {
+    "id": "llancaments_partit_judicial_barcelona",
+    "enunciat": "Quants desnonaments s'han executat el 2025 als jutjats de Barcelona?",
+    "unitat": "desnonaments",
+    "valor": 1362,
+    "any_referencia": 2025,
+    "ambit": "Partit judicial de Barcelona",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Llançaments practicats (desnonaments executats; CGPJ, taula OUJII021) als 62 jutjats de primera instància de Barcelona (J1I nr. 1 a 62). El CGPJ compta un llançament per immoble amb canvi de possessió. El partit judicial de Barcelona (codi CTEAJE 0811) només inclou el municipi de Barcelona, segons la relació de municipis i partits judicials del Departament de Justícia (font gencat_partits_judicials).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 3000
+    },
+    "pas": 25,
+    "escala": "lineal",
+    "metafora": "claus",
+    "revelacio": "1.362: gairebé 4 cada dia, i 8 de cada 10 provenen d'un lloguer. Del 2013 al 2025, 27.609: gairebé 6 cada dia.",
+    "nota": "Inclou també immobles no residencials. 2025: 1.096 per la Llei d'arrendaments urbans (80,5 %), 124 per execució hipotecària, 142 altres. Per dia: 1.362 / 365 = 3,73; 2013–2025: 27.609 / 4.748 dies = 5,81. La xifra anual ha baixat des dels 3.289 del 2013 (mínim: 1.028 el 2020). Sèrie disponible des del 2013. No s'ha comprovat si el canvi d'organització judicial (tribunals d'instància) afecta el recompte del 2025.",
+    "nota_curta": "Tots els jutjats de Barcelona (el partit judicial és la ciutat); inclou locals i altres immobles."
+  }
+]

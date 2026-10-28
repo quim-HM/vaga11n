@@ -1,0 +1,101 @@
+[
+  {
+    "id": "incasol_fiances_municipis",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica (Secretaria d'Habitatge) / INCASÒL",
+    "titol": "Preu mitjà del lloguer d'habitatges per municipi (fiances de lloguer dipositades a l'INCASÒL) – conjunt de dades qww9-bvhh",
+    "titol_curt": "Fiances de lloguer per municipi (INCASÒL)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/qww9-bvhh.csv?codi_territorial=08019&$limit=5000&$order=any,periode",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Conjunt de dades actualitzat el 30-7-2026. Descripció oficial: explotació estadística censal del registre de fiances de lloguer dipositades a l'INCASÒL (contractes nous). Barcelona: 30.789 contractes el 2025. Còpia: data/raw/llocs/barcelona/fiances_barcelona.csv (metadades: data/raw/llocs/barcelona/fiances_municipis_metadades.json)."
+  },
+  {
+    "id": "ine_censo2021_us",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Censo de Población y Viviendas 2021 – Viviendas según su intensidad de uso (taula 59531)",
+    "titol_curt": "Cens 2021: habitatges segons l'ús (INE)",
+    "url": "https://www.ine.es/jaxi/files/tpx/es/csv_bdsc/59531.csv?nocab=1",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Fitxer complet tal com es va baixar (SHA-256 8fccd6713f3940a01e3a74c0394a93f5395500257ad328415c301afc6d0ef7af), desat comprimit amb gzip: data/raw/llocs/barcelona/ine_censo2021_59531.csv.gz (és el mateix fitxer que el de Santpedor, consultat el 26-10-2026). Files usades: '08019 Barcelona' i '09 Cataluña'. Nota de la taula: dades actualitzades el 22-11-2024. Pàgina de consulta: https://www.ine.es/jaxi/Tabla.htm?tpx=59531&L=0"
+  },
+  {
+    "id": "gencat_ptsh_2024",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica",
+    "titol": "Pla territorial sectorial d'habitatge de Catalunya (octubre 2024), aprovat pel Decret 408/2024, de 22 d'octubre",
+    "titol_curt": "Pla territorial sectorial d'habitatge 2024 (Generalitat)",
+    "url": "https://www.gencat.cat/territori/transparencia/normativa_tramit/pla-territorial-sectorial-habitatge/20241011-pla-territorial-sectorial-habitatge.pdf",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Taula d'objectius quinquennals de solidaritat urbana per municipi (quinquennis 2025–2044): Barcelona, situació inicial 46.976 habitatges destinats a polítiques socials de 738.280 principals (6,4 %); nous a promoure 16.983, 32.076, 35.333, 5.467. Taula del registre de sol·licitants d'habitatge amb protecció oficial: Barcelona, població 1.636.762, 42.941 sol·licituds el 2019 i 39.602 de mitjana 2017–2019. El PDF original fa 165 MB: es conserva el text complet extret (data/raw/pdf/gencat_ptsh_2024.txt) i un extracte de pàgines (data/raw/pdf/gencat_ptsh_2024_extracte.pdf)."
+  },
+  {
+    "id": "cgpj_pxweb_llancaments",
+    "organisme": "Consejo General del Poder Judicial (CGPJ) – Estadística Judicial",
+    "titol": "Base de datos de la Estadística Judicial (PC-Axis): 'Lanzamientos practicados. Juzgados de Primera Instancia e Instrucción' (taula OUJII021)",
+    "titol_curt": "Llançaments practicats per jutjat (CGPJ)",
+    "url": "https://www6.poderjudicial.es/PXWeb-2025-v1/pxweb/es/10.-Juzgados%20de%20Primera%20Instancia%20e%20Instrucci%C3%B3n/-/OUJII021.px/",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Selecció: anys 2013–2025, els 62 òrgans 'J1I nr. 1 a 62 BARCELONA' (codis 090811…, partit judicial de Barcelona, codi CTEAJE 0811), els 4 tipus de procediment. Consulta feta amb el formulari PxWeb (data/raw/llocs/barcelona/cgpj_pxweb_query_bcn.py) en trams d'anys perquè el PxWeb mostra 1.000 files com a màxim; respostes HTML desades tal com arriben: data/raw/llocs/barcelona/cgpj_pxweb_OUJII021_barcelona_*.html."
+  },
+  {
+    "id": "gencat_partits_judicials",
+    "organisme": "Generalitat de Catalunya – Departament de Justícia i Qualitat Democràtica (Catàleg Tècnic de Dades)",
+    "titol": "Relació Municipis i Partit Judicial de Catalunya (conjunt de dades 772x-hgsh) i Partits judicials de Catalunya (95tc-3cti)",
+    "titol_curt": "Partits judicials per municipi (Departament de Justícia)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/772x-hgsh.csv?$limit=5000",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Barcelona (codi Idescat 080193) és l'únic municipi del partit judicial 11, Barcelona (codi CTEAJE 0811). Dades actualitzades el 2021-09-22. Llista de partits: https://analisi.transparenciacatalunya.cat/resource/95tc-3cti.csv?$limit=5000. Còpies (les mateixes que les de Santpedor, consultades el 26-10-2026): data/raw/llocs/barcelona/gencat_municipis_partit_judicial.csv, gencat_partits_judicials.csv i les metadades *_metadades.json."
+  },
+  {
+    "id": "bcn_pbd_lloguer",
+    "organisme": "Ajuntament de Barcelona – Oficina Municipal de Dades",
+    "titol": "Preu mitjà (€) del lloguer d'habitatges i Nombre de contractes de lloguer d'habitatge constituïts, per barri i districte",
+    "titol_curt": "Fiances de lloguer de l'INCASÒL per barri (Barcelona Dades)",
+    "url": "https://portaldades.ajuntament.barcelona.cat/ca/estadistiques/b37xv8wcjh",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "CC BY 4.0",
+    "notes": "Portal Barcelona Dades; font primària: Generalitat de Catalunya. Secretaria d'habitatge, a partir de les fiances de lloguer dipositades a l'INCASÒL. Fiances de lloguer dipositades a l'INCASÒL, agregades per l'Ajuntament per barris i districtes; anual i trimestral. Can Baró (barri 34): des del 2014; 158 contractes el 2025; 2026: només el primer trimestre (41 contractes). El total de Barcelona del portal coincideix any per any amb el conjunt de dades municipal de la Generalitat (incasol_fiances_municipis). Dates de publicació al portal: Preu mitjà (€) del lloguer d'habitatges: 2026-07-16, Nombre de contractes de lloguer d'habitatge constituïts: 2026-07-14. Llicència declarada al portal: CC BY 4.0. Còpies (taula completa, tots els territoris, tal com l'exporta l'API /services/backend/rest/statistic/export): data/raw/llocs/can-baro/pbd_lloguer_preu_mitja.csv, data/raw/llocs/can-baro/pbd_lloguer_contractes.csv; metadades a data/raw/llocs/can-baro/pbd_metadades.json; script de descàrrega data/raw/llocs/can-baro/pbd_query.py."
+  },
+  {
+    "id": "bcn_pbd_rdlpc",
+    "organisme": "Ajuntament de Barcelona – Oficina Municipal de Dades",
+    "titol": "Renda disponible de les llars per càpita (RDLpc, €), per barri",
+    "titol_curt": "Renda disponible per càpita per barri (Barcelona Dades)",
+    "url": "https://portaldades.ajuntament.barcelona.cat/ca/estadistiques/nzjnewo7n6",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "CC BY 4.0",
+    "notes": "Portal Barcelona Dades; font primària: Ajuntament de Barcelona. Oficina Municipal de Dades (OMD). Estimació de l'Ajuntament (Oficina Municipal de Dades): renda disponible anual de les llars per càpita, 2015–2023. Can Baró: 23.689 € el 2023. Dates de publicació al portal: Renda disponible de les llars per càpita (RDLpc, €): 2026-06-25. Llicència declarada al portal: CC BY 4.0. Còpies (taula completa, tots els territoris, tal com l'exporta l'API /services/backend/rest/statistic/export): data/raw/llocs/can-baro/pbd_rdlpc.csv; metadades a data/raw/llocs/can-baro/pbd_metadades.json; script de descàrrega data/raw/llocs/can-baro/pbd_query.py."
+  },
+  {
+    "id": "bcn_pbd_cens",
+    "organisme": "Ajuntament de Barcelona – Oficina Municipal de Dades",
+    "titol": "Nombre d'habitatges censals per tipus d'habitatge i Nombre d'habitatges censals principals per règim de tinença, per barri",
+    "titol_curt": "Cens 2021 de l'INE per barri (Barcelona Dades)",
+    "url": "https://portaldades.ajuntament.barcelona.cat/ca/estadistiques/rdkoh4ukx5",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "CC BY 4.0",
+    "notes": "Portal Barcelona Dades; font primària: Instituto Nacional de Estadística (INE). Censos de població i habitatges.. INE, Cens de població i habitatges 2021, agregat per barris. Per al 2021 el tipus només distingeix principal i no principal. Can Baró: 519 no principals i 3.903 principals. Dates de publicació al portal: Nombre d’habitatges censals per tipus d’habitatge: 2024-01-11, Nombre d’habitatges censals principals per règim de tinença: 2024-01-11. Llicència declarada al portal: CC BY 4.0. Còpies (taula completa, tots els territoris, tal com l'exporta l'API /services/backend/rest/statistic/export): data/raw/llocs/can-baro/pbd_cens_tipus_habitatge.csv, data/raw/llocs/can-baro/pbd_cens_tinenca.csv; metadades a data/raw/llocs/can-baro/pbd_metadades.json; script de descàrrega data/raw/llocs/can-baro/pbd_query.py."
+  },
+  {
+    "id": "bcn_pbd_poblacio",
+    "organisme": "Ajuntament de Barcelona – Oficina Municipal de Dades",
+    "titol": "Població (padró municipal d'habitants, a 1 de cada mes), per barri",
+    "titol_curt": "Població per barri (Barcelona Dades)",
+    "url": "https://portaldades.ajuntament.barcelona.cat/ca/estadistiques/yzlntdm2fs",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "CC BY 4.0",
+    "notes": "Portal Barcelona Dades; font primària: Ajuntament de Barcelona. Oficina Municipal de Dades (OMD). Padró Municipal d'Habitants. Can Baró: 9.627 habitants a 2026-06-01. No s'usa en cap pregunta; context a docs/llocs/can-baro_preguntes.md. Dates de publicació al portal: Població: 2026-10-06. Llicència declarada al portal: CC BY 4.0. Còpies (taula completa, tots els territoris, tal com l'exporta l'API /services/backend/rest/statistic/export): data/raw/llocs/can-baro/pbd_poblacio.csv; metadades a data/raw/llocs/can-baro/pbd_metadades.json; script de descàrrega data/raw/llocs/can-baro/pbd_query.py."
+  }
+]

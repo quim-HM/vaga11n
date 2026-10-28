@@ -1,0 +1,438 @@
+{
+ "ciutats": [
+  {
+   "id": "08015",
+   "nom": "Badalona",
+   "comarca": "barcelones",
+   "fitxer": "barris/08015.json",
+   "n": 34,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08019",
+   "nom": "Barcelona",
+   "comarca": "barcelones",
+   "fitxer": "barris/08019.json",
+   "n": 73,
+   "font": "bcn_unitats_administratives",
+   "tipus_font": "oficial"
+  },
+  {
+   "id": "17079",
+   "nom": "Girona",
+   "comarca": "girones",
+   "fitxer": "barris/17079.json",
+   "n": 9,
+   "font": "girona_barris",
+   "tipus_font": "oficial"
+  },
+  {
+   "id": "08101",
+   "nom": "l'Hospitalet de Llobregat",
+   "comarca": "barcelones",
+   "fitxer": "barris/08101.json",
+   "n": 13,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08113",
+   "nom": "Manresa",
+   "comarca": "bages",
+   "fitxer": "barris/08113.json",
+   "n": 18,
+   "font": "osm_manresa_barris",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08124",
+   "nom": "Mollet del Vallès",
+   "comarca": "valles-oriental",
+   "fitxer": "barris/08124.json",
+   "n": 13,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08169",
+   "nom": "el Prat de Llobregat",
+   "comarca": "baix-llobregat",
+   "fitxer": "barris/08169.json",
+   "n": 10,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "43123",
+   "nom": "Reus",
+   "comarca": "baix-camp",
+   "fitxer": "barris/43123.json",
+   "n": 61,
+   "font": "reus_barris",
+   "tipus_font": "oficial"
+  },
+  {
+   "id": "08187",
+   "nom": "Sabadell",
+   "comarca": "valles-occidental",
+   "fitxer": "barris/08187.json",
+   "n": 40,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08194",
+   "nom": "Sant Adrià de Besòs",
+   "comarca": "barcelones",
+   "fitxer": "barris/08194.json",
+   "n": 6,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08245",
+   "nom": "Santa Coloma de Gramenet",
+   "comarca": "barcelones",
+   "fitxer": "barris/08245.json",
+   "n": 17,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08279",
+   "nom": "Terrassa",
+   "comarca": "valles-occidental",
+   "fitxer": "barris/08279.json",
+   "n": 40,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  },
+  {
+   "id": "08307",
+   "nom": "Vilanova i la Geltrú",
+   "comarca": "garraf",
+   "fitxer": "barris/08307.json",
+   "n": 18,
+   "font": "osm_barris_ciutats",
+   "tipus_font": "secundària"
+  }
+ ],
+ "comarques": [
+  {
+   "id": "alt-camp",
+   "nom": "l'Alt Camp",
+   "codi": "01",
+   "fitxer": "comarques/alt-camp.json",
+   "n": 23
+  },
+  {
+   "id": "alt-emporda",
+   "nom": "l'Alt Empordà",
+   "codi": "02",
+   "fitxer": "comarques/alt-emporda.json",
+   "n": 68
+  },
+  {
+   "id": "alt-penedes",
+   "nom": "l'Alt Penedès",
+   "codi": "03",
+   "fitxer": "comarques/alt-penedes.json",
+   "n": 27
+  },
+  {
+   "id": "alt-urgell",
+   "nom": "l'Alt Urgell",
+   "codi": "04",
+   "fitxer": "comarques/alt-urgell.json",
+   "n": 19
+  },
+  {
+   "id": "alta-ribagorca",
+   "nom": "l'Alta Ribagorça",
+   "codi": "05",
+   "fitxer": "comarques/alta-ribagorca.json",
+   "n": 3
+  },
+  {
+   "id": "anoia",
+   "nom": "l'Anoia",
+   "codi": "06",
+   "fitxer": "comarques/anoia.json",
+   "n": 33
+  },
+  {
+   "id": "bages",
+   "nom": "el Bages",
+   "codi": "07",
+   "fitxer": "comarques/bages.json",
+   "n": 30
+  },
+  {
+   "id": "baix-camp",
+   "nom": "el Baix Camp",
+   "codi": "08",
+   "fitxer": "comarques/baix-camp.json",
+   "n": 28
+  },
+  {
+   "id": "baix-ebre",
+   "nom": "el Baix Ebre",
+   "codi": "09",
+   "fitxer": "comarques/baix-ebre.json",
+   "n": 14
+  },
+  {
+   "id": "baix-emporda",
+   "nom": "el Baix Empordà",
+   "codi": "10",
+   "fitxer": "comarques/baix-emporda.json",
+   "n": 36
+  },
+  {
+   "id": "baix-llobregat",
+   "nom": "el Baix Llobregat",
+   "codi": "11",
+   "fitxer": "comarques/baix-llobregat.json",
+   "n": 30
+  },
+  {
+   "id": "baix-penedes",
+   "nom": "el Baix Penedès",
+   "codi": "12",
+   "fitxer": "comarques/baix-penedes.json",
+   "n": 14
+  },
+  {
+   "id": "barcelones",
+   "nom": "el Barcelonès",
+   "codi": "13",
+   "fitxer": "comarques/barcelones.json",
+   "n": 5
+  },
+  {
+   "id": "bergueda",
+   "nom": "el Berguedà",
+   "codi": "14",
+   "fitxer": "comarques/bergueda.json",
+   "n": 31
+  },
+  {
+   "id": "cerdanya",
+   "nom": "la Cerdanya",
+   "codi": "15",
+   "fitxer": "comarques/cerdanya.json",
+   "n": 17
+  },
+  {
+   "id": "conca-de-barbera",
+   "nom": "la Conca de Barberà",
+   "codi": "16",
+   "fitxer": "comarques/conca-de-barbera.json",
+   "n": 22
+  },
+  {
+   "id": "garraf",
+   "nom": "el Garraf",
+   "codi": "17",
+   "fitxer": "comarques/garraf.json",
+   "n": 6
+  },
+  {
+   "id": "garrigues",
+   "nom": "les Garrigues",
+   "codi": "18",
+   "fitxer": "comarques/garrigues.json",
+   "n": 24
+  },
+  {
+   "id": "garrotxa",
+   "nom": "la Garrotxa",
+   "codi": "19",
+   "fitxer": "comarques/garrotxa.json",
+   "n": 21
+  },
+  {
+   "id": "girones",
+   "nom": "el Gironès",
+   "codi": "20",
+   "fitxer": "comarques/girones.json",
+   "n": 27
+  },
+  {
+   "id": "maresme",
+   "nom": "el Maresme",
+   "codi": "21",
+   "fitxer": "comarques/maresme.json",
+   "n": 30
+  },
+  {
+   "id": "montsia",
+   "nom": "el Montsià",
+   "codi": "22",
+   "fitxer": "comarques/montsia.json",
+   "n": 12
+  },
+  {
+   "id": "noguera",
+   "nom": "la Noguera",
+   "codi": "23",
+   "fitxer": "comarques/noguera.json",
+   "n": 30
+  },
+  {
+   "id": "osona",
+   "nom": "Osona",
+   "codi": "24",
+   "fitxer": "comarques/osona.json",
+   "n": 43
+  },
+  {
+   "id": "pallars-jussa",
+   "nom": "el Pallars Jussà",
+   "codi": "25",
+   "fitxer": "comarques/pallars-jussa.json",
+   "n": 14
+  },
+  {
+   "id": "pallars-sobira",
+   "nom": "el Pallars Sobirà",
+   "codi": "26",
+   "fitxer": "comarques/pallars-sobira.json",
+   "n": 15
+  },
+  {
+   "id": "pla-d-urgell",
+   "nom": "el Pla d'Urgell",
+   "codi": "27",
+   "fitxer": "comarques/pla-d-urgell.json",
+   "n": 16
+  },
+  {
+   "id": "pla-de-l-estany",
+   "nom": "el Pla de l'Estany",
+   "codi": "28",
+   "fitxer": "comarques/pla-de-l-estany.json",
+   "n": 11
+  },
+  {
+   "id": "priorat",
+   "nom": "el Priorat",
+   "codi": "29",
+   "fitxer": "comarques/priorat.json",
+   "n": 23
+  },
+  {
+   "id": "ribera-d-ebre",
+   "nom": "la Ribera d'Ebre",
+   "codi": "30",
+   "fitxer": "comarques/ribera-d-ebre.json",
+   "n": 14
+  },
+  {
+   "id": "ripolles",
+   "nom": "el Ripollès",
+   "codi": "31",
+   "fitxer": "comarques/ripolles.json",
+   "n": 19
+  },
+  {
+   "id": "segarra",
+   "nom": "la Segarra",
+   "codi": "32",
+   "fitxer": "comarques/segarra.json",
+   "n": 19
+  },
+  {
+   "id": "segria",
+   "nom": "el Segrià",
+   "codi": "33",
+   "fitxer": "comarques/segria.json",
+   "n": 38
+  },
+  {
+   "id": "selva",
+   "nom": "la Selva",
+   "codi": "34",
+   "fitxer": "comarques/selva.json",
+   "n": 26
+  },
+  {
+   "id": "solsones",
+   "nom": "el Solsonès",
+   "codi": "35",
+   "fitxer": "comarques/solsones.json",
+   "n": 17
+  },
+  {
+   "id": "tarragones",
+   "nom": "el Tarragonès",
+   "codi": "36",
+   "fitxer": "comarques/tarragones.json",
+   "n": 22
+  },
+  {
+   "id": "terra-alta",
+   "nom": "la Terra Alta",
+   "codi": "37",
+   "fitxer": "comarques/terra-alta.json",
+   "n": 12
+  },
+  {
+   "id": "urgell",
+   "nom": "l'Urgell",
+   "codi": "38",
+   "fitxer": "comarques/urgell.json",
+   "n": 20
+  },
+  {
+   "id": "val-d-aran",
+   "nom": "la Val d'Aran",
+   "codi": "39",
+   "fitxer": "comarques/val-d-aran.json",
+   "n": 9
+  },
+  {
+   "id": "valles-occidental",
+   "nom": "el Vallès Occidental",
+   "codi": "40",
+   "fitxer": "comarques/valles-occidental.json",
+   "n": 23
+  },
+  {
+   "id": "valles-oriental",
+   "nom": "el Vallès Oriental",
+   "codi": "41",
+   "fitxer": "comarques/valles-oriental.json",
+   "n": 38
+  },
+  {
+   "id": "moianes",
+   "nom": "el Moianès",
+   "codi": "42",
+   "fitxer": "comarques/moianes.json",
+   "n": 10
+  },
+  {
+   "id": "llucanes",
+   "nom": "el Lluçanès",
+   "codi": "43",
+   "fitxer": "comarques/llucanes.json",
+   "n": 8
+  }
+ ],
+ "final": [
+  {
+   "id": "ppcc",
+   "nom": "Països Catalans",
+   "fitxer": "ppcc.json",
+   "n": 91
+  },
+  {
+   "id": "catalunya",
+   "nom": "Catalunya",
+   "fitxer": "catalunya_comarques.json",
+   "n": 43
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 # Versions per localitat
 
 El joc és el mateix per a tothom; el que canvia d'un lloc a un altre és aquí. Cada carpeta és una versió
-(`manresa`, `santpedor`, `valles-oriental`…) i `index.json` diu quines es publiquen i on.
+(`manresa`, `santpedor`, `valles-oriental`, `barcelona`, `can-baro`…) i `index.json` diu quines es publiquen i on.
 
 | Minijoc / pantalla | Què és local | On es configura |
 |---|---|---|
@@ -37,7 +37,7 @@ de cada versió a `docs/llocs/<id>_preguntes.md`.
 {
   "id": "santpedor",                 // = nom de la carpeta; minúscules, xifres i guions
   "nom": "Santpedor",                // surt al títol de la finestra i a la pàgina d'operador
-  "tipus": "municipi",               // municipi | comarca (informatiu)
+  "tipus": "municipi",               // municipi | comarca | barri (informatiu)
   "codis": { "ine": "08192", "comarca": "bages", "partit_judicial": "Manresa" },   // informatiu
   "joc1": {                          // «El preu (in)just»
     "comunes": "totes",              // o una llista d'ids de preguntes_comunes.json
@@ -73,7 +73,7 @@ sense tocar aquests fitxers: es desen al navegador, separats per versió.
 
 ```json
 { "url_base": "https://quim-hm.github.io/vaga11n/", "arrel": "manresa",
-  "publicats": ["manresa", "santpedor", "valles-oriental"] }
+  "publicats": ["manresa", "santpedor", "valles-oriental", "barcelona", "can-baro"] }
 ```
 
 `tools/build_web.py` construeix totes les versions de `publicats`: `arrel` a `dist/` i les altres a `dist/<id>/`.

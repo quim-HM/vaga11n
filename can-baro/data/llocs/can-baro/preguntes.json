@@ -1,0 +1,128 @@
+[
+  {
+    "id": "lloguer_mitja_can_baro",
+    "enunciat": "Segons les dades del 2025, quin és el lloguer mitjà mensual d'un contracte nou a Can Baró?",
+    "unitat": "€/mes",
+    "valor": 846.8,
+    "any_referencia": 2025,
+    "ambit": "Can Baró (Barcelona)",
+    "font_id": "bcn_pbd_lloguer",
+    "definicio": "Renda mitjana dels contractes d'habitatge nous amb fiança dipositada a l'INCASÒL durant l'any, barri de Can Baró (barri 34 de Barcelona): 846,80 € amb 158 contractes. Comparació: districte d'Horta-Guinardó 909,13 € i Barcelona 1.134,61 € (30.789 contractes). Mitjanes de 3 anys: renda de tots els contractes del trienni = Σ(renda × contractes) / Σ contractes.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 1800
+    },
+    "pas": 20,
+    "escala": "lineal",
+    "metafora": "bitllets",
+    "revelacio": "846,80 €. A Horta-Guinardó, 909,13 €; a Barcelona, 1.134,61 €. La mitjana 2023–2025 és un 53,3 % més alta que la del 2014–2016.",
+    "nota": "Només contractes nous; no inclou els lloguers de contractes antics ni despeses com subministraments o comunitat. Mostra petita: 158 contractes el 2025 (162 el 2024, 177 el 2023); el valor anual oscil·la (890,02 €, 917,26 € i 846,80 €). Per això la variació es calcula amb mitjanes de 3 anys: 577,33 € (2014–2016, 631 contractes) i 885,16 € (2023–2025, 497 contractes). La sèrie del barri comença el 2014, i 2014–2016 és el trienni més barat. Euros corrents: entre els mateixos triennis l'IPC general de Catalunya (mitjana anual) va pujar un 23,4 % (font ine_ipc). El barri de cada contracte l'assigna l'Ajuntament de Barcelona a partir de l'adreça de l'habitatge (dades del Portal Barcelona Dades, font bcn_pbd_lloguer).",
+    "nota_curta": "Només contractes nous amb fiança dipositada (158 a Can Baró el 2025); no inclou despeses ni lloguers antics."
+  },
+  {
+    "id": "lloguer_vs_renda_can_baro",
+    "enunciat": "Segons les dades del 2023, quin percentatge de la renda anual per habitant de Can Baró costa un any de lloguer d'un contracte nou?",
+    "unitat": "%",
+    "valor": 45.1,
+    "any_referencia": 2023,
+    "ambit": "Can Baró (Barcelona)",
+    "font_id": "bcn_pbd_rdlpc",
+    "definicio": "Càlcul propi: lloguer mitjà mensual dels contractes nous × 12 / renda disponible de les llars per càpita × 100 = 890,02 € × 12 / 23.689 € × 100. Lloguer: fiances INCASÒL, barri de Can Baró, 2023 (177 contractes; font bcn_pbd_lloguer). Renda: Ajuntament de Barcelona, Oficina Municipal de Dades, renda disponible de les llars per càpita del barri, 2023.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 100
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "pastis",
+    "revelacio": "El 45,1 %: més de 4 de cada 10 euros. Un any de lloguer són 10.680 € i la renda per habitant, 23.689 €. A Barcelona, el 52,3 %.",
+    "nota": "La renda disponible per càpita reparteix la renda de totes les llars entre tota la població (també infants i gent gran): és la referència d'una persona que visqués sola amb la renda mitjana; en una llar amb més ingressos el pes del lloguer és menor. Amb la mitjana de lloguer 2021–2023 (807,75 €) surt el 40,9 %. Mateix càlcul: districte d'Horta-Guinardó 47,7 %, Barcelona 1.136,40 € × 12 / 26.069 € = 52,3 %. Evolució (2015–2017 contra 2021–2023): lloguer nou +28,0 % i renda per habitant +14,0 %. 2023 és la darrera dada de renda publicada per barris. El barri de cada contracte l'assigna l'Ajuntament de Barcelona a partir de l'adreça de l'habitatge (dades del Portal Barcelona Dades, font bcn_pbd_lloguer).",
+    "nota_curta": "Renda disponible per habitant del barri (Ajuntament, 2023) i lloguer dels contractes nous del 2023."
+  },
+  {
+    "id": "hores_setmana_smi_lloguer_can_baro",
+    "enunciat": "Segons les dades del 2025, quantes hores a la setmana cal treballar amb el salari mínim només per pagar el lloguer a Can Baró?",
+    "unitat": "hores",
+    "valor": 24.5,
+    "any_referencia": 2025,
+    "ambit": "Can Baró (Barcelona)",
+    "font_id": "bcn_pbd_lloguer",
+    "definicio": "Càlcul propi: hores setmanals = lloguer setmanal / preu de l'hora de salari mínim. Lloguer setmanal = 846,80 €/mes × 12 / 52 = 195,41 € (lloguer mitjà dels contractes nous de 2025 al barri, fiances INCASÒL). Hora d'SMI = 1.184 € × 14 pagues / 2.080 h (40 h × 52 setmanes) = 7,97 €/h bruts (Real Decreto 87/2025, BOE-A-2025-2576). Resultat: 24,5 h, el 61,3 % d'una setmana de 40 hores.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 56
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "setmana",
+    "revelacio": "Unes 25 hores: fins dijous, només per al lloguer. A Barcelona (1.135 €/mes), unes 33: fins divendres.",
+    "nota": "Salari mínim brut (abans de cotitzacions i retencions; amb el net calen més hores), 14 pagues i 2.080 h retribuïdes l'any. Lloguer mitjà dels contractes nous amb fiança dipositada a l'INCASÒL (no inclou lloguers antics ni despeses). Mostra petita: 158 contractes el 2025 (162 el 2024, 177 el 2023); el valor anual oscil·la (890,02 €, 917,26 € i 846,80 €). Amb la mitjana 2023–2025 (885,16 €) en surten 25,6 h, el mateix tram. Mateix mètode: Horta-Guinardó (909,13 €) 26,3 h; Barcelona (1.134,61 €) 32,9 h. Fonts boe_smi i boe_smi_2025.",
+    "nota_curta": "Salari mínim brut del 2025 (14 pagues, 40 h setmanals) i lloguer mitjà dels contractes nous del 2025."
+  },
+  {
+    "id": "habitatges_no_principals_can_baro",
+    "enunciat": "Segons l'últim cens (2021), de cada 100 habitatges de Can Baró, quants no són la residència habitual de ningú?",
+    "unitat": "%",
+    "valor": 11.7,
+    "any_referencia": 2021,
+    "ambit": "Can Baró (Barcelona)",
+    "font_id": "bcn_pbd_cens",
+    "definicio": "Habitatges no principals / habitatges totals: 519 / 4.422 (INE, Cens de població i habitatges 2021, agregat per barris per l'Ajuntament de Barcelona). Habitatge principal: el que és la residència habitual d'almenys una persona; els no principals són els buits i els secundaris o d'ús esporàdic.",
+    "confianca": "mitjana",
+    "rang": {
+      "min": 0,
+      "max": 40
+    },
+    "pas": 1,
+    "escala": "lineal",
+    "metafora": "casetes",
+    "revelacio": "11,7 de cada 100: 519 habitatges, gairebé el doble dels contractes de lloguer nous signats al barri el 2021 (277). A Barcelona, 17,0.",
+    "nota": "Per barris, el cens només separa els habitatges principals dels no principals; la xifra d'habitatges buits (estimada per l'INE a partir del consum elèctric) només es publica per municipis: a Barcelona, el 9,3 % (font ine_censo2021_us). Un habitatge no principal no vol dir disponible per llogar (segones residències, obres, herències, venda, mal estat...). Barcelona: 137.601 no principals de 808.740 (la taula 59531 de l'INE en dona 808.751 en total, 11 més). Contractes nous del 2021 al barri: fiances INCASÒL (font bcn_pbd_lloguer); 519 / 277 = 1,87. Llars de lloguer a Can Baró el 2021: 1.086 de 3.912 habitatges principals.",
+    "nota_curta": "Cens 2021: buits més secundaris; no principal no vol dir disponible per llogar."
+  },
+  {
+    "id": "hpo_acabats_barcelona",
+    "enunciat": "Entre 2013 i 2025, quants habitatges de protecció oficial s'han acabat a tot Barcelona?",
+    "unitat": "habitatges",
+    "valor": 5696,
+    "any_referencia": 2025,
+    "ambit": "Barcelona",
+    "font_id": "gencat_hpo",
+    "definicio": "Suma dels habitatges amb protecció oficial acabats (amb qualificació definitiva) al municipi de Barcelona (codi Idescat 080193), anys 2013 a 2025 (Generalitat de Catalunya, conjunt de dades v8i4-fa4q). Mitjanes anuals: càlcul propi.",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 12000
+    },
+    "pas": 100,
+    "escala": "lineal",
+    "metafora": "edifici",
+    "revelacio": "5.696, uns 438 l'any; del 2002 al 2012, uns 1.145 l'any. Del 2025 al 2029, la Generalitat en demana 3.397 l'any a Barcelona.",
+    "nota": "Inclou habitatges protegits de lloguer i de venda (no tots són habitatge públic), els del programa de remodelació de barris, els adquirits per tanteig i retracte i els preexistents. Tall: 2013, primer any complet després del rescat bancari del 2012. 2002–2012: 12.590 acabats a Barcelona. A tot Catalunya: 5.425 acabats l'any de mitjana (2002–2012) i 1.438 (2013–2025). Objectiu: Pla territorial sectorial d'habitatge (Decret 408/2024, font gencat_ptsh_2024), objectius de solidaritat urbana de Barcelona: 46.976 habitatges destinats a polítiques socials de 738.280 principals (6,4 %) a la situació inicial; nous a promoure per quinquenni (2025–2029, 2030–2034, 2035–2039, 2040–2044): 16.983, 32.076, 35.333, 5.467 (total 89.859), per arribar al 15 % de l'article 73 de la Llei 18/2007. Primer quinquenni: 16.983 en 5 anys, 3.397 l'any de mitjana. Els 'habitatges destinats a polítiques socials' del Pla són una categoria més àmplia que els de protecció oficial acabats (inclouen, per exemple, habitatges privats de lloguer administrats per xarxes de mediació social, allotjaments dotacionals o habitatges cedits en masoveria urbana), de manera que la comparació és orientativa. Registre de sol·licitants d'habitatge protegit a Barcelona (dades del Pla): 42.941 el 2019 (mitjana 2017–2019: 39.602). No hi ha dada per barris: la xifra és de tota la ciutat. No s'ha revisat l'estat del pla local d'habitatge de l'Ajuntament.",
+    "nota_curta": "Tota la ciutat; inclou HPO de lloguer i de venda. Pla territorial (Decret 408/2024): comparació orientativa."
+  },
+  {
+    "id": "llancaments_partit_judicial_barcelona",
+    "enunciat": "Quants desnonaments s'han executat el 2025 als jutjats de Barcelona, dels quals depèn Can Baró?",
+    "unitat": "desnonaments",
+    "valor": 1362,
+    "any_referencia": 2025,
+    "ambit": "Partit judicial de Barcelona",
+    "font_id": "cgpj_pxweb_llancaments",
+    "definicio": "Llançaments practicats (desnonaments executats; CGPJ, taula OUJII021) als 62 jutjats de primera instància de Barcelona (J1I nr. 1 a 62). El CGPJ compta un llançament per immoble amb canvi de possessió. El partit judicial de Barcelona (codi CTEAJE 0811) només inclou el municipi de Barcelona, segons la relació de municipis i partits judicials del Departament de Justícia (font gencat_partits_judicials).",
+    "confianca": "alta",
+    "rang": {
+      "min": 0,
+      "max": 3000
+    },
+    "pas": 25,
+    "escala": "lineal",
+    "metafora": "claus",
+    "revelacio": "1.362: gairebé 4 cada dia, i 8 de cada 10 provenen d'un lloguer. Del 2013 al 2025, 27.609: gairebé 6 cada dia.",
+    "nota": "Inclou també immobles no residencials. 2025: 1.096 per la Llei d'arrendaments urbans (80,5 %), 124 per execució hipotecària, 142 altres. Per dia: 1.362 / 365 = 3,73; 2013–2025: 27.609 / 4.748 dies = 5,81. La xifra anual ha baixat des dels 3.289 del 2013 (mínim: 1.028 el 2020). Sèrie disponible des del 2013. El CGPJ no publica aquesta dada per barris: la xifra és de tota la ciutat. No s'ha comprovat si el canvi d'organització judicial (tribunals d'instància) afecta el recompte del 2025.",
+    "nota_curta": "Tots els jutjats de Barcelona (el partit judicial és la ciutat); inclou locals i altres immobles."
+  }
+]

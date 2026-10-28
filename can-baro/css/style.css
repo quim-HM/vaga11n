@@ -1,0 +1,11 @@
+/* Archivo (SIL OFL 1.1, fonts/OFL-Archivo.txt): variable wght 100–900 / wdth 62–125, from google/fonts.
+   Poster type is the system «Arial Black» (vagageneral.org «arialBlack»); it is not bundled. */
+@font-face { font-family: "Archivo"; src: url("../fonts/Archivo-Variable.ttf") format("truetype");
+  font-weight: 100 900; font-stretch: 62% 125%; font-style: normal; font-display: block; }
+
+html, body { margin: 0; height: 100%; background: #00009E; overflow: hidden; cursor: none; }
+body.show-cursor { cursor: default; }
+canvas#stage { display: block; width: 100vw; height: 100vh; }
+#boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: 800 32px "Archivo", Arial, sans-serif; color: #FFFF00; background: #00009E; }
+#boot.hidden { display: none; }

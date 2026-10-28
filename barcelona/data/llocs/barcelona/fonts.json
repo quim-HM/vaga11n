@@ -1,0 +1,68 @@
+[
+  {
+    "id": "incasol_fiances_municipis",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica (Secretaria d'Habitatge) / INCASÒL",
+    "titol": "Preu mitjà del lloguer d'habitatges per municipi (fiances de lloguer dipositades a l'INCASÒL) – conjunt de dades qww9-bvhh",
+    "titol_curt": "Fiances de lloguer per municipi (INCASÒL)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/qww9-bvhh.csv?codi_territorial=08019&$limit=5000&$order=any,periode",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Conjunt de dades actualitzat el 30-7-2026. Descripció oficial: explotació estadística censal del registre de fiances de lloguer dipositades a l'INCASÒL (contractes nous). Barcelona: 30.789 contractes el 2025. Còpia: data/raw/llocs/barcelona/fiances_barcelona.csv (metadades: data/raw/llocs/barcelona/fiances_municipis_metadades.json)."
+  },
+  {
+    "id": "ine_censo2021_us",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Censo de Población y Viviendas 2021 – Viviendas según su intensidad de uso (taula 59531)",
+    "titol_curt": "Cens 2021: habitatges segons l'ús (INE)",
+    "url": "https://www.ine.es/jaxi/files/tpx/es/csv_bdsc/59531.csv?nocab=1",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Fitxer complet tal com es va baixar (SHA-256 8fccd6713f3940a01e3a74c0394a93f5395500257ad328415c301afc6d0ef7af), desat comprimit amb gzip: data/raw/llocs/barcelona/ine_censo2021_59531.csv.gz (és el mateix fitxer que el de Santpedor, consultat el 26-10-2026). Files usades: '08019 Barcelona' i '09 Cataluña'. Nota de la taula: dades actualitzades el 22-11-2024. Pàgina de consulta: https://www.ine.es/jaxi/Tabla.htm?tpx=59531&L=0"
+  },
+  {
+    "id": "gencat_ptsh_2024",
+    "organisme": "Generalitat de Catalunya – Departament de Territori, Habitatge i Transició Ecològica",
+    "titol": "Pla territorial sectorial d'habitatge de Catalunya (octubre 2024), aprovat pel Decret 408/2024, de 22 d'octubre",
+    "titol_curt": "Pla territorial sectorial d'habitatge 2024 (Generalitat)",
+    "url": "https://www.gencat.cat/territori/transparencia/normativa_tramit/pla-territorial-sectorial-habitatge/20241011-pla-territorial-sectorial-habitatge.pdf",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Taula d'objectius quinquennals de solidaritat urbana per municipi (quinquennis 2025–2044): Barcelona, situació inicial 46.976 habitatges destinats a polítiques socials de 738.280 principals (6,4 %); nous a promoure 16.983, 32.076, 35.333, 5.467. Taula del registre de sol·licitants d'habitatge amb protecció oficial: Barcelona, població 1.636.762, 42.941 sol·licituds el 2019 i 39.602 de mitjana 2017–2019. El PDF original fa 165 MB: es conserva el text complet extret (data/raw/pdf/gencat_ptsh_2024.txt) i un extracte de pàgines (data/raw/pdf/gencat_ptsh_2024_extracte.pdf)."
+  },
+  {
+    "id": "cgpj_pxweb_llancaments",
+    "organisme": "Consejo General del Poder Judicial (CGPJ) – Estadística Judicial",
+    "titol": "Base de datos de la Estadística Judicial (PC-Axis): 'Lanzamientos practicados. Juzgados de Primera Instancia e Instrucción' (taula OUJII021)",
+    "titol_curt": "Llançaments practicats per jutjat (CGPJ)",
+    "url": "https://www6.poderjudicial.es/PXWeb-2025-v1/pxweb/es/10.-Juzgados%20de%20Primera%20Instancia%20e%20Instrucci%C3%B3n/-/OUJII021.px/",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Selecció: anys 2013–2025, els 62 òrgans 'J1I nr. 1 a 62 BARCELONA' (codis 090811…, partit judicial de Barcelona, codi CTEAJE 0811), els 4 tipus de procediment. Consulta feta amb el formulari PxWeb (data/raw/llocs/barcelona/cgpj_pxweb_query_bcn.py) en trams d'anys perquè el PxWeb mostra 1.000 files com a màxim; respostes HTML desades tal com arriben: data/raw/llocs/barcelona/cgpj_pxweb_OUJII021_barcelona_*.html."
+  },
+  {
+    "id": "gencat_partits_judicials",
+    "organisme": "Generalitat de Catalunya – Departament de Justícia i Qualitat Democràtica (Catàleg Tècnic de Dades)",
+    "titol": "Relació Municipis i Partit Judicial de Catalunya (conjunt de dades 772x-hgsh) i Partits judicials de Catalunya (95tc-3cti)",
+    "titol_curt": "Partits judicials per municipi (Departament de Justícia)",
+    "url": "https://analisi.transparenciacatalunya.cat/resource/772x-hgsh.csv?$limit=5000",
+    "data_consulta": "2026-10-26",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús del portal Dades obertes de Catalunya (metadada de llicència: 'See Terms of Use')",
+    "notes": "Barcelona (codi Idescat 080193) és l'únic municipi del partit judicial 11, Barcelona (codi CTEAJE 0811). Dades actualitzades el 2021-09-22. Llista de partits: https://analisi.transparenciacatalunya.cat/resource/95tc-3cti.csv?$limit=5000. Còpies (les mateixes que les de Santpedor, consultades el 26-10-2026): data/raw/llocs/barcelona/gencat_municipis_partit_judicial.csv, gencat_partits_judicials.csv i les metadades *_metadades.json."
+  },
+  {
+    "id": "ine_adrh",
+    "organisme": "Instituto Nacional de Estadística (INE)",
+    "titol": "Atlas de Distribución de Renta de los Hogares – Indicadores de renta media y mediana (Barcelona, taula 30896); sèrie ADRH102264 'Barcelona. Renta neta media por hogar'",
+    "titol_curt": "Atles de distribució de la renda de les llars (INE)",
+    "url": "https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/ADRH102264?nult=30",
+    "data_consulta": "2026-10-28",
+    "tipus": "oficial",
+    "llicencia": null,
+    "notes": "Sèrie municipal localitzada filtrant la taula 30896 pel municipi (https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/30896?tv=19:563&nult=20). També s'ha baixat ADRH102265 (renda neta mitjana per persona). Còpies: data/raw/llocs/barcelona/ine_adrh_barcelona_hogar.json, ine_adrh_barcelona_persona.json i ine_adrh_30896_barcelona_municipi.json."
+  }
+]

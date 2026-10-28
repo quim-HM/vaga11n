@@ -1,0 +1,47 @@
+{
+  "_nota": "Versió de Barcelona (municipi). Format: data/llocs/README.md. Les preguntes, sèries i fonts locals les genera tools/build_lloc_barcelona.py; decisions a docs/llocs/barcelona_preguntes.md. La resta d'aquest fitxer s'edita a mà.",
+  "id": "barcelona",
+  "nom": "Barcelona",
+  "tipus": "municipi",
+  "codis": {
+    "ine": "08019",
+    "idescat": "080193",
+    "comarca": "barcelones",
+    "provincia": "08",
+    "partit_judicial": "Barcelona"
+  },
+  "joc1": {
+    "comunes": "totes",
+    "excloure": []
+  },
+  "joc2": {
+    "_nota": "Configuració de «Final de mes» (vegeu data/llocs/manresa/lloc.json).",
+    "any_base": 2015,
+    "ordenar_per_pujada": true,
+    "etapes": [
+      { "serie": "salari_catalunya", "etiqueta": "Salaris" },
+      { "serie": "ipc_catalunya_aliments", "etiqueta": "Cistella" },
+      { "opcions": [
+        { "serie": "lloguer_barcelona", "etiqueta": "Lloguer a Barcelona" },
+        { "serie": "lloguer_catalunya", "etiqueta": "Lloguer a Catalunya" }
+      ] },
+      { "serie": "preu_habitatge_catalunya", "etiqueta": "Preu de l'habitatge" }
+    ]
+  },
+  "joc3": {
+    "_nota": "El joc comença pels 73 barris de Barcelona, després els municipis del Barcelonès i els Països Catalans.",
+    "ciutat": "08019",
+    "comarca": "barcelones",
+    "final": "ppcc"
+  },
+  "final": {
+    "difusio": {
+      "_nota": "Barcelona té comitès de vaga per barris o districtes (Can Baró, Ciutat Vella, el Guinardó, Horta, les Corts, Nou Barris, Poble Sec, Sant Martí, Eixample…) i cap canal comú de ciutat a vagageneral.org (consulta 28-10-2026, còpies a data/raw/llocs/barcelona/vagageneral_participa.html i data/raw/llocs/can-baro/vagageneral_convocatories_comite_can-baro.html): l'enllaç du al mapa de comitès de la campanya.",
+      "titol": "Comitès de vaga",
+      "subtitol": "Barcelona · vagageneral.org/participa",
+      "url": "https://vagageneral.org/participa",
+      "mostrar": true
+    }
+  },
+  "textos": {}
+}

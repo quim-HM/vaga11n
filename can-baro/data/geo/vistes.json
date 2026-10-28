@@ -1,0 +1,7 @@
+{
+  "_nota": "Vista de joc per ciutat (nivell 1 d'«Encén la vaga»). 'context': barris perifèrics/rurals que es dibuixen tènues i no es juguen. 'vista': [minLon, minLat, maxLon, maxLat] del marc urbà.",
+  "08113": {
+    "context": ["08113-17"],
+    "vista": [1.793, 41.705, 1.871, 41.75]
+  }
+}

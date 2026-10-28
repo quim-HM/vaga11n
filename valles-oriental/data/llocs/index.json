@@ -2,5 +2,5 @@
   "_nota": "Versions que es publiquen amb tools/build_web.py. 'arrel' va a l'arrel del lloc web (url_base) i cada una de les altres a url_base + <id>/. Cada id és una carpeta d'aquesta mateixa carpeta (vegeu README.md).",
   "url_base": "https://quim-hm.github.io/vaga11n/",
   "arrel": "manresa",
-  "publicats": ["manresa", "santpedor", "valles-oriental"]
+  "publicats": ["manresa", "santpedor", "valles-oriental", "barcelona", "can-baro"]
 }

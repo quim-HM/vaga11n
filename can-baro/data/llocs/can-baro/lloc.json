@@ -1,0 +1,50 @@
+{
+  "_nota": "Versió de Can Baró (barri 34 de Barcelona, districte d'Horta-Guinardó). Format: data/llocs/README.md. Les preguntes, sèries i fonts locals les genera tools/build_lloc_can_baro.py; decisions a docs/llocs/can-baro_preguntes.md. La resta d'aquest fitxer s'edita a mà.",
+  "id": "can-baro",
+  "nom": "Can Baró",
+  "tipus": "barri",
+  "codis": {
+    "barri": "34",
+    "districte": "07",
+    "municipi_ine": "08019",
+    "municipi_idescat": "080193",
+    "comarca": "barcelones",
+    "provincia": "08",
+    "partit_judicial": "Barcelona"
+  },
+  "joc1": {
+    "comunes": "totes",
+    "excloure": []
+  },
+  "joc2": {
+    "_nota": "Configuració de «Final de mes» (vegeu data/llocs/manresa/lloc.json). Can Baró té pocs contractes l'any i la sèrie del barri comença el 2014: es fa servir la del districte (vegeu series.json).",
+    "any_base": 2015,
+    "ordenar_per_pujada": true,
+    "etapes": [
+      { "serie": "salari_catalunya", "etiqueta": "Salaris" },
+      { "serie": "ipc_catalunya_aliments", "etiqueta": "Cistella" },
+      { "opcions": [
+        { "serie": "lloguer_horta_guinardo", "etiqueta": "Lloguer a Horta-Guinardó" },
+        { "serie": "lloguer_barcelona", "etiqueta": "Lloguer a Barcelona" },
+        { "serie": "lloguer_catalunya", "etiqueta": "Lloguer a Catalunya" }
+      ] },
+      { "serie": "preu_habitatge_catalunya", "etiqueta": "Preu de l'habitatge" }
+    ]
+  },
+  "joc3": {
+    "_nota": "El joc comença pels 73 barris de Barcelona (Can Baró n'és un), després els municipis del Barcelonès i els Països Catalans.",
+    "ciutat": "08019",
+    "comarca": "barcelones",
+    "final": "ppcc"
+  },
+  "final": {
+    "difusio": {
+      "_nota": "El Comitè de vaga de Can Baró no publica cap canal ni correu a vagageneral.org (consulta 28-10-2026, còpia a data/raw/llocs/can-baro/vagageneral_convocatories_comite_can-baro.html; fa assemblees obertes els dilluns al carrer França, 46): l'enllaç du a les seves convocatòries al web de la campanya.",
+      "titol": "Comitè de vaga",
+      "subtitol": "Can Baró · convocatòries a vagageneral.org",
+      "url": "https://vagageneral.org/convocatories?comite=can-baro",
+      "mostrar": true
+    }
+  },
+  "textos": {}
+}

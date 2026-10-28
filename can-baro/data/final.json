@@ -1,0 +1,26 @@
+{
+  "_nota": "Textos de la pantalla final i d'atracció, comuns a totes les versions. Lemes de la campanya (vagageneral.org). Cada versió pot canviar-ne qualsevol camp a data/llocs/<id>/lloc.json → final (p. ex. el canal de difusió: difusio.url, subtitol, mostrar). El QR es genera a partir de l'enllaç. «anim»: frases breus del manifest de vagageneral.org per a la pantalla final.",
+  "lemes": {
+    "dalt": "VIURE ENS COSTA LA VIDA",
+    "titol": "VAGA GENERAL",
+    "data": "11 DE NOVEMBRE",
+    "crida": "Ni salaris per terra ni habitatge pels núvols."
+  },
+  "difusio": {
+    "titol": "Participa",
+    "subtitol": "vagageneral.org/participa",
+    "url": "https://vagageneral.org/participa",
+    "mostrar": true
+  },
+  "anim": {
+    "frase": "Només lluitant podem millorar les nostres vides. Ara és l'hora de redoblar la lluita.",
+    "exigim_titol": "Exigim",
+    "exigim": [
+      "Baixada dels preus de lloguer",
+      "Salari mínim fins als 1.600 €",
+      "Jornada de 35 hores setmanals"
+    ],
+    "font": "vagageneral.org/manifest",
+    "mes_info": "Totes les demandes de la vaga: vagageneral.org/manifest"
+  }
+}
