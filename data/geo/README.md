@@ -6,8 +6,9 @@ Geometries reals (no inventades) per al joc, en WGS84 lon/lat (5 decimals), simp
 
 | Fitxer | Contingut | Features | Mida | Tolerància DP | Font geometria | Població |
 |---|---|---|---|---|---|---|
-| `index.json` | ciutats (13) i un barri (Can Baró), comarques (43) i mapes finals (2) | | ~8 KB | | | |
+| `index.json` | ciutats (13) i un barri (Can Baró), comarques (43) i una àrea (AMB), mapes finals (2) | | ~8 KB | | | |
 | `comarques/<slug>.json` (43) | municipis de cada comarca | 947 en total (3–68 per fitxer) | 1,5 MB en total, màx. 78 KB | extensió/1200 (16–56 m) | ICGC Divisions administratives v2r2 (CC BY 4.0) | Idescat, 1/1/2025 |
+| `arees/amb.json` | els 36 municipis de l'Àrea Metropolitana de Barcelona (a `index.json`, entre les comarques amb `"tipus": "area"` i id `amb`); llista d'AMB Open Data (`raw/amb_municipis.json`, aparellada pel nom) | 36 | ~51 KB | 31,5 m | ICGC v2r2 (CC BY 4.0) | Idescat, 1/1/2025 |
 | `barris/<INE>.json` (13) | barris de ciutats | 352 en total | 275 KB en total, màx. 79 KB | extensió/1200 (3–14 m) | oficial (Barcelona, Girona, Reus) o OSM (ODbL) | Barcelona 1/1/2026, Reus 31/12/2024, Manresa 2023; la resta null |
 | `barris/08019-34.json` | les 7 seccions censals de Can Baró (barri 34 de Barcelona), primer nivell de la versió `can-baro` | 7 | ~6 KB | 3 m | **Aj. Barcelona, Open Data BCN (CC BY 4.0)** | padró 1/1/2026 per secció censal |
 | `ppcc.json` | Països Catalans (sense l'Alguer) | 91 | ~360 KB | 300 m | ICGC, ICV, IGEAR, IDEIB, IGN/Etalab, OSM | Idescat, INE, INSEE |

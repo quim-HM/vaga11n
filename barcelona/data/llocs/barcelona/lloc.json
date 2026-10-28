@@ -29,9 +29,9 @@
     ]
   },
   "joc3": {
-    "_nota": "El joc comença pels 73 barris de Barcelona, després els municipis del Barcelonès i els Països Catalans.",
+    "_nota": "El joc comença pels 73 barris de Barcelona, després els 36 municipis de l'Àrea Metropolitana de Barcelona (data/geo/arees/amb.json) i els Països Catalans. A la pàgina d'operador es pot triar el Barcelonès com a segon nivell.",
     "ciutat": "08019",
-    "comarca": "barcelones",
+    "comarca": "amb",
     "final": "ppcc"
   },
   "final": {
