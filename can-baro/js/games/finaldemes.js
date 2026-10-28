@@ -1155,7 +1155,7 @@ export default class FinalDeMes {
       t: this.pt,
       cards: finaldemesCards(oneHand, T),
     });
-    drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins del camí"));
+    drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins de l'àrea"));
     if (this.pt > HOWTO_MIN) {
       const mouse = inp.usingMouse;
       const r = clamp((this.raiseT || 0) / RAISE_S, 0, 1);
