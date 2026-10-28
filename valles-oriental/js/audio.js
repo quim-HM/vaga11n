@@ -166,11 +166,17 @@ function coin(step) {
 // pentatonic with the share of the map organised, so a map filling up is heard as a rise; a small
 // detune, a random second voice and a varying crackle keep repeats at the same share from sounding
 // identical.
-const SPARK_STEPS = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];   // semitones above C5
+// Two octaves of a major pentatonic (semitones): sparks, and the reveal count-up of «El preu (in)just»
+const SPARK_STEPS = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+
+// Step of that scale (0..10) for a share 0..1 (a share of the map, a value's place on its range)
+export function scaleStep(share) {
+  const s = Number.isFinite(share) ? clamp01(share) : 0;
+  return Math.round(s * (SPARK_STEPS.length - 1));
+}
 
 export function sparkSemis(share) {
-  const s = Number.isFinite(share) ? clamp01(share) : 0;
-  return SPARK_STEPS[Math.round(s * (SPARK_STEPS.length - 1))];
+  return SPARK_STEPS[scaleStep(share)];
 }
 
 function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
@@ -221,6 +227,20 @@ export const sfx = {
   limit: () => { tone(196, 0.15, { type: "square", gain: 0.05, slide: -60, lp: 900 }); noise(0.05, { gain: 0.04, hp: 150, lp: 1200 }); },
   // a confirm ring filling up (stage 1..3 of 4: C5, E5, G5); the lock sound completes it
   charge: (stage) => tone(523 * 2 ** ([0, 4, 7][clampInt(stage - 1, 0, 2)] / 12), 0.14, { gain: 0.06 }),
+  // «El preu (in)just» reveal: a soft pluck per step while the real figure counts up (share = its
+  // place on the range, C4 at the bottom, two octaves up at the top), then one calm bell where it
+  // lands. Neutral on purpose: the same for every answer, no verdict.
+  tally: (share) => {
+    const f = 261.63 * 2 ** (sparkSemis(share) / 12);
+    tone(f, 0.12, { type: "triangle", gain: 0.055, attack: 0.006 });
+    tone(f * 2, 0.07, { gain: 0.012, attack: 0.006 });
+  },
+  land: (share) => {
+    const f = 261.63 * 2 ** (sparkSemis(share) / 12);
+    tone(f, 1.0, { type: "triangle", gain: 0.085 });
+    tone(f * 2, 0.7, { gain: 0.025, delay: 0.01 });
+    tone(f * 1.5, 0.8, { gain: 0.02, delay: 0.03 });
+  },
   // screen / level change: a rising swish and a soft two-note chime
   whoosh: () => {
     swish(0.42, { gain: 0.06 });

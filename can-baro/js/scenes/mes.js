@@ -63,8 +63,9 @@ export default class Mes {
     text(g, T("mes.titol", "MÉS PREGUNTES?"), W / 2, 320, { size: 110, kind: "title", align: "center", color: C.head, alpha: a, maxW: W - 200 });
     // this screen only follows «El preu (in)just»: the next game is the one after it in the list
     const next = GAMES[GAMES.findIndex((gm) => gm.id === "preu") + 1];
+    const nMes = Math.min(N_QUESTIONS, this.left);
     const labels = {
-      mes: [T("mes.si", "Sí, més preguntes"), T("mes.queden", "{n} preguntes més", { n: Math.min(N_QUESTIONS, this.left) })],
+      mes: [T("mes.si", "Sí, més preguntes"), nMes === 1 ? T("mes.queda_una", "1 pregunta més") : T("mes.queden", "{n} preguntes més", { n: nMes })],
       seguent: [T("mes.no", "Següent joc ▶"), next ? next.title : ""],
     };
     for (const b of this.buttons) {

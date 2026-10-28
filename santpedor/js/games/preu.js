@@ -10,14 +10,15 @@ import { T } from "../textos.js";
 //    it has come down once.
 import { W, H, C, LAYOUT, text, wrap, wrapLines, font, panel, clamp, lerp, easeOut, shuffle, Particles, onCard, posterBlock } from "../ui.js";
 import { MAP, inRect } from "../input.js";
-import { drawMetaphor, fmtWithUnit } from "./metafores.js";
+import { drawMetaphor, fmtWithUnit, fraction } from "./metafores.js";
+import { scaleStep } from "../audio.js";
 import { drawCountdown } from "../countdown.js";
 import { drawOkBadge, textIcon } from "../icons.js";
 import { drawFooterHint } from "../hand.js";
 import { drawTutorial, preuFigure, drawPreuGoal } from "../tutorial.js";
 
-// A round is short (3 questions); «Més preguntes» offers another one while unseen questions remain
-export const N_QUESTIONS = 3;
+// A round has 5 questions; «Més preguntes» offers another one while unseen questions remain
+export const N_QUESTIONS = 5;
 const ANSWER_MAX_S = 22;
 const WARN_S = 6;              // countdown shown during the last seconds
 const CONFIRM_S = 1.2;
@@ -30,6 +31,8 @@ const HOWTO_MIN_S = 6.0;      // the how-to card stays at least this long before
 const HOWTO_AUTO_S = 24;      // … and moves on by itself after this
 const REVEAL_MAX_S = 25;   // players move on themselves (raise a hand / click); auto only as a safety net
 const NEXT_RAISE_S = 0.6;
+const COUNT_S = 2.0;          // reveal: «LA REALITAT» counts up to the real value in this time
+const TALLY_GAP_S = 0.06;     // ... with a pluck per step of the scale, never closer than this
 const LEVER_UP = 0.45, LEVER_DOWN = -0.1, REST_Y = -0.5;
 
 const yOf = (hy) => H * (MAP.yTop - hy) / (MAP.yTop - MAP.yBottom);
@@ -164,7 +167,9 @@ export default class Preu {
     this.t = 0;
     this.nextT = 0;
     this.nextArmed = false;
-    this.revealSfx = false;
+    this.revealLanded = false;
+    this.revealStep = null;
+    this.revealStepT = null;
     if (!quiet) this.app.transition();
   }
 
@@ -245,16 +250,41 @@ export default class Preu {
         break;
       case "reveal": {
         const r = this.results[this.results.length - 1];
-        if (!this.revealSfx && this.t > 1.0) {
-          this.revealSfx = true;
-          this.app.sfx.reveal();
-          setTimeout(() => (r.points >= 80 ? this.app.sfx.good() : r.points >= 40 ? this.app.sfx.meh() : this.app.sfx.bad()), 900);
-          if (r.points >= 80) this.fx.burst(W * 0.73, H * 0.45, 70);
-        }
+        this.revealSound(r);
         if (this.wantsNext(dt, REVEAL_NEXT_MIN_S)) { this.app.ack(); this.next(); }
         else if (this.t > REVEAL_MAX_S) this.next();
         break;
       }
+    }
+  }
+
+  // «LA REALITAT» counts up from the bottom of the scale to the real value (easing out, COUNT_S)
+  countUp(q) {
+    const prog = easeOut(this.t / COUNT_S);
+    const shown = q.escala === "log" && q.rang.min > 0
+      ? q.rang.min * Math.pow(q.valor / q.rang.min, Math.max(prog, 0.0001))
+      : lerp(q.rang.min, q.valor, prog);
+    return { prog, shown };
+  }
+
+  // The reveal is heard only through that count-up, the same for every answer (no verdict jingle):
+  // a soft pluck on each step of the scale it climbs (fast, then slowing down with the figure), and
+  // one calm bell when it lands on the real value — the higher the figure, the higher the climb.
+  revealSound(r) {
+    const q = r.q;
+    if (this.revealLanded) return;
+    const { prog, shown } = this.countUp(q);
+    const share = fraction(q, prog >= 1 ? q.valor : shown);
+    if (prog >= 1) {
+      this.revealLanded = true;
+      this.app.sfx.land(share);
+      if (r.points >= 80) this.fx.burst(W * 0.73, H * 0.45, 70);
+      return;
+    }
+    const step = scaleStep(share);
+    if (step !== this.revealStep && this.t - (this.revealStepT ?? -1) >= TALLY_GAP_S) {
+      this.revealStep = step; this.revealStepT = this.t;
+      this.app.sfx.tally(share);
     }
   }
 
@@ -459,10 +489,7 @@ export default class Preu {
   drawReveal(g) {
     const app = this.app, r = this.results[this.results.length - 1], q = r.q;
     // the real value counts up from the first frame (no blank card, no "0" pause), landing just before the verdict
-    const prog = easeOut(this.t / 2.0);
-    const shown = q.escala === "log" && q.rang.min > 0
-      ? q.rang.min * Math.pow(q.valor / q.rang.min, Math.max(prog, 0.0001))
-      : lerp(q.rang.min, q.valor, prog);
+    const { prog, shown } = this.countUp(q);
     this.drawProgress(g, 34);
     wrap(g, q.enunciat, W / 2, 90, 1600, { size: 30, weight: 700, align: "center", maxLines: 2, color: C.ink, lineH: 1.18 });
     // the two comparison cards are deliberately small: the numbers are the headline, but what the
