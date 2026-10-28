@@ -590,7 +590,7 @@ export default class Encen {
   drawHowto(g) {
     const inp = this.app.input;
     this.app.drawSilhouette(g, { alpha: 0.08 });
-    drawTutorial(g, {
+    const L = drawTutorial(g, {
       title: T("joc.encen", "Encén la vaga"),
       block: T("encen.com_es_juga", "Com es juga"),
       explain: inp.oneArm
@@ -599,7 +599,7 @@ export default class Encen {
       t: this.phaseT,
       cards: encenCards(!!inp.oneArm, T),
     });
-    drawEncenGoal(g, T("encen.com.objectiu", "Mobilitza el teu entorn"));
+    drawEncenGoal(g, T("encen.com.objectiu", "Mobilitza el teu entorn"), L.goalY);
     if (this.phaseT > HOWTO_MIN_S) {
       const p = this.raiseArmed ? clamp(this.raiseT / RAISE_S, 0, 1) : 0;
       drawFooterHint(g, T("encen.com.continua", "Aixeca la mà per començar"), p, { mouse: inp.usingMouse, waitT: this.phaseT - HOWTO_MIN_S });

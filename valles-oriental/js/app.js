@@ -235,6 +235,13 @@ export class App {
       if (this.paused) this.drawPause(g);
       if (this.debug) this.drawDebug(g);
       g.restore();
+      // full-canvas effects of the scene (margins around the 16:9 stage included), in device pixels
+      if (this.scene && this.scene.drawScreen && !this.paused) {
+        g.save();
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        this.scene.drawScreen(g, cw, ch);
+        g.restore();
+      }
     });
   }
 

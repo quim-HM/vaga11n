@@ -91,8 +91,8 @@ const CARD_PICK_MIN = 2.5;  // reading time before an option can be picked
 const RAISE_S = 0.6;
 const NODATA_DUR = 3;
 // End screen: all lines revealed one after another, then the campaign line
-const FINAL_LINE_T0 = 0.5, FINAL_LINE_GAP = 0.75, FINAL_LINE_DUR = 0.9;
-const FINAL_MIN = 6, FINAL_AUTO = 14;
+const FINAL_LINE_T0 = 0.6, FINAL_LINE_GAP = 1.15, FINAL_LINE_DUR = 1.4;
+const FINAL_MIN = 7, FINAL_AUTO = 17;
 // ... each line is heard as it is drawn: one note per year marker, on a C major pentatonic (two
 // octaves from C4, bottom to top of the chart), so the bigger the rise, the higher the tune climbs —
 // and a flat line repeats its note. In C, like the closing chord.
@@ -140,6 +140,10 @@ const DRAIN = 0.45;        // marge/s outside the corridor: ~2.2 s from full to 
 // a smooth swell below 3 Hz (no hard flashing).
 const HURT_IN = 10, HURT_OUT = 4;          // 1/s: how fast the red comes in / goes away
 const BEAT_SLOW = 0.8, BEAT_FAST = 0.42;   // heartbeat period (s) with a full / an empty marge
+// matte reds of the hurt effect (fixed, not theme colours: it has to read as alarm on every palette)
+const HURT_RED = "#A3201C";        // recolouring (hue + saturation of the screen)
+const HURT_RED_LIGHT = "#E0928A";  // multiply: what white turns into at full strength
+const HURT_RED_DARK = "#4A0808";   // multiply: the burnt edges
 const REGEN = 0.06;        // and slow to come back: being out of the corridor has to hurt
 const MARGE_SEG = 5;       // the marge is shown as segments (a life bar), with no label to read
 
@@ -199,11 +203,10 @@ function usablePoints(s) {
   return m;
 }
 
-// A palette colour (#RRGGBB) with an alpha, for gradients (which take no globalAlpha per stop)
-function hexA(c, a) {
-  const k = Math.round(clamp(a, 0, 1) * 255);
-  if (/^#[0-9a-f]{6}$/i.test(c)) return c + k.toString(16).padStart(2, "0");
-  return `rgba(215,0,15,${k / 255})`;
+// Mix of two #RRGGBB colours (t = 0..1), as #RRGGBB
+function mixHex(a, b, t) {
+  const p = (c, i) => parseInt(c.slice(1 + 2 * i, 3 + 2 * i), 16);
+  return "#" + [0, 1, 2].map((i) => Math.round(p(a, i) + (p(b, i) - p(a, i)) * clamp(t, 0, 1)).toString(16).padStart(2, "0")).join("");
 }
 
 function fitText(g, str, x, y, maxW, opts = {}) {
@@ -793,10 +796,6 @@ export default class FinalDeMes {
     // coin sparks stay inside the play area (never fall into the footer / ◀ ▶ corners)
     g.save(); g.beginPath(); g.rect(0, PLAY_TOP, W, PLAY_H); g.clip(); this.fx.draw(g); g.restore();
     g.restore();
-    if (this.flash > 0) {
-      // single soft pulse per hit (hits are rate-limited to < 1.5 Hz)
-      withAlpha(g, 0.22 * (this.flash / 0.3), () => { g.fillStyle = C.red; g.fillRect(0, PLAY_TOP, W, PLAY_H); });
-    }
     // the level card goes under the hands: the player has to see them to line them up
     if (this.phase === "prep") onCard(() => this._drawPrep(g));
     this._drawHandLink(g);
@@ -804,7 +803,6 @@ export default class FinalDeMes {
     this._drawHud(g, st);
     this._drawFlyingCoins(g);
     this._drawFooter(g, st);
-    this._drawHurt(g);
     onCard(() => {
       if (this.phase === "card") this._drawCard(g);
     });
@@ -815,18 +813,32 @@ export default class FinalDeMes {
 
   _xOfU(st, uu) { return PLAYER_X + (uu - this.u) * st.ppy; }
 
-  // Outside the corridor: the whole screen (HUD and footer included) washes red and red edges close
-  // in, both deeper as the marge drains, swelling on each heartbeat
-  _drawHurt(g) {
-    const h = this.hurt || 0;
-    if (h < 0.01) return;
-    const danger = 1 - clamp(this.marge, 0, 1), pulse = this.beatPulse || 0;
-    withAlpha(g, h * (0.1 + 0.14 * danger + 0.08 * pulse), () => { g.fillStyle = C.red; g.fillRect(0, 0, W, H); });
-    const inner = H * (0.62 - 0.22 * danger - 0.06 * pulse);
-    const grad = g.createRadialGradient(W / 2, H / 2, inner, W / 2, H / 2, Math.hypot(W, H) / 2);
-    grad.addColorStop(0, hexA(C.red, 0));
-    grad.addColorStop(1, hexA(C.red, h * (0.5 + 0.35 * danger + 0.1 * pulse)));
-    g.save(); g.fillStyle = grad; g.fillRect(0, 0, W, H); g.restore();
+  // Outside the corridor, over the whole canvas (letterbox margins included; called by the app in
+  // device pixels): a matte red, no glow. The screen's own colours are pulled towards a dusty brick
+  // red (multiply: whites turn red, nothing gets lighter) and recoloured red (keeping light and dark),
+  // and the edges burn darker; all deeper as the marge drains, swelling on each heartbeat and on the
+  // jolt of a hit.
+  drawScreen(g, w, h) {
+    const k = this.hurt || 0;
+    if (k < 0.01) return;
+    const danger = 1 - clamp(this.marge, 0, 1), pulse = this.beatPulse || 0, jolt = this.flash / 0.3;
+    const amt = clamp(k * (0.45 + 0.3 * danger + 0.1 * pulse + 0.15 * jolt), 0, 1);
+    g.globalCompositeOperation = "multiply";
+    g.fillStyle = mixHex("#FFFFFF", HURT_RED_LIGHT, amt);
+    g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = "color";
+    g.globalAlpha = 0.75 * amt;
+    g.fillStyle = HURT_RED;
+    g.fillRect(0, 0, w, h);
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "multiply";
+    const r = Math.hypot(w, h) / 2;
+    const grad = g.createRadialGradient(w / 2, h / 2, r * (0.6 - 0.22 * danger - 0.05 * pulse), w / 2, h / 2, r);
+    grad.addColorStop(0, "#FFFFFF");
+    grad.addColorStop(1, mixHex("#FFFFFF", HURT_RED_DARK, clamp(k * (0.55 + 0.35 * danger), 0, 1)));
+    g.fillStyle = grad;
+    g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = "source-over";
   }
 
   _drawGrid(g, st) {
@@ -1186,7 +1198,7 @@ export default class FinalDeMes {
   _drawHowto(g) {
     const inp = this.app.input;
     const oneHand = inp.usingMouse || !!inp.oneArm;
-    drawTutorial(g, {
+    const L = drawTutorial(g, {
       title: T("joc.finaldemes", "Final de mes"),
       block: T("finaldemes.com_es_juga", "Com es juga"),
       explain: oneHand
@@ -1195,7 +1207,7 @@ export default class FinalDeMes {
       t: this.pt,
       cards: finaldemesCards(oneHand, T),
     });
-    drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins de l'àrea"));
+    drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins de l'àrea"), L.goalY);
     if (this.pt > HOWTO_MIN) {
       const mouse = inp.usingMouse;
       const r = clamp((this.raiseT || 0) / RAISE_S, 0, 1);

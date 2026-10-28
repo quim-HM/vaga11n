@@ -4,7 +4,7 @@
 // is a neutral mid-tone and the arm(s) doing the gesture carry the card's accent colour, so the
 // gesture reads in every theme (an ink-coloured arm on an ink body disappears). Coordinates of a
 // figure are in its own space: origin between the feet, y up negative, about 290 units tall.
-import { W, C, text, wrap, wrapLines, font, panel, rrect, onCard, posterBlock, clamp, drawCheck } from "./ui.js";
+import { W, C, text, wrap, wrapLines, font, caseFor, panel, rrect, onCard, posterBlock, clamp, drawCheck } from "./ui.js";
 import { textIcon, centerText, drawOkBadge } from "./icons.js";
 import { drawHand, handOutline } from "./hand.js";
 
@@ -131,54 +131,94 @@ export function drawCoinPath(g, a, b, t, colour, { r = 22, period = 2.2, phase =
 }
 
 // --- screen -------------------------------------------------------------------------------------
-export const CARDS = { xs: [480, 960, 1440], y: 300, w: 440, h: 540, feet: 684, label: 734, sub: 786 };
+// «Com es juga» screen, top to bottom: a small «COM ES JUGA» kicker, the game title, a short plain-text
+// explanation (what it is, what to do, how it ends), three cards (gesture animation + label + effect),
+// the goal line (icon + rule) and, in the footer row, «Aixeca la mà» (drawn by each game).
+//
+// Vertical rhythm, computed from the real height of each element (the explanation may take 2 or 3
+// lines): every element is separated from the next by the same gap G — kicker, title, explanation,
+// cards, goal line, footer hint — so nothing is crowded at the top and the screen reads evenly. The
+// cards' horizontal gap is the same G, so the grid is even in both directions.
+//
+// Relevance: the cards and the explanation are what teach the game, so they keep the most room; the
+// title was the hero of the interlude just before, so here it is context (76 px, was 96).
+export const TUT = {
+  top: 24,                 // screen top to the kicker block
+  kicker: 30,              // kicker size
+  title: 76,               // title size
+  explainW: 1600, maxSize: 36, minSize: 30, minSize3: 28, lineH: 1.18,
+  cardW: 440, cardH: 520, padTop: 22,
+  goalH: 46,               // visual height of the goal icons (they are all sized to it: secondary to the cards)
+  hintTop: 1032 - 28,      // top of the «Aixeca la mà» icon in the footer row (LAYOUT.navY − its radius)
+};
+// Figure geometry inside a card (from the card's top): props reach ~370 px above the feet, and the
+// label/effect lines sit under the feet
+const FEET = TUT.padTop + 370, LABEL = FEET + 48, SUB = LABEL + 50;
+export const CARDS = { w: TUT.cardW, h: TUT.cardH };
 
-// «Com es juga» screen: a small «COM ES JUGA» block, the game title, a short plain-text explanation of
-// the game (what it is, what to do, how it ends; at most two lines) and three cards. Each card:
-// { draw(g, cx, feetY, t), label, sub, tone } where tone is a card colour role ("red", "blue",
-// "teal") for the sub-label.
-// Vertical band for the explanation: between the title's baseline (158) and the top of the cards
-// (CARDS.y = 300); the block is centred in it optically (cap height of the first line to the baseline
-// of the last), whatever the number of lines and the size.
-export const EXPLAIN = { w: 1640, top: 158, bottom: 300, maxSize: 36, minSize: 30, minSize3: 28, lineH: 1.18 };
-
-export function drawTutorial(g, { title, block, explain = "", cards, t }) {
-  posterBlock(g, block, W / 2, 58, 34, { align: "center", maxW: W - 200 });
-  text(g, title, W / 2, 158, { size: 96, kind: "title", align: "center", color: C.head, maxW: W - 200 });
-  if (explain) {
-    // the largest size at which it fits in two lines (down to 30 px); longer texts go to three lines
-    // (from 30 px down to 28 px) rather than becoming too small to read from a few metres away
-    let size = EXPLAIN.maxSize, lines = [], maxLines = 2;
-    for (; size >= EXPLAIN.minSize; size -= 2) {
-      font(g, size, "body", 600);
-      lines = wrapLines(g, explain, EXPLAIN.w);
-      if (lines.length <= 2) break;
-    }
-    if (lines.length > 2) {
-      maxLines = 3;
-      for (size = EXPLAIN.minSize; size >= EXPLAIN.minSize3; size -= 2) {
-        font(g, size, "body", 600);
-        lines = wrapLines(g, explain, EXPLAIN.w);
-        if (lines.length <= 3) break;
-      }
-      size = Math.max(size, EXPLAIN.minSize3);
-    }
-    const lh = size * EXPLAIN.lineH, n = Math.min(lines.length, maxLines);
-    const cap = size * 0.72;                                   // Archivo cap height
-    const blockH = cap + (n - 1) * lh;                         // cap of line 1 to baseline of line n
-    const y = (EXPLAIN.top + EXPLAIN.bottom) / 2 - blockH / 2 + cap;
-    wrap(g, explain, W / 2, y, EXPLAIN.w, { size, weight: 600, align: "center", color: C.ink, lineH: EXPLAIN.lineH, maxLines });
+// Explanation fitting: the largest size at which it fits in two lines (down to 30 px); longer texts
+// go to three lines (from 30 px down to 28 px) rather than becoming too small to read from a few metres
+function fitExplain(g, explain) {
+  let size = TUT.maxSize, lines = [], maxLines = 2;
+  for (; size >= TUT.minSize; size -= 2) {
+    font(g, size, "body", 600);
+    lines = wrapLines(g, explain, TUT.explainW);
+    if (lines.length <= 2) break;
   }
+  if (lines.length > 2) {
+    maxLines = 3;
+    for (size = TUT.minSize; size >= TUT.minSize3; size -= 2) {
+      font(g, size, "body", 600);
+      lines = wrapLines(g, explain, TUT.explainW);
+      if (lines.length <= 3) break;
+    }
+    size = Math.max(size, TUT.minSize3);
+  }
+  return { size, n: Math.min(lines.length, maxLines), maxLines };
+}
+
+// Positions of every element of the screen (all y in canvas px). Spacing uses each element's real
+// drawn extent: the title's own glyph bounds (accents like «É», descenders like the parentheses of
+// «(IN)JUST»), the explanation's cap height to its last descender and the cards' drop shadow (10 px).
+export function tutorialLayout(g, explain, title = "") {
+  const ex = explain ? fitExplain(g, explain) : { size: TUT.maxSize, n: 0, maxLines: 0 };
+  const exCap = ex.size * 0.72, exLh = ex.size * TUT.lineH;
+  const exH = ex.n ? exCap + (ex.n - 1) * exLh + ex.size * 0.2 : 0;
+  const tagH = TUT.kicker * 1.18;                                     // posterBlock band
+  font(g, TUT.title, "title");
+  const tm = g.measureText(caseFor(title || "M", "title"));
+  const tAsc = tm.actualBoundingBoxAscent || TUT.title * 0.716, tDesc = tm.actualBoundingBoxDescent || 0;
+  const cardVis = TUT.cardH + 10;                                     // the panel's drop shadow hangs 10 px below
+  const parts = [tagH, tAsc + tDesc, ...(ex.n ? [exH] : []), cardVis, TUT.goalH];
+  const used = parts.reduce((s, h) => s + h, 0);
+  const G = Math.max(24, (TUT.hintTop - TUT.top - used) / parts.length);   // equal gaps, footer hint included
+  let y = TUT.top;
+  const tagTop = y; y += tagH + G;
+  const titleBase = y + tAsc; y = titleBase + tDesc + G;
+  const exBase = y + exCap; if (ex.n) y += exH + G;
+  const cardsTop = y;
+  const goalY = cardsTop + cardVis + G + TUT.goalH / 2;
+  const xs = [-1, 0, 1].map((k) => W / 2 + k * (TUT.cardW + G));
+  return { G, ex, tagBase: tagTop + TUT.kicker * 0.95, titleBase, exBase, cardsTop, goalY, xs };
+}
+
+// Draws the screen and returns its layout (the game draws the goal line at layout.goalY)
+export function drawTutorial(g, { title, block, explain = "", cards, t }) {
+  const L = tutorialLayout(g, explain, title);
+  posterBlock(g, block, W / 2, L.tagBase, TUT.kicker, { align: "center", maxW: W - 200 });
+  text(g, title, W / 2, L.titleBase, { size: TUT.title, kind: "title", align: "center", color: C.head, maxW: W - 200 });
+  if (explain) wrap(g, explain, W / 2, L.exBase, TUT.explainW, { size: L.ex.size, weight: 600, align: "center", color: C.ink, lineH: TUT.lineH, maxLines: L.ex.maxLines });
   cards.forEach((it, i) => onCard(() => {
-    const x = CARDS.xs[i];
-    panel(g, x - CARDS.w / 2, CARDS.y, CARDS.w, CARDS.h, { lw: 3 });
+    const x = L.xs[i], y0 = L.cardsTop;
+    panel(g, x - TUT.cardW / 2, y0, TUT.cardW, TUT.cardH, { lw: 3 });
     g.save();
-    g.beginPath(); g.rect(x - CARDS.w / 2 + 4, CARDS.y + 4, CARDS.w - 8, CARDS.h - 8); g.clip();
-    it.draw(g, x, CARDS.feet, t);
+    g.beginPath(); g.rect(x - TUT.cardW / 2 + 4, y0 + 4, TUT.cardW - 8, TUT.cardH - 8); g.clip();
+    it.draw(g, x, y0 + FEET, t);
     g.restore();
-    textIcon(g, it.label, x, CARDS.label, { size: 44, weight: 800, align: "center", maxW: CARDS.w - 40 });
-    textIcon(g, it.sub, x, CARDS.sub, { size: 36, weight: 800, align: "center", color: C[it.tone] || C.ink, maxW: CARDS.w - 40 });
+    textIcon(g, it.label, x, y0 + LABEL, { size: 44, weight: 800, align: "center", maxW: TUT.cardW - 40 });
+    textIcon(g, it.sub, x, y0 + SUB, { size: 36, weight: 800, align: "center", color: C[it.tone] || C.ink, maxW: TUT.cardW - 40 });
   }));
+  return L;
 }
 
 // --- «El preu (in)just» --------------------------------------------------------------------------
@@ -240,11 +280,11 @@ export function preuFigure(g, x, y, arm, t) {
   });
 }
 
-// Goal line under the cards: a small target (the real figure) and the rule
+// Goal line under the cards: a small target (the real figure) and the rule. y = visual centre line.
 export function drawPreuGoal(g, label, y = 916) {
-  const size = 40, r = 22, gap = 22;
+  const size = 40, r = TUT.goalH / 2 - 2, gap = 24;
   const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
-  const x0 = W / 2 - (2 * r + gap + tw) / 2, cx = x0 + r, cy = y - 2;
+  const x0 = W / 2 - (2 * r + gap + tw) / 2, cx = x0 + r, cy = y;
   onCard(() => {
     g.save();
     for (const [rr, col] of [[r, C.red], [r * 0.66, C.card], [r * 0.33, C.red]]) {
@@ -253,7 +293,7 @@ export function drawPreuGoal(g, label, y = 916) {
     g.lineWidth = 3; g.strokeStyle = C.card; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
     g.restore();
   });
-  textIcon(g, label, x0 + 2 * r + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
+  textIcon(g, label, x0 + 2 * r + gap, y + size * 0.36, { size, weight: 800, color: C.ink });
 }
 
 // --- «Final de mes» -------------------------------------------------------------------------------
@@ -323,10 +363,11 @@ export function finaldemesCards(oneHand, T) {
 // Goal line under the cards: a small piece of the game's road (white band with dark edges, the data
 // line along its middle and the € on it), then the rule
 export function drawFinaldemesGoal(g, label, y = 916) {
-  const size = 40, iw = 128, gap = 24, half = 17;
+  // road band 2 × half thick, rising: TUT.goalH tall overall, centred on y
+  const size = 40, iw = 104, gap = 24, half = 11, rise = TUT.goalH - 2 * half - 2;
   const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
   const x0 = W / 2 - (iw + gap + tw) / 2;
-  const mid = (u) => [x0 + iw * u, y + 10 - 26 * (u * u * (3 - 2 * u))];   // gentle rise, left to right
+  const mid = (u) => [x0 + iw * u, y + rise / 2 - rise * (u * u * (3 - 2 * u))];   // gentle rise, left to right
   const edge = (off) => { g.beginPath(); for (let i = 0; i <= 16; i++) { const [px, py] = mid(i / 16); if (i) g.lineTo(px, py + off); else g.moveTo(px, py + off); } };
   onCard(() => {
     g.save();
@@ -340,9 +381,9 @@ export function drawFinaldemesGoal(g, label, y = 916) {
     edge(0); g.stroke();
     g.restore();
     const [cx, cy] = mid(0.55);
-    drawCoin(g, cx, cy, 12);
+    drawCoin(g, cx, cy, 10);
   });
-  textIcon(g, label, x0 + iw + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
+  textIcon(g, label, x0 + iw + gap, y + size * 0.36, { size, weight: 800, color: C.ink });
 }
 
 // --- «Encén la vaga» ------------------------------------------------------------------------------
@@ -371,10 +412,11 @@ function motionArcs(g, x, y, side, colour) {
 // already lit, and the rule
 export function drawEncenGoal(g, label, y = 916) {
   // a «flower» of 7 map cells (one in the middle, six around it): the organisation spreading from the
-  // centre, hottest in the middle and warmer on one side, as on the game's map
-  const size = 40, r = 17, hw = Math.sqrt(3) * r, gap = 24, iw = 2 * hw + hw;
+  // centre, hottest in the middle and warmer on one side, as on the game's map. Its height
+  // (2.5 cell radii each side + halo) matches the other goal icons.
+  const size = 40, r = (TUT.goalH / 2 - 2.5) / 2.5, hw = Math.sqrt(3) * r, gap = 24, iw = 2 * hw + hw;
   const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
-  const x0 = W / 2 - (iw + gap + tw) / 2, cx = x0 + iw / 2, cy = y - 13;
+  const x0 = W / 2 - (iw + gap + tw) / 2, cx = x0 + iw / 2, cy = y;
   const cells = [[0, 0, 1]];
   const ring = [0.85, 0.7, 0.35, 0.2, 0.3, 0.6];          // heats of the six neighbours, clockwise from the right
   for (let k = 0; k < 6; k++) {
@@ -393,7 +435,7 @@ export function drawEncenGoal(g, label, y = 916) {
     }
     g.restore();
   });
-  textIcon(g, label, x0 + iw + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
+  textIcon(g, label, x0 + iw + gap, y + size * 0.36, { size, weight: 800, color: C.ink });
 }
 
 export function encenCards(oneArm, T) {

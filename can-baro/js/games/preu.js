@@ -362,7 +362,7 @@ export default class Preu {
     const app = this.app;
     app.drawSilhouette(g, { alpha: 0.08 });
     // the goal of the game was said on the interlude: here, just how to play it (shared tutorial layout)
-    drawTutorial(g, {
+    const L = drawTutorial(g, {
       title: T("preu.el_preu_in_just", "EL PREU (IN)JUST"),
       block: T("preu.com_es_juga", "Com es juga"),
       explain: T("preu.com.text", "Per què viure ens costa la vida? Movent la mà amunt o avall, tria la resposta a les preguntes següents. Confirma-la mantenint la mà en un dels botons dels costats i compara-la amb la realitat."),
@@ -373,7 +373,7 @@ export default class Preu {
         { label: T("preu.ma_quieta_ok", "Mà quieta al {check}"), sub: T("preu.respon", "respon"), tone: "teal", draw: (gg, x, y, t) => preuFigure(gg, x, y, 0, t) },
       ],
     });
-    drawPreuGoal(g, T("preu.com.objectiu", "Acosta't el màxim a la xifra real"));
+    drawPreuGoal(g, T("preu.com.objectiu", "Acosta't el màxim a la xifra real"), L.goalY);
     this.drawNextHint(g, HOWTO_MIN_S);
   }
 
