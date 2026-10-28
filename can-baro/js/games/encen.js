@@ -13,7 +13,7 @@ import { W, H, C, LAYOUT, text, wrap, panel, ring, hatch, Particles, clamp, ease
 import { centerText, drawOkBadge } from "../icons.js";
 import { drawTrail } from "../trail.js";
 import { drawFooterHint } from "../hand.js";
-import { drawTutorial, encenCards } from "../tutorial.js";
+import { drawTutorial, encenCards, drawEncenGoal } from "../tutorial.js";
 import { areasFromGeo, areasFromBubbles, fallbackZones, pointInArea, buildCells, cellsInCircle } from "./encen_geo.js";
 import { T } from "../textos.js";
 
@@ -599,6 +599,7 @@ export default class Encen {
       t: this.phaseT,
       cards: encenCards(!!inp.oneArm, T),
     });
+    drawEncenGoal(g, T("encen.com.objectiu", "Mobilitza el teu entorn"));
     if (this.phaseT > HOWTO_MIN_S) {
       const p = this.raiseArmed ? clamp(this.raiseT / RAISE_S, 0, 1) : 0;
       drawFooterHint(g, T("encen.com.continua", "Aixeca la mà per començar"), p, { mouse: inp.usingMouse, waitT: this.phaseT - HOWTO_MIN_S });

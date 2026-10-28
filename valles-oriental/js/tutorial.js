@@ -367,6 +367,33 @@ function motionArcs(g, x, y, side, colour) {
   });
 }
 
+// Goal line under the cards: a small cluster of map cells (as on the game's map), the middle ones
+// already lit, and the rule
+export function drawEncenGoal(g, label, y = 916) {
+  const size = 40, r = 15, hw = Math.sqrt(3) * r, gap = 22, iw = 4 * hw, pad = 7;
+  const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
+  const x0 = W / 2 - (iw + 2 * pad + gap + tw) / 2 + pad, cy = y - 13;
+  const cells = [
+    [0.5, -0.75, 0.25], [1.5, -0.75, 0.9], [2.5, -0.75, 0.55], [3.5, -0.75, 0.1],
+    [0, 0.75, 0.15], [1, 0.75, 0.7], [2, 0.75, 1], [3, 0.75, 0.6],
+  ];
+  const warm = C.heatHot || C.red;
+  onCard(() => {
+    // a small white map card behind the cells, as the other goal icons, so it reads on any theme
+    g.save();
+    g.fillStyle = C.card; g.strokeStyle = C.cardLine; g.lineWidth = 2.5;
+    rrect(g, x0 - pad, cy - 1.5 * r - r - pad + 4, iw + 2 * pad + hw / 2, 3 * r + 2 * r + 2 * pad - 8, 6); g.fill(); g.stroke();
+    g.restore();
+    for (const [cx, ry, heat] of cells) {
+      const x = x0 + hw / 2 + cx * hw, yy = cy + ry * 1.5 * r;
+      hex(g, x, yy, r - 1);
+      g.fillStyle = mix(C.cardSoft, warm, heat); g.fill();
+      g.lineWidth = heat > 0.6 ? 2.5 : 1.5; g.strokeStyle = heat > 0.6 ? C.cardLine : mix(C.card, C.cardInk, 0.4); g.stroke();
+    }
+  });
+  textIcon(g, label, x0 + iw + hw / 2 + pad + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
+}
+
 export function encenCards(oneArm, T) {
   const warm = () => C.heatHot || C.red;
   // 1 · wave: arms up in a V, swinging fast, with motion marks
