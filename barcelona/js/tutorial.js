@@ -137,22 +137,37 @@ export const CARDS = { xs: [480, 960, 1440], y: 300, w: 440, h: 540, feet: 684, 
 // the game (what it is, what to do, how it ends; at most two lines) and three cards. Each card:
 // { draw(g, cx, feetY, t), label, sub, tone } where tone is a card colour role ("red", "blue",
 // "teal") for the sub-label.
-export const EXPLAIN = { w: 1640, y0: 206, maxSize: 36, minSize: 28, lineH: 1.22 };
+// Vertical band for the explanation: between the title's baseline (158) and the top of the cards
+// (CARDS.y = 300); the block is centred in it optically (cap height of the first line to the baseline
+// of the last), whatever the number of lines and the size.
+export const EXPLAIN = { w: 1640, top: 158, bottom: 300, maxSize: 36, minSize: 30, minSize3: 28, lineH: 1.18 };
 
 export function drawTutorial(g, { title, block, explain = "", cards, t }) {
   posterBlock(g, block, W / 2, 58, 34, { align: "center", maxW: W - 200 });
   text(g, title, W / 2, 158, { size: 96, kind: "title", align: "center", color: C.head, maxW: W - 200 });
   if (explain) {
-    // the largest size at which it fits in two lines; a single line sits in the middle of the band
-    let size = EXPLAIN.maxSize, lines = [];
+    // the largest size at which it fits in two lines (down to 30 px); longer texts go to three lines
+    // (from 30 px down to 28 px) rather than becoming too small to read from a few metres away
+    let size = EXPLAIN.maxSize, lines = [], maxLines = 2;
     for (; size >= EXPLAIN.minSize; size -= 2) {
       font(g, size, "body", 600);
       lines = wrapLines(g, explain, EXPLAIN.w);
       if (lines.length <= 2) break;
     }
-    const lh = Math.round(size * EXPLAIN.lineH);
-    const y = lines.length > 1 ? EXPLAIN.y0 : EXPLAIN.y0 + lh / 2;
-    wrap(g, explain, W / 2, y, EXPLAIN.w, { size, weight: 600, align: "center", color: C.ink, lineH: EXPLAIN.lineH, maxLines: 2 });
+    if (lines.length > 2) {
+      maxLines = 3;
+      for (size = EXPLAIN.minSize; size >= EXPLAIN.minSize3; size -= 2) {
+        font(g, size, "body", 600);
+        lines = wrapLines(g, explain, EXPLAIN.w);
+        if (lines.length <= 3) break;
+      }
+      size = Math.max(size, EXPLAIN.minSize3);
+    }
+    const lh = size * EXPLAIN.lineH, n = Math.min(lines.length, maxLines);
+    const cap = size * 0.72;                                   // Archivo cap height
+    const blockH = cap + (n - 1) * lh;                         // cap of line 1 to baseline of line n
+    const y = (EXPLAIN.top + EXPLAIN.bottom) / 2 - blockH / 2 + cap;
+    wrap(g, explain, W / 2, y, EXPLAIN.w, { size, weight: 600, align: "center", color: C.ink, lineH: EXPLAIN.lineH, maxLines });
   }
   cards.forEach((it, i) => onCard(() => {
     const x = CARDS.xs[i];

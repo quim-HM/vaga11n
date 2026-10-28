@@ -31,10 +31,11 @@ export default class Mes {
   // the hand raised to resume from the pause must leave the buttons before it counts
   onResume() { for (const b of this.buttons) { b.armed = false; b.p = 0; } }
 
-  choose(id) {
+  // b = the button picked by hand or click (acknowledged on it); none when it moves on by itself
+  choose(id, b = null) {
     if (this.done) return;
     this.done = true;
-    this.app.sfx.select();
+    if (b) this.app.ack({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
     if (id === "mes") this.app.goto("preu", { continuar: true });
     else this.app.nextGame();
   }
@@ -52,7 +53,7 @@ export default class Mes {
       b.p = over ? b.p + dt / DWELL_S : Math.max(0, b.p - dt * 2);
       b.over = over;
       const clicked = inp.usingMouse && this.t > MIN_S && inp.consumeClick(b.x, b.y, b.w, b.h);
-      if (b.p >= 1 || clicked) return this.choose(b.id);
+      if (b.p >= 1 || clicked) return this.choose(b.id, b);
     }
     if (this.t > AUTO_S) this.choose("seguent");
   }

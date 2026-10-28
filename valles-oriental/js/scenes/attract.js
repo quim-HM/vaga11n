@@ -28,12 +28,12 @@ export default class Attract {
     if (!inp.mouseForced && inp.cameraAvailable && inp.consumeClick(b.x, b.y, b.w, b.h)) {
       inp.mouseForced = true;
       inp.mouseDown = false;
-      this.app.sfx.select();
+      this.app.ack({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
       return;
     }
     if (inp.state.present && inp.anyRaisedFor() > START_RAISE_S) {
       inp.oneArm = null;
-      this.app.sfx.select();
+      this.app.ack();
       this.app.startSession();
     }
   }

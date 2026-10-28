@@ -196,7 +196,6 @@ export default class Encen {
     const geos = this.geoLevels();
     this.built = geos.map((g, i) => this.makeLevel(i, g));
     this.buildLevel(0);
-    this.app.sfx.whoosh();
   }
 
   exit() {
@@ -361,7 +360,7 @@ export default class Encen {
     this.li += 1;
     this.buildLevel(this.li);
     this.phase = "ready"; this.phaseT = 0; this.lastCount = null;
-    this.app.sfx.whoosh();
+    this.app.transition();
   }
 
   score() {
@@ -421,9 +420,9 @@ export default class Encen {
     if (r === 0) this.raiseArmed = true;
     this.raiseT = this.raiseArmed && this.phaseT > HOWTO_MIN_S && r > 0 ? this.raiseT + dt : 0;
     if (this.raiseT >= RAISE_S || this.phaseT >= HOWTO_AUTO_S || (this.phaseT > HOWTO_MIN_S && this.app.input.keys.has("Space"))) {
-      if (this.raiseT >= RAISE_S) this.app.sfx.select();
+      if (this.raiseT >= RAISE_S || (this.phaseT > HOWTO_MIN_S && this.app.input.keys.has("Space"))) this.app.ack();
       this.phase = "ready"; this.phaseT = 0; this.lastCount = null;
-      this.app.sfx.whoosh();
+      this.app.transition();
     }
   }
 
@@ -504,7 +503,7 @@ export default class Encen {
       a.lit = frac >= (was ? L.areaLit - TU.litHyst : L.areaLit) - 1e-6;
       if (a.lit) { lit++; if (!was) newlyLit++; }
     });
-    if (newlyLit && this.sfxT <= 0) { sfx.coin(); this.sfxT = 0.12; }
+    if (newlyLit && this.sfxT <= 0) { sfx.spark(lit / Math.max(1, A.length)); this.sfxT = 0.12; }
     this.lit = lit;
     // the goal is a share of the whole map organised at once, wherever it is
     this.area = litTotal / Math.max(1, n);
@@ -595,8 +594,8 @@ export default class Encen {
       title: T("joc.encen", "Encén la vaga"),
       block: T("encen.com_es_juga", "Com es juga"),
       explain: inp.oneArm
-        ? T("encen.com.text_una", "Organitza la vaga al mapa del teu entorn. Mou la mà sense parar: on passes s'encén, i on deixes de passar es refreda. Arriba a la bandera de la barra de dalt i mantén-t'hi.")
-        : T("encen.com.text", "Organitza la vaga al mapa del teu entorn. Mou les mans sense parar: on passes s'encén, i on deixes de passar es refreda. Arriba a la bandera de la barra de dalt i mantén-t'hi."),
+        ? T("encen.com.text_una", "Una vaga no es fa, es construeix: passa la mà per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 2 segons per passar al següent nivell.")
+        : T("encen.com.text", "Una vaga no es fa, es construeix: passa les mans per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 2 segons per passar al següent nivell."),
       t: this.phaseT,
       cards: encenCards(!!inp.oneArm, T),
     });

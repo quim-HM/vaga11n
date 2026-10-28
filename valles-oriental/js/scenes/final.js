@@ -57,7 +57,9 @@ export default class Final {
     this.fx.update(dt);
     const dur = this.short ? DUR_SHORT : DUR_FULL;
     const inp = this.app.input;
-    if (this.t > dur || (this.t > RESTART_AFTER_S && inp.state.present && inp.anyRaisedFor() > 1.0)) {
+    const raised = this.t > RESTART_AFTER_S && inp.state.present && inp.anyRaisedFor() > 1.0;
+    if (raised || this.t > dur) {
+      if (raised) this.app.ack();
       this.app.newSession();
       this.app.goto("attract");
     }

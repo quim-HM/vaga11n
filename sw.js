@@ -3,7 +3,7 @@
 // next visit. Cache-first: once loaded, the installation keeps working without internet at the venue.
 // Several versions (one per locality) can live on one origin, e.g. /vaga11n/ and /vaga11n/santpedor/:
 // each one names its caches with its locality and never touches the folders of the others (SKIP).
-const VERSION = "5d28f93195cf";
+const VERSION = "a95314666b63";
 const LLOC = "manresa";
 const SKIP = ["santpedor", "valles-oriental", "barcelona", "can-baro"];
 const ASSETS = [

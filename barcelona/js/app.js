@@ -1,7 +1,7 @@
 import { T, setMouseMode } from "./textos.js";
 // Scene manager + session flow (attract -> join -> games with interludes -> final -> attract),
 // presence monitoring (pause / relay / timeout) and operator shortcuts.
-import { W, H, C, LAYOUT, text, wrap, panel, ring, drawSkeleton, clamp, privacyFooter, onCard, onPage, font } from "./ui.js";
+import { W, H, C, LAYOUT, text, wrap, panel, ring, drawSkeleton, clamp, easeOut, privacyFooter, onCard, onPage, font } from "./ui.js";
 import { drawHandCursor } from "./hand.js";
 import { sfx, setMuted, isMuted } from "./audio.js";
 import { applyTheme } from "./temes.js";
@@ -31,6 +31,8 @@ const NAV_SCENES = new Set(["join", "interlude", "preu", "finaldemes", "encen", 
 const PAUSE_AFTER_S = 1.5;     // player not visible -> pause
 const PAUSE_TIMEOUT_S = 15;    // paused for this long -> end session
 const RESUME_RAISE_S = 0.8;    // raise a hand this long to resume / take over
+const TRANS_S = 0.35;          // screen change: the new screen fades in from the page colour
+const ACK_S = 0.5;             // input acknowledged: a ring bursts out of the hand that did it
 
 // Placeholder used while a game module is not available yet (keeps the flow testable)
 class Placeholder {
@@ -56,7 +58,48 @@ export class App {
     this.absentT = 0;
     this.modules = new Map();
     this.nav = { prev: 0, next: 0 };
+    this.transT = TRANS_S;
+    this.acks = [];
     this.newSession();
+  }
+
+  // Feedback for a screen change (a scene, or a step inside a game: next question, next level):
+  // a swish and a short fade-in. Every scene change gets it from goto().
+  transition({ sound = true } = {}) {
+    this.transT = 0;
+    if (sound) sfx.whoosh();
+  }
+
+  // Feedback for an input that has been acknowledged (a raised hand, a dwell, a click): a confirm
+  // sound and a ring bursting out of the hand that did it (or out of the given point). sound: an sfx
+  // name, or null for the ring alone (when the caller already plays its own sound).
+  ack({ x, y, side, sound = "select" } = {}) {
+    if (sound && sfx[sound]) sfx[sound]();
+    let p = Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+    if (!p) {
+      const s = side || this.input.raisedSide();
+      const c = (s && this.input.state.cursors[s]) || this.input.primary();
+      if (c) p = { x: c.x, y: c.y - 10 };
+    }
+    if (p) this.acks.push({ x: p.x, y: p.y, t: 0 });
+  }
+
+  drawFeedback(g) {
+    if (this.transT < TRANS_S) {
+      g.save();
+      g.globalAlpha = 0.85 * (1 - easeOut(this.transT / TRANS_S));
+      g.fillStyle = C.paper;
+      g.fillRect(0, 0, W, H);
+      g.restore();
+    }
+    for (const a of this.acks) {
+      const k = clamp(a.t / ACK_S, 0, 1), e = easeOut(k);
+      g.save();
+      g.globalAlpha = 1 - k;
+      g.strokeStyle = C.teal; g.lineWidth = 12 * (1 - k) + 2;
+      g.beginPath(); g.arc(a.x, a.y, 50 + 90 * e, 0, Math.PI * 2); g.stroke();
+      g.restore();
+    }
   }
 
   newSession() {
@@ -90,10 +133,12 @@ export class App {
     if (!Cls && game) { Cls = Placeholder; params = { ...params, id: game.id, title: game.title }; }
     if (!Cls) { console.error("missing scene", name); return; }
     if (this.scene && this.scene.exit) this.scene.exit();
+    const first = !this.scene;
     this.sceneName = name;
     this.scene = new Cls(this, params);
     this.paused = null;
     this.absentT = 0;
+    this.transition({ sound: !first });   // no swish at boot: audio is not unlocked yet
     if (this.scene.enter) this.scene.enter();
   }
 
@@ -142,6 +187,9 @@ export class App {
   // --- main loop ----------------------------------------------------------
   update(dt) {
     this.time += dt;
+    this.transT += dt;
+    for (const a of this.acks) a.t += dt;
+    this.acks = this.acks.filter((a) => a.t < ACK_S);
     this.input.update(dt);
     setMouseMode(this.input.usingMouse);
     if (!this.scene || this.switching) return;
@@ -152,7 +200,7 @@ export class App {
       if (this.paused) {
         this.paused.t += dt;
         if (!this.paused.manual && present && this.input.anyRaisedFor() > RESUME_RAISE_S) {
-          this.paused = null; sfx.select();
+          this.paused = null; this.ack();
           // the hand raised to resume must not also count as «continue» on the screen underneath
           if (this.scene && this.scene.onResume) this.scene.onResume();
         } else if (!this.paused.manual && this.paused.t > PAUSE_TIMEOUT_S) {
@@ -182,6 +230,7 @@ export class App {
       g.save();
       g.beginPath(); g.rect(0, 0, W, H); g.clip();
       if (this.scene) this.scene.draw(g);
+      this.drawFeedback(g);
       if (!this.paused) this.drawNav(g);
       if (this.paused) this.drawPause(g);
       if (this.debug) this.drawDebug(g);
@@ -280,7 +329,7 @@ export class App {
       if (clicked || this.nav[b.id] >= 1) {
         this.nav.prev = this.nav.next = 0;
         this.navLock = true;
-        this.sfx.select();
+        this.ack({ x: b.x, y: b.y });
         if (b.id === "next") this.gotoNextGame(); else this.gotoPrevGame();
         return;
       }
@@ -362,7 +411,7 @@ export class App {
     if (k === "d") this.debug = !this.debug;
     else if (k === "r") { this.newSession(); this.goto("attract"); }
     else if (k === "s" || k === "n") { if (this.scene && this.scene.skip) this.scene.skip(); else if (GAMES.some((g) => g.id === this.sceneName)) this.finishGame(this.sceneName, { score: 0, summary: T("app.saltat", "Saltat"), skipped: true }); }
-    else if (k === "p") { this.paused = this.paused ? null : { t: 0, manual: true }; }
+    else if (k === "p") { this.paused = this.paused ? null : { t: 0, manual: true }; sfx[this.paused ? "meh" : "select"](); }
     else if (k === "u") { this.input.oneArm = this.input.oneArm ? null : (this.input.active || "r"); this.session.oneArm = this.input.oneArm; }
     else if (k === "m") setMuted(!isMuted());
     else if (k === "c") this.goto("credits");

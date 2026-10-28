@@ -139,12 +139,13 @@ export default class Preu {
   }
 
   enter() {
-    if (this.continuing && this.questions.length) this.startQuestion();
+    if (this.continuing && this.questions.length) this.startQuestion({ quiet: true });
   }
 
   get q() { return this.questions[this.i]; }
 
-  startQuestion() {
+  // quiet: the scene change itself already gave the transition feedback
+  startQuestion({ quiet = false } = {}) {
     const q = this.q;
     this.tParam = startParam(q);   // bottom of the scale, or the question's neutral point
     this.value = valueAt(q, this.tParam);
@@ -155,11 +156,16 @@ export default class Preu {
     this.confirmP = 0;
     this.leverArmed = false;
     this.overBtn = -1;
+    this.prevOverBtn = -1;
+    this.hoverCool = 0;
+    this.chargeStage = 0;
+    this.atLimit = false;
     this.phase = "answer";
     this.t = 0;
     this.nextT = 0;
     this.nextArmed = false;
     this.revealSfx = false;
+    if (!quiet) this.app.transition();
   }
 
   lock(reason) {
@@ -172,6 +178,7 @@ export default class Preu {
     this.nextT = 0;
     this.nextArmed = false;
     this.app.sfx.lock();
+    this.app.transition({ sound: false });   // answer -> reveal: new layout, the lock sound is enough
   }
 
   next() {
@@ -230,7 +237,8 @@ export default class Preu {
         if (this.t > 3) this.finish();
         break;
       case "howto":
-        if (this.wantsNext(dt, HOWTO_MIN_S) || this.t > HOWTO_AUTO_S) this.startQuestion();
+        if (this.wantsNext(dt, HOWTO_MIN_S)) { this.app.ack(); this.startQuestion(); }
+        else if (this.t > HOWTO_AUTO_S) this.startQuestion();
         break;
       case "answer":
         this.updateAnswer(dt);
@@ -243,7 +251,8 @@ export default class Preu {
           setTimeout(() => (r.points >= 80 ? this.app.sfx.good() : r.points >= 40 ? this.app.sfx.meh() : this.app.sfx.bad()), 900);
           if (r.points >= 80) this.fx.burst(W * 0.73, H * 0.45, 70);
         }
-        if (this.wantsNext(dt, REVEAL_NEXT_MIN_S) || this.t > REVEAL_MAX_S) this.next();
+        if (this.wantsNext(dt, REVEAL_NEXT_MIN_S)) { this.app.ack(); this.next(); }
+        else if (this.t > REVEAL_MAX_S) this.next();
         break;
       }
     }
@@ -263,6 +272,14 @@ export default class Preu {
     });
     const canConfirm = armed && (this.touched || this.t > 6);
     this.confirmP = this.overBtn >= 0 && canConfirm ? this.confirmP + dt / CONFIRM_S : Math.max(0, this.confirmP - dt * 2);
+    // sound: a hand landing on a ✓ (with a short cooldown, so a hand on the edge does not chatter),
+    // then a rising note at each quarter of the ring
+    this.hoverCool = Math.max(0, (this.hoverCool || 0) - dt);
+    if (this.overBtn >= 0 && this.prevOverBtn < 0 && this.hoverCool <= 0) { this.app.sfx.hover(); this.hoverCool = 0.4; }
+    this.prevOverBtn = this.overBtn;
+    const stage = Math.floor(this.confirmP * 4);
+    if (stage > this.chargeStage && stage < 4) this.app.sfx.charge(stage);
+    this.chargeStage = stage;
 
     const c = inp.primary();
     // a hand still up from «raise to continue» must leave the «up» zone once before it steers
@@ -275,19 +292,29 @@ export default class Preu {
       if (dir !== 0) {
         const steps = stepsOf(q);
         const sps = Math.min(2 + this.leverHeld * 8, LEVER_MAX_SPS);   // steps per second, accelerating
+        const before = this.tParam;
         this.tParam = clamp(this.tParam + (dir * sps * dt) / steps, 0, 1);
-      }
+        // pushed against the end of the scale: one thunk per push
+        const stuck = this.tParam === before && (this.tParam <= 0 || this.tParam >= 1);
+        if (stuck && !this.atLimit) this.app.sfx.limit();
+        this.atLimit = stuck;
+      } else this.atLimit = false;
     } else {
       this.leverDir = 0;
       this.leverHeld = 0;
+      this.atLimit = false;
     }
     this.value = valueAt(q, this.tParam);
     if (this.value !== this.prevValue) {
       this.touched = true;
-      this.app.sfx.tick();
+      this.app.sfx.notch(this.tParam);
       this.prevValue = this.value;
     }
-    if (this.confirmP >= 1) this.lock("button");
+    if (this.confirmP >= 1) {
+      const b = BUTTONS[this.overBtn];
+      if (b) this.app.ack({ x: b.x + b.w / 2, y: b.y + b.h / 2, sound: null });   // lock() plays the sound
+      this.lock("button");
+    }
     else if (inp.keys.has("Space") && armed) this.lock("key");
     else if (this.t >= ANSWER_MAX_S) this.lock("timeout");
     // audible tick on each of the last seconds
@@ -338,7 +365,7 @@ export default class Preu {
     drawTutorial(g, {
       title: T("preu.el_preu_in_just", "EL PREU (IN)JUST"),
       block: T("preu.com_es_juga", "Com es juga"),
-      explain: T("preu.com.text", "Tres preguntes amb xifres reals. Puja o baixa la mà per triar la teva resposta i deixa-la quieta sobre un botó dels costats per confirmar-la. Després, veuràs la realitat."),
+      explain: T("preu.com.text", "Per què viure ens costa la vida? Movent la mà amunt o avall, tria la resposta a les preguntes següents. Confirma-la mantenint la mà en un dels botons dels costats i compara-la amb la realitat."),
       t: this.t,
       cards: [
         { label: T("preu.ma_amunt", "Mà amunt"), sub: T("preu.puja__", "▲ puja"), tone: "red", draw: (gg, x, y, t) => preuFigure(gg, x, y, 1, t) },

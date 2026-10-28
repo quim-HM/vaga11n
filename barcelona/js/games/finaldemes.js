@@ -93,6 +93,12 @@ const NODATA_DUR = 3;
 // End screen: all lines revealed one after another, then the campaign line
 const FINAL_LINE_T0 = 0.5, FINAL_LINE_GAP = 0.75, FINAL_LINE_DUR = 0.9;
 const FINAL_MIN = 6, FINAL_AUTO = 14;
+// ... each line is heard as it is drawn: one note per year marker, on a C major pentatonic (two
+// octaves from C4, bottom to top of the chart), so the bigger the rise, the higher the tune climbs —
+// and a flat line repeats its note. In C, like the closing chord.
+const FINAL_SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];   // semitones above C4
+const FINAL_F_C4 = 261.63;
+const FINAL_NOTE_GAP = 0.055;   // the first markers appear almost at once: keep the notes this far apart
 
 // Control. With two hands the line between them is the direction the € travels: tilt it up and the
 // € climbs, tilt it down and it dives, hold it level and it keeps its height. With a single hand
@@ -110,6 +116,21 @@ const TILT_SPAN = 170;      // hands closer than this (px apart) give no usable 
 export function tiltSpeed(slope) {
   const mag = clamp((Math.abs(slope) - TILT_DEAD) / (TILT_FULL - TILT_DEAD), 0, 1);
   return slope > 0 ? -mag * TILT_VMAX : mag * TILT_VMAX;
+}
+
+// Notes of an end-screen line: one per year, at the moment its marker appears (the drawing eases
+// out, so marker k shows when easeOut(p) reaches k / (n - 1)), pitched from the common % scale
+// [lo, hi] onto FINAL_SCALE. at = seconds from the start of the line; the last note lands at dur.
+export function trendNotes(pct, lo, hi, dur = FINAL_LINE_DUR) {
+  const n = pct.length, out = [];
+  for (let k = 0; k < n; k++) {
+    const x = n > 1 ? k / (n - 1) : 1;
+    let at = (1 - Math.cbrt(1 - x)) * dur;
+    if (k > 0) at = Math.max(at, out[k - 1].at + FINAL_NOTE_GAP);
+    const deg = Math.round(clamp((pct[k] - lo) / Math.max(1e-9, hi - lo), 0, 1) * (FINAL_SCALE.length - 1));
+    out.push({ at, f: FINAL_F_C4 * 2 ** (FINAL_SCALE[deg] / 12), last: k === n - 1 });
+  }
+  return out;
 }
 
 // Marge
@@ -387,11 +408,16 @@ export default class FinalDeMes {
     this.grazeT = 0;
     this.touching = false;
     this.coinChain = 0;
+    this.coinRun = 0;
   }
 
-  _startPrep() { this.phase = "prep"; this.pt = 0; this.gateT = 0; this.app.sfx.whoosh(); }
+  _startPrep() { this.phase = "prep"; this.pt = 0; this.gateT = 0; this.app.transition(); }
 
-  _startGo() { this.phase = "go"; this.pt = 0; this.app.sfx.select(); }
+  // gate passed with the hands in place: acknowledged on the € (by time-out: just the sound); then «Som-hi!»
+  _startGo(byHands = true) {
+    this.phase = "go"; this.pt = 0;
+    if (byHands) this.app.ack({ x: PLAYER_X, y: this.py }); else this.app.sfx.select();
+  }
 
   _startPlay() { this.phase = "play"; this.pt = 0; this.graceT = GRACE; this.vy = 0; }
 
@@ -555,13 +581,14 @@ export default class FinalDeMes {
     if (this.phase === "nodata") { if (this.pt > NODATA_DUR) this._finish(); return; }
 
     if (this.phase === "howto") {
-      if (this._raiseToContinue(dt, HOWTO_MIN, HOWTO_AUTO)) { this.app.sfx.select(); this._startPrep(); }
+      if (this._raiseToContinue(dt, HOWTO_MIN, HOWTO_AUTO)) { if (this.raiseT >= RAISE_S) this.app.ack(); this._startPrep(); }
     } else if (this.phase === "prep") {
       // hand-placement gate: ball locked at the corridor centre, nothing counts
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       this.gateT = this._handReady() ? this.gateT + dt : 0;
       const minT = this.si === 0 && !this.st.retried ? GATE_MIN : GATE_MIN_NEXT;
-      if ((this.gateT >= GATE_HOLD && this.pt >= minT) || this.pt >= GATE_MAX) this._startGo();
+      if (this.gateT >= GATE_HOLD && this.pt >= minT) this._startGo(true);
+      else if (this.pt >= GATE_MAX) this._startGo(false);
     } else if (this.phase === "go") {
       this.py = this.centreAt(this.st, 0); this.vy = 0;
       if (this.pt >= GO_DUR) this._startPlay();
@@ -569,11 +596,13 @@ export default class FinalDeMes {
       this._steer(dt);
       this._updatePlay(dt);
     } else if (this.phase === "final") {
-      if (this._raiseToContinue(dt, FINAL_MIN, FINAL_AUTO)) this._finish();
+      this._finalSound();
+      if (this._raiseToContinue(dt, FINAL_MIN, FINAL_AUTO)) { if (this.raiseT >= RAISE_S) this.app.ack(); this._finish(); }
     } else if (this.phase === "card") {
       // a level lost for want of marge can be played again once; otherwise the result moves on by itself
       if (this._canRetry()) {
         const pick = this._pickOnCard(dt);
+        if (pick) { const b = this._cardRects()[pick]; this.app.ack({ x: b.x + b.w / 2, y: b.y + b.h / 2 }); }
         if (pick === "retry") this._retryStage();
         else if (pick === "next" || this.pt > CARD_RETRY_AUTO) this._afterCard();
       } else if (this.pt > (this.stages[this.si].result === "ok" ? RESULT_DUR : RESULT_FAIL_DUR)) this._afterCard();
@@ -581,8 +610,26 @@ export default class FinalDeMes {
   }
 
   _afterCard() {
-    if (this.si >= this.stages.length - 1) { this.phase = "final"; this.pt = 0; this.armed = false; this.raiseT = 0; this.app.sfx.reveal(); }
+    if (this.si >= this.stages.length - 1) {
+      this.phase = "final"; this.pt = 0; this.armed = false; this.raiseT = 0;
+      this.finalLine = 0; this.finalStamp = false;
+      this.app.sfx.reveal();
+    }
     else { this.si += 1; this._prepStage(); this._startPrep(); }
+  }
+
+  // When the campaign line appears on the end screen (after the last stage line is drawn)
+  _finalPhraseT() { return FINAL_LINE_T0 + (this.stages.length - 1) * FINAL_LINE_GAP + FINAL_LINE_DUR + 0.3; }
+
+  // End-screen sound, driven by the same clock as the drawing (so it waits while the game is paused):
+  // each line is heard as it is drawn, then the campaign line lands with a stamp
+  _finalSound() {
+    const i = this.finalLine || 0;
+    if (i < this.stages.length && this.pt >= FINAL_LINE_T0 + i * FINAL_LINE_GAP) {
+      this.finalLine = i + 1;
+      this.app.sfx.trend(trendNotes(this.stages[i].pct, this.lo, this.hi));
+    }
+    if (!this.finalStamp && this.pt >= this._finalPhraseT()) { this.finalStamp = true; this.app.sfx.stamp(); }
   }
 
   // A level is only offered again if it was lost and has not been retried yet
@@ -671,13 +718,13 @@ export default class FinalDeMes {
     for (const co of st.coins) {
       if (co.got !== false) continue;
       const dx = (co.u - this.u) * st.ppy;
-      if (dx < -BALL_R - 20) { co.got = "missed"; this.coinChain = 0; continue; }   // missed: keeps scrolling, faded
+      if (dx < -BALL_R - 20) { co.got = "missed"; this.coinChain = 0; this.coinRun = 0; continue; }   // missed: keeps scrolling, faded
       if (Math.abs(dx) < BALL_R + 20 && Math.abs(this.coinY(st, co) - this.py) < BALL_R + 12) {
         co.got = true; st.coinsGot += 1;
         this.flying.push({ u: co.u, y: this.coinY(st, co), t: 0 });
         this.coinChain = Math.min(5, this.coinChain + 1);
         this._addPts(COIN_PTS * this.coinChain);
-        this.app.sfx.coin();
+        this.app.sfx.coin(this.coinRun++);   // a run of coins climbs the scale; a missed one restarts it
       }
     }
     if (this.marge <= 0) { this.marge = 0; this._endStage(false); return; }
@@ -1103,8 +1150,8 @@ export default class FinalDeMes {
       title: T("joc.finaldemes", "Final de mes"),
       block: T("finaldemes.com_es_juga", "Com es juga"),
       explain: oneHand
-        ? T("finaldemes.com.text_una", "Porta l'€ pel camí que han seguit els salaris i els preus des del 2015. Puja o baixa la mà per moure'l i no en surtis: fora del camí, se t'acaba el marge.")
-        : T("finaldemes.com.text", "Porta l'€ pel camí que han seguit els salaris i els preus des del 2015. Inclina la línia entre les mans per pujar o baixar, i no en surtis: fora del camí, se t'acaba el marge."),
+        ? T("finaldemes.com.text_una", "Viu l'augment del cost de la vida: movent la mà amunt o avall, guia verticalment l'€ al llarg dels anys i mantén-te a prop de l'increment dels preus des del 2015. Pots reintentar una vegada cada nivell.")
+        : T("finaldemes.com.text", "Viu l'augment del cost de la vida: inclinant la recta entre les teves mans, guia verticalment l'€ al llarg dels anys i mantén-te a prop de l'increment dels preus des del 2015. Pots reintentar una vegada cada nivell."),
       t: this.pt,
       cards: finaldemesCards(oneHand, T),
     });
@@ -1320,7 +1367,7 @@ export default class FinalDeMes {
       g.restore();
     });
     // campaign line (vagageneral.org/manifest), once every line is drawn
-    const tPhrase = FINAL_LINE_T0 + (this.stages.length - 1) * FINAL_LINE_GAP + FINAL_LINE_DUR + 0.3;
+    const tPhrase = this._finalPhraseT();
     const pa = clamp((this.pt - tPhrase) / 0.5, 0, 1);
     if (pa > 0) posterBlock(g, T("finaldemes.final.frase", "Ni salaris per terra ni habitatge pels núvols."), W / 2, py + ph + 100, 54,
       { align: "center", alpha: pa, maxW: W - 2 * m });

@@ -30,14 +30,15 @@ export default class Interlude {
     this.t = 0;
     this.nextT = 0;
   }
-  enter() { this.app.sfx.whoosh(); }
+  enter() {}
   update(dt) {
     this.t += dt;
     const inp = this.app.input;
     // a hand still up from the previous screen must come down first
     if (inp.anyRaisedFor() === 0) this.armed = true;
     if (this.t > MIN_S && this.armed) this.nextT = inp.anyRaisedFor() > 0 ? this.nextT + dt : Math.max(0, this.nextT - 2 * dt);
-    if (this.t > AUTO_S || this.nextT > RAISE_S || (this.t > MIN_S && inp.keys.has("Space"))) this.app.goto(this.params.game.id);
+    if (this.nextT > RAISE_S || (this.t > MIN_S && inp.keys.has("Space"))) { this.app.ack(); this.app.goto(this.params.game.id); }
+    else if (this.t > AUTO_S) this.app.goto(this.params.game.id);
   }
   skip() { this.app.goto(this.params.game.id); }
   // the hand raised to resume from the pause must come down before it counts here

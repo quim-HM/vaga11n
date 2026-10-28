@@ -47,7 +47,7 @@ export default class Join {
       this.app.session.oneArm = inp.oneArm;
       b.dwell = new Dwell(1.3, 3);
       b.cool = 1.5;
-      this.app.sfx.select();
+      this.app.ack({ x: b.x, y: b.y });
       this.place();
     }
     if (b.cool) { b.cool -= dt; if (b.cool > 0) b.dwell.p = 0; else b.cool = 0; }
