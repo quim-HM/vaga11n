@@ -110,6 +110,17 @@
     "notes": "Suma de 'Valor' per Codi_Barri (homes + dones)."
   },
   {
+    "id": "amb_municipis",
+    "organisme": "Àrea Metropolitana de Barcelona (AMB Open Data)",
+    "titol": "Municipis metropolitans (col·lecció 'municipis' de l'API d'AMB Open Data)",
+    "titol_curt": "AMB Open Data – municipis metropolitans",
+    "url": "https://opendata.amb.cat/municipis/search?format=json&rows=100",
+    "data_consulta": "2026-10-25",
+    "tipus": "oficial",
+    "llicencia": "Termes d'ús d'AMB Open Data (no consultats)",
+    "notes": "36 municipis (Llei 31/2010, de 3 d'agost, de l'Àrea Metropolitana de Barcelona). Només se'n fa servir el nom, per triar els municipis de la geometria de l'ICGC; la població és la d'Idescat."
+  },
+  {
     "id": "girona_barris",
     "organisme": "Ajuntament de Girona (Portal de dades obertes – terra.girona.cat)",
     "titol": "Barris (shapefile, ETRS89 UTM 31N)",

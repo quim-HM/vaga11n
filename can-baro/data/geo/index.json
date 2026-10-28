@@ -428,6 +428,14 @@
    "codi": "43",
    "fitxer": "comarques/llucanes.json",
    "n": 8
+  },
+  {
+   "id": "amb",
+   "nom": "l'Àrea Metropolitana de Barcelona",
+   "codi": null,
+   "tipus": "area",
+   "fitxer": "arees/amb.json",
+   "n": 36
   }
  ],
  "final": [

@@ -55,22 +55,149 @@ function calendari(g, b, v, q, style) {
   text(g, fmtValue(q, v, style === "real" && v === q.valor), x + w / 2, y + h * 0.78, { size: Math.round(h * 0.42), kind: "title", align: "center", color: style === "real" ? C.red : C.ink, maxW: w - 50 });
 }
 
+// A block of flats built as the value grows, one window at a time (ED_FLOORS × ED_WIN steps, so it
+// grows as finely as the coin stacks): the floor being built shows its finished windows and the
+// empty openings of the rest, with a crane on top; once a floor is complete the roof gets its
+// rooftop structure instead. Drawn with volume (side face, roof slab, ground shadow) and in the
+// answer / reality colour, like the coins.
+const ED_FLOORS = 12, ED_WIN = 6;
+
+// Tower crane on the roof of the floor being built, carrying the next window (the next home) on its
+// hook right over the slot it goes into. u = size unit (1 for a 300 px wide building), so it reads at
+// the same size on the small reveal cards; the mast takes the height left above the building (room),
+// and the crane is left out when there is too little. Returns the y of its top, or null if not drawn.
+function crane(g, { u, mx, y0, room, hx, loadY, ww, wh, r, main, soft }) {
+  const mw = 12 * u, jt = 10 * u, apex = 22 * u;
+  const h = Math.min(150 * u, room - jt - apex);
+  if (h < 40 * u) return null;
+  const jy = y0 - h;                                   // bottom chord of the jib
+  const jl = Math.min(hx - 24 * u, mx - 120 * u), jr = mx + 66 * u;
+  const thin = Math.max(1, 1.3 * u), thick = Math.max(1.5, 2.6 * u);
+  g.save();
+  g.strokeStyle = main; g.fillStyle = main; g.lineCap = "round"; g.lineJoin = "round";
+  // mast: two rails with X bracing, on a foot plate
+  g.fillRect(mx - mw, y0 - 3 * u, mw * 2, 5 * u);
+  g.lineWidth = thick;
+  g.beginPath(); g.moveTo(mx - mw / 2, y0); g.lineTo(mx - mw / 2, jy); g.moveTo(mx + mw / 2, y0); g.lineTo(mx + mw / 2, jy); g.stroke();
+  g.lineWidth = thin; g.beginPath();
+  for (let y = y0; y - mw > jy - 0.5; y -= mw) {
+    g.moveTo(mx - mw / 2, y); g.lineTo(mx + mw / 2, y - mw);
+    g.moveTo(mx + mw / 2, y); g.lineTo(mx - mw / 2, y - mw);
+  }
+  g.stroke();
+  // jib + counter-jib: a truss (two chords and a zigzag), the tip tapering to the bottom chord
+  const jtop = jy - jt;
+  g.lineWidth = thick; g.beginPath();
+  g.moveTo(jl, jy); g.lineTo(jr, jy);
+  g.moveTo(jl + jt * 1.5, jtop); g.lineTo(jr, jtop); g.lineTo(jr, jy);
+  g.moveTo(jl, jy); g.lineTo(jl + jt * 1.5, jtop);
+  g.stroke();
+  g.lineWidth = thin; g.beginPath();
+  for (let xx = jl + jt * 1.5, up = true; xx < jr - 0.5; xx += jt, up = !up) {
+    const nx = Math.min(jr, xx + jt);
+    g.moveTo(xx, up ? jtop : jy); g.lineTo(nx, up ? jy : jtop);
+  }
+  g.stroke();
+  // tower head with its tie cables to both arms
+  const ay = jtop - apex;
+  g.lineWidth = thick; g.beginPath();
+  g.moveTo(mx - mw / 2, jtop); g.lineTo(mx, ay); g.lineTo(mx + mw / 2, jtop); g.stroke();
+  g.lineWidth = thin; g.beginPath();
+  g.moveTo(mx, ay); g.lineTo(jl + (mx - jl) * 0.3, jtop);
+  g.moveTo(mx, ay); g.lineTo(jr - 6 * u, jtop);
+  g.stroke();
+  // operator's cab (with a window) and the counterweight
+  const cw = 20 * u, ch = 15 * u, cx = mx - mw / 2 - cw;
+  rrect(g, cx, jy + 1, cw, ch, 3 * u); g.fill();
+  g.fillStyle = soft; g.fillRect(cx + 4 * u, jy + 4 * u, cw * 0.45, ch * 0.45);
+  g.fillStyle = main;
+  const kw = 24 * u, kh = 18 * u;
+  g.fillRect(jr - kw - 2 * u, jy, kw, kh);
+  g.strokeStyle = soft; g.lineWidth = thin;
+  g.beginPath(); g.moveTo(jr - kw - 2 * u, jy + kh / 2); g.lineTo(jr - 2 * u, jy + kh / 2); g.stroke();
+  // trolley, cable, hook and the next window on two slings (in the air, clear of the jib)
+  g.strokeStyle = main; g.fillStyle = main;
+  g.fillRect(hx - 8 * u, jy, 16 * u, 5 * u);
+  loadY = Math.max(loadY, jy + 26 * u);
+  const hookY = loadY - 10 * u;
+  g.lineWidth = thin; g.beginPath(); g.moveTo(hx, jy + 5 * u); g.lineTo(hx, hookY); g.stroke();
+  g.lineWidth = thick; g.beginPath(); g.arc(hx, hookY + 2 * u, 3 * u, -Math.PI / 2, Math.PI * 0.9); g.stroke();
+  g.lineWidth = thin; g.beginPath();
+  g.moveTo(hx, hookY + 4 * u); g.lineTo(hx - ww / 2 + 2, loadY);
+  g.moveTo(hx, hookY + 4 * u); g.lineTo(hx + ww / 2 - 2, loadY);
+  g.stroke();
+  rrect(g, hx - ww / 2, loadY, ww, wh, r); g.fill();
+  g.restore();
+  return ay;
+}
+
 function edifici(g, b, v, q, style) {
   const f = fraction(q, v);
-  const floors = Math.max(1, Math.round(f * 18));
-  const fh = Math.min(30, (b.h - 124) / 18), bw = Math.min(260, b.w * 0.45);
-  const x = b.x + (b.w - bw) / 2, base = b.y + b.h - 20;
-  g.fillStyle = C.ink; g.fillRect(b.x + 20, base, b.w - 40, 6);
+  const n = Math.max(1, Math.round(f * ED_FLOORS * ED_WIN));
+  const floors = Math.ceil(n / ED_WIN);
+  const building = n % ED_WIN !== 0;
+  const main = style === "answer" ? C.blue : C.red, soft = style === "answer" ? C.blueSoft : C.redSoft;
+  const bw = Math.min(300, b.w * 0.5), dx = Math.round(bw * 0.16), dy = Math.round(dx * 0.6);
+  // height budget: floors + roof + crane (2.4 floors) + room for the label above
+  const fh = Math.min(32, (b.h - 90 - dy) / (ED_FLOORS + 2.4));
+  const x = b.x + (b.w - bw - dx) / 2, base = b.y + b.h - 24, top = base - floors * fh;
+  g.lineJoin = "round";
+  g.fillStyle = off(0.12);
+  g.beginPath(); g.ellipse(x + (bw + dx) / 2, base + 3, (bw + dx) * 0.62, 9, 0, 0, Math.PI * 2); g.fill();
+  // side face (depth): light shade of the colour, a line per floor
+  g.beginPath();
+  g.moveTo(x + bw, base); g.lineTo(x + bw + dx, base - dy); g.lineTo(x + bw + dx, top - dy); g.lineTo(x + bw, top); g.closePath();
+  g.fillStyle = soft; g.fill();
+  g.save(); g.globalAlpha *= 0.3; g.fillStyle = main; g.fill(); g.restore();
+  g.strokeStyle = main; g.lineWidth = 3; g.stroke();
+  g.lineWidth = 1.5;
+  for (let i = 1; i < floors; i++) {
+    const y = base - i * fh;
+    g.beginPath(); g.moveTo(x + bw, y); g.lineTo(x + bw + dx, y - dy); g.stroke();
+  }
+  // front: alternating bands (like the coins), one window per step
+  const pad = Math.max(8, bw * 0.06), slot = (bw - 2 * pad) / ED_WIN, ww = slot * 0.7, wh = fh * 0.52, r = Math.min(4, wh / 3);
   for (let i = 0; i < floors; i++) {
     const y = base - (i + 1) * fh;
-    g.fillStyle = style === "answer" ? (i % 2 ? C.blueSoft : C.white) : (i % 2 ? C.redSoft : C.white);
+    g.fillStyle = i % 2 ? soft : C.white;
     g.fillRect(x, y, bw, fh);
-    g.strokeStyle = C.ink; g.lineWidth = 2; g.strokeRect(x, y, bw, fh);
-    for (let k = 0; k < 5; k++) { g.fillStyle = style === "answer" ? C.blue : C.red; g.fillRect(x + 16 + k * (bw - 32) / 5, y + fh * 0.25, (bw - 32) / 5 - 10, fh * 0.5); }
+    g.strokeStyle = main; g.lineWidth = 1.5; g.strokeRect(x, y, bw, fh);
+    for (let k = 0; k < ED_WIN; k++) {
+      const idx = i * ED_WIN + k, wx = x + pad + k * slot + (slot - ww) / 2, wy = y + fh * 0.24;
+      // ground floor: an entrance in the middle instead of two windows
+      if (i === 0 && (k === ED_WIN / 2 - 1 || k === ED_WIN / 2)) {
+        if (k === ED_WIN / 2 - 1) {
+          const dw = slot * 1.2, dh = fh * 0.78;
+          g.fillStyle = main; rrect(g, x + bw / 2 - dw / 2, y + fh - dh, dw, dh, [r, r, 0, 0]); g.fill();
+        }
+        continue;
+      }
+      if (idx < n) { g.fillStyle = main; rrect(g, wx, wy, ww, wh, r); g.fill(); }
+      else {
+        g.save(); g.setLineDash([4, 3]); g.strokeStyle = main; g.lineWidth = 1.5;
+        rrect(g, wx, wy, ww, wh, r); g.stroke(); g.restore();
+      }
+    }
   }
-  const top = base - floors * fh;
-  g.fillStyle = C.ink; g.beginPath(); g.moveTo(x - 14, top); g.lineTo(x + bw / 2, top - 40); g.lineTo(x + bw + 14, top); g.fill();
-  text(g, lab(q, v, style), x + bw / 2, top - 56, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
+  g.strokeStyle = main; g.lineWidth = 3; g.strokeRect(x, top, bw, base - top);
+  // roof slab
+  g.beginPath();
+  g.moveTo(x, top); g.lineTo(x + dx, top - dy); g.lineTo(x + bw + dx, top - dy); g.lineTo(x + bw, top); g.closePath();
+  g.fillStyle = C.white; g.fill(); g.strokeStyle = main; g.lineWidth = 3; g.stroke();
+  let peak = top - dy;
+  const craneTop = building ? crane(g, {
+    u: bw / 300, mx: x + bw * 0.78, y0: top - dy * 0.5, room: top - dy * 0.5 - (b.y + 74),
+    hx: x + pad + ((n % ED_WIN) + 0.5) * slot, loadY: top - dy - wh - 10, ww, wh, r, main, soft,
+  }) : null;
+  if (craneTop !== null) peak = craneTop;
+  else if (!building) {
+    // completed: lift / water-tank housing on the roof
+    const hw = bw * 0.22, hh = fh * 0.7, hx = x + dx + bw * 0.55;
+    g.fillStyle = soft; g.fillRect(hx, top - dy * 0.5 - hh, hw, hh);
+    g.strokeStyle = main; g.lineWidth = 2; g.strokeRect(hx, top - dy * 0.5 - hh, hw, hh);
+    peak = Math.min(peak, top - dy * 0.5 - hh);
+  }
+  text(g, lab(q, v, style), b.x + b.w / 2, peak - 18, { ...labStyle(style), kind: "title", align: "center", maxW: b.w - 24 });
 }
 
 // Neutral "off" colour for unlit items (empty houses, people, keys): a light tint of the ink of
