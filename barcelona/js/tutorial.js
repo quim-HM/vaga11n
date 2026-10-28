@@ -140,41 +140,36 @@ export function drawCoinPath(g, a, b, t, colour, { r = 22, period = 2.2, phase =
 // cards, goal line, footer hint — so nothing is crowded at the top and the screen reads evenly. The
 // cards' horizontal gap is the same G, so the grid is even in both directions.
 //
-// Relevance: the cards and the explanation are what teach the game, so they keep the most room; the
-// title was the hero of the interlude just before, so here it is context (76 px, was 96).
+// Relevance: the explanation is what makes the game understandable, so it gets the largest type that
+// fits (up to 44 px, three lines if needed); the animations illustrate it, so they are drawn at 80 %
+// in shorter cards; the title was the hero of the interlude just before, so here it is context (76 px).
 export const TUT = {
   top: 24,                 // screen top to the kicker block
   kicker: 30,              // kicker size
   title: 76,               // title size
-  explainW: 1600, maxSize: 36, minSize: 30, minSize3: 28, lineH: 1.18,
-  cardW: 440, cardH: 520, padTop: 22,
+  explainW: 1640, maxSize: 44, minSize: 34, maxLines: 3, lineH: 1.18,
+  figScale: 0.8,           // animations inside the cards, relative to their drawing size
+  cardW: 420, padTop: 20,
   goalH: 46,               // visual height of the goal icons (they are all sized to it: secondary to the cards)
   hintTop: 1032 - 28,      // top of the «Aixeca la mà» icon in the footer row (LAYOUT.navY − its radius)
 };
-// Figure geometry inside a card (from the card's top): props reach ~370 px above the feet, and the
-// label/effect lines sit under the feet
-const FEET = TUT.padTop + 370, LABEL = FEET + 48, SUB = LABEL + 50;
+// Figure geometry inside a card (from the card's top): props reach ~385 drawing units above the feet
+// (scaled by figScale), and the label/effect lines sit under the feet
+const FEET = TUT.padTop + Math.round(385 * TUT.figScale), LABEL = FEET + 48, SUB = LABEL + 50;
+TUT.cardH = SUB + 28;
 export const CARDS = { w: TUT.cardW, h: TUT.cardH };
 
-// Explanation fitting: the largest size at which it fits in two lines (down to 30 px); longer texts
-// go to three lines (from 30 px down to 28 px) rather than becoming too small to read from a few metres
+// Explanation fitting: the largest size (44 px down to 34 px) at which it fits in three lines, so the
+// text that explains the game is as big as the room allows
 function fitExplain(g, explain) {
-  let size = TUT.maxSize, lines = [], maxLines = 2;
+  let size = TUT.maxSize, lines = [];
   for (; size >= TUT.minSize; size -= 2) {
     font(g, size, "body", 600);
     lines = wrapLines(g, explain, TUT.explainW);
-    if (lines.length <= 2) break;
+    if (lines.length <= TUT.maxLines) break;
   }
-  if (lines.length > 2) {
-    maxLines = 3;
-    for (size = TUT.minSize; size >= TUT.minSize3; size -= 2) {
-      font(g, size, "body", 600);
-      lines = wrapLines(g, explain, TUT.explainW);
-      if (lines.length <= 3) break;
-    }
-    size = Math.max(size, TUT.minSize3);
-  }
-  return { size, n: Math.min(lines.length, maxLines), maxLines };
+  size = Math.max(size, TUT.minSize);
+  return { size, n: Math.min(lines.length, TUT.maxLines), maxLines: TUT.maxLines };
 }
 
 // Positions of every element of the screen (all y in canvas px). Spacing uses each element's real
@@ -213,7 +208,9 @@ export function drawTutorial(g, { title, block, explain = "", cards, t }) {
     panel(g, x - TUT.cardW / 2, y0, TUT.cardW, TUT.cardH, { lw: 3 });
     g.save();
     g.beginPath(); g.rect(x - TUT.cardW / 2 + 4, y0 + 4, TUT.cardW - 8, TUT.cardH - 8); g.clip();
-    it.draw(g, x, y0 + FEET, t);
+    // the animation, scaled about its feet
+    g.translate(x, y0 + FEET); g.scale(TUT.figScale, TUT.figScale);
+    it.draw(g, 0, 0, t);
     g.restore();
     textIcon(g, it.label, x, y0 + LABEL, { size: 44, weight: 800, align: "center", maxW: TUT.cardW - 40 });
     textIcon(g, it.sub, x, y0 + SUB, { size: 36, weight: 800, align: "center", color: C[it.tone] || C.ink, maxW: TUT.cardW - 40 });

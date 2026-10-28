@@ -1,0 +1,19 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#888"><canvas id="c" width="1920" height="1300"></canvas><script type="module">
+import { drawMetaphor } from "./js/games/metafores.js";
+import { C } from "./js/ui.js";
+const g = document.getElementById("c").getContext("2d");
+const q = { rang: { min: 0, max: 400 }, pas: 5, escala: "lineal", unitat: "habitatges", valor: 107 };
+const P = new URLSearchParams(location.search);
+const kind = P.get("k") || "edifici";
+const vals = (P.get("v") || "40,107,230,390").split(",").map(Number);
+g.fillStyle = "#ddd"; g.fillRect(0, 0, 1920, 1300);
+vals.forEach((v, i) => {
+  const big = { x: 20 + i * 475, y: 30, w: 440, h: 550 };
+  const small = { x: 20 + i * 475, y: 720, w: 440, h: 350 };
+  for (const [b, style] of [[big, "answer"], [small, i % 2 ? "real" : "answer"]]) {
+    g.fillStyle = C.card || "#fff"; g.fillRect(b.x - 10, b.y - 20, b.w + 20, b.h + 60);
+    drawMetaphor(g, kind, b, v, q, style);
+  }
+});
+window.__ok = true;
+</script>
