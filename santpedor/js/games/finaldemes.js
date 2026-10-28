@@ -135,6 +135,11 @@ export function trendNotes(pct, lo, hi, dur = FINAL_LINE_DUR) {
 
 // Marge
 const DRAIN = 0.45;        // marge/s outside the corridor: ~2.2 s from full to empty
+// Being outside has to feel bad: the whole screen goes red (more as the marge drains), red edges
+// close in, and a heartbeat thumps and pulses the red, faster as the marge runs out. The pulse stays
+// a smooth swell below 3 Hz (no hard flashing).
+const HURT_IN = 10, HURT_OUT = 4;          // 1/s: how fast the red comes in / goes away
+const BEAT_SLOW = 0.8, BEAT_FAST = 0.42;   // heartbeat period (s) with a full / an empty marge
 const REGEN = 0.06;        // and slow to come back: being out of the corridor has to hurt
 const MARGE_SEG = 5;       // the marge is shown as segments (a life bar), with no label to read
 
@@ -192,6 +197,13 @@ function usablePoints(s) {
     if (Number.isFinite(y) && Number.isFinite(v) && v > 0 && !partial.has(y)) m.set(y, v);
   }
   return m;
+}
+
+// A palette colour (#RRGGBB) with an alpha, for gradients (which take no globalAlpha per stop)
+function hexA(c, a) {
+  const k = Math.round(clamp(a, 0, 1) * 255);
+  if (/^#[0-9a-f]{6}$/i.test(c)) return c + k.toString(16).padStart(2, "0");
+  return `rgba(215,0,15,${k / 255})`;
 }
 
 function fitText(g, str, x, y, maxW, opts = {}) {
@@ -571,6 +583,9 @@ export default class FinalDeMes {
     this.hitSfxT = Math.max(0, this.hitSfxT - dt);
     this.shake = Math.max(0, this.shake - dt);
     this.flash = Math.max(0, this.flash - dt);
+    const hurting = this.phase === "play" && this.touching;
+    this.hurt = (this.hurt || 0) + ((hurting ? 1 : 0) - (this.hurt || 0)) * Math.min(1, dt * (hurting ? HURT_IN : HURT_OUT));
+    this.beatPulse = Math.max(0, (this.beatPulse || 0) - dt * 3);
     this.grazeCool = Math.max(0, this.grazeCool - dt);
     if (this.popup) { this.popup.t += dt; if (this.popup.t > 0.9) this.popup = null; }
     for (const f of this.flying) f.t += dt;
@@ -713,6 +728,15 @@ export default class FinalDeMes {
       if (!wasTouching && this.hitSfxT <= 0) {
         this.app.sfx.hit();
         this.hitSfxT = 0.7;
+        this.shake = 0.35; this.flash = 0.3;
+        this.beatT = 0.3;   // the first heartbeat right after the hit
+      }
+      this.beatT = (this.beatT || 0) - dt;
+      if (this.beatT <= 0) {
+        const danger = 1 - clamp(this.marge, 0, 1);
+        this.app.sfx.heartbeat(danger);
+        this.beatPulse = 1;
+        this.beatT = BEAT_SLOW + (BEAT_FAST - BEAT_SLOW) * danger;
       }
     }
     for (const co of st.coins) {
@@ -749,8 +773,9 @@ export default class FinalDeMes {
     // drawn ON TOP of the road, so they stay visible where they cross it. Data drawn inside the road
     // (current line, coins, ball, labels) uses the card roles; what lies on the field uses the bg roles.
     g.save();
-    if (this.shake > 0) {
-      const a = 12 * (this.shake / 0.35);
+    if (this.shake > 0 || this.hurt > 0.01) {
+      // a hit jolts the screen; while outside it keeps trembling, harder as the marge runs out
+      const a = 12 * (this.shake / 0.35) + this.hurt * (1.5 + 4 * (1 - clamp(this.marge, 0, 1)));
       g.translate(Math.sin(this.t * 55) * a, Math.cos(this.t * 47) * a * 0.6);
     }
     this._drawGrid(g, st);
@@ -779,6 +804,7 @@ export default class FinalDeMes {
     this._drawHud(g, st);
     this._drawFlyingCoins(g);
     this._drawFooter(g, st);
+    this._drawHurt(g);
     onCard(() => {
       if (this.phase === "card") this._drawCard(g);
     });
@@ -788,6 +814,20 @@ export default class FinalDeMes {
   }
 
   _xOfU(st, uu) { return PLAYER_X + (uu - this.u) * st.ppy; }
+
+  // Outside the corridor: the whole screen (HUD and footer included) washes red and red edges close
+  // in, both deeper as the marge drains, swelling on each heartbeat
+  _drawHurt(g) {
+    const h = this.hurt || 0;
+    if (h < 0.01) return;
+    const danger = 1 - clamp(this.marge, 0, 1), pulse = this.beatPulse || 0;
+    withAlpha(g, h * (0.1 + 0.14 * danger + 0.08 * pulse), () => { g.fillStyle = C.red; g.fillRect(0, 0, W, H); });
+    const inner = H * (0.62 - 0.22 * danger - 0.06 * pulse);
+    const grad = g.createRadialGradient(W / 2, H / 2, inner, W / 2, H / 2, Math.hypot(W, H) / 2);
+    grad.addColorStop(0, hexA(C.red, 0));
+    grad.addColorStop(1, hexA(C.red, h * (0.5 + 0.35 * danger + 0.1 * pulse)));
+    g.save(); g.fillStyle = grad; g.fillRect(0, 0, W, H); g.restore();
+  }
 
   _drawGrid(g, st) {
     g.save();

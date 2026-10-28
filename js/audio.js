@@ -196,9 +196,22 @@ export const sfx = {
   good: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.2, { type: "triangle", gain: 0.11, delay: i * 0.08 })),
   meh: () => { tone(392, 0.22, { type: "triangle", gain: 0.11 }); tone(330, 0.32, { type: "triangle", gain: 0.11, delay: 0.15 }); },
   bad: () => tone(220, 0.38, { type: "sawtooth", gain: 0.08, slide: -110, lp: 1000 }),
-  // out of the corridor: a soft bump (filtered noise + a dropping tone), never a crack; kept above
-  // ~200 Hz so laptop and projector speakers still play it
-  hit: () => { noise(0.12, { gain: 0.25, hp: 180, lp: 1600 }); tone(262, 0.15, { type: "triangle", gain: 0.18, slide: -110, attack: 0.004 }); },
+  // out of the corridor: a heavy bump (filtered noise + a dropping tone) with a short dissonant sting
+  // (a minor second, filtered), never a crack; kept above ~200 Hz so laptop and projector speakers
+  // still play it
+  hit: () => {
+    noise(0.14, { gain: 0.28, hp: 160, lp: 1600 });
+    tone(262, 0.18, { type: "triangle", gain: 0.2, slide: -120, attack: 0.004 });
+    tone(233, 0.32, { type: "sawtooth", gain: 0.05, lp: 1100, delay: 0.02 });
+    tone(247, 0.32, { type: "sawtooth", gain: 0.05, lp: 1100, delay: 0.02 });
+  },
+  // while outside the corridor: «lub-dub», louder and tenser as the marge runs out (danger 0..1)
+  heartbeat: (danger = 0) => {
+    const k = Number.isFinite(danger) ? clamp01(danger) : 0;
+    tone(120, 0.16, { type: "triangle", gain: 0.2 + 0.12 * k, slide: -45, attack: 0.006 });
+    tone(240, 0.1, { gain: 0.05 + 0.04 * k, attack: 0.006 });
+    tone(105, 0.14, { type: "triangle", gain: 0.13 + 0.08 * k, slide: -35, attack: 0.006, delay: 0.15 });
+  },
   coin,
   spark,
   // game 1 lever: one soft notch per step, its pitch following the value's place on the scale

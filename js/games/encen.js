@@ -77,7 +77,7 @@ const TU = TUNING;
 const NLEVELS = 3;
 const LIT = 0.5;        // a cell counts as organised from half the range up: the top half is
                         // headroom that visibly cools down, so the map keeps breathing
-const HOLD_S = 2;
+const HOLD_S = 5;   // seconds the target must be held to win the level
 // «Com es juga» (stickman cards) first, then a level card before each map. Result cards move on by
 // themselves (no gesture), but stay long enough to be read even by a player who is ready at once.
 const HOWTO_MIN_S = 6.0, HOWTO_AUTO_S = 24, RAISE_S = 0.6;
@@ -594,8 +594,8 @@ export default class Encen {
       title: T("joc.encen", "Encén la vaga"),
       block: T("encen.com_es_juga", "Com es juga"),
       explain: inp.oneArm
-        ? T("encen.com.text_una", "Una vaga no es fa, es construeix: passa la mà per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 2 segons per passar al següent nivell.")
-        : T("encen.com.text", "Una vaga no es fa, es construeix: passa les mans per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 2 segons per passar al següent nivell."),
+        ? T("encen.com.text_una", "Una vaga no es fa, es construeix: passa la mà per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 5 segons per passar al següent nivell.")
+        : T("encen.com.text", "Una vaga no es fa, es construeix: passa les mans per tot el mapa per agitar i fer créixer l'organització per a la vaga. Aconsegueix mantenir mobilitzada la major part del mapa durant 5 segons per passar al següent nivell."),
       t: this.phaseT,
       cards: encenCards(!!inp.oneArm, T),
     });

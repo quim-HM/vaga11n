@@ -388,7 +388,7 @@ export function drawEncenGoal(g, label, y = 916) {
       const x = x0 + hw / 2 + cx * hw, yy = cy + ry * 1.5 * r;
       hex(g, x, yy, r - 1);
       g.fillStyle = mix(C.cardSoft, warm, heat); g.fill();
-      g.lineWidth = heat > 0.6 ? 2.5 : 1.5; g.strokeStyle = heat > 0.6 ? C.cardLine : mix(C.card, C.cardInk, 0.4); g.stroke();
+      g.lineWidth = heat > 0.6 ? 2 : 1.5; g.strokeStyle = heat > 0.6 ? mix(C.cardLine, warm, 0.35) : mix(C.card, C.cardInk, 0.4); g.stroke();
     }
   });
   textIcon(g, label, x0 + iw + hw / 2 + pad + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
@@ -428,14 +428,14 @@ export function encenCards(oneArm, T) {
           }
           hex(gg, cell.x, cell.y, R - 1.5);
           gg.fillStyle = mix(C.cardSoft, warm(), heat); gg.fill();
-          gg.lineWidth = heat > 0.6 ? 3.5 : 1.5; gg.strokeStyle = heat > 0.6 ? C.cardLine : mix(C.cardSoft, C.cardInk, 0.35); gg.stroke();
+          gg.lineWidth = heat > 0.6 ? 2.2 : 1.5; gg.strokeStyle = heat > 0.6 ? mix(C.cardLine, warm(), 0.35) : mix(C.cardSoft, C.cardInk, 0.35); gg.stroke();
         }
       },
     });
   };
   // 3 · the gauge passes the flag and holds: the flag becomes the ✓
   const goal = (g, x, y, t) => {
-    const cyc = t % 5.2, fill = clamp(cyc / 3, 0, 1), reached = cyc > 3;
+    const cyc = t % 8.4, fill = clamp(cyc / 3, 0, 1), reached = cyc > 3;   // fills in 3 s, then holds the flag for 5 s, as in the game
     const k = 0.86 * (1 - Math.pow(1 - fill, 2));
     const bounce = reached ? Math.abs(Math.sin(t * 6)) * 6 : 0;
     drawFigure(g, x, y - bounce, {
