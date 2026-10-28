@@ -26,7 +26,8 @@ const LEVER_MAX_SPS = 25;      // lever speed cap (steps per second): fast, but 
 // Minimum reading time before a raised hand can move on (even a player who is ready at once gets
 // time to take in what the screen says): the reveal has the figure, a verdict and an explanation.
 const REVEAL_NEXT_MIN_S = 5.0;
-const HOWTO_MIN_S = 4.0;      // the how-to card stays at least this long before a raised hand skips it
+const HOWTO_MIN_S = 6.0;      // the how-to card stays at least this long before a raised hand skips it
+const HOWTO_AUTO_S = 24;      // … and moves on by itself after this
 const REVEAL_MAX_S = 25;   // players move on themselves (raise a hand / click); auto only as a safety net
 const NEXT_RAISE_S = 0.6;
 const LEVER_UP = 0.45, LEVER_DOWN = -0.1, REST_Y = -0.5;
@@ -229,7 +230,7 @@ export default class Preu {
         if (this.t > 3) this.finish();
         break;
       case "howto":
-        if (this.wantsNext(dt, HOWTO_MIN_S) || this.t > 14) this.startQuestion();
+        if (this.wantsNext(dt, HOWTO_MIN_S) || this.t > HOWTO_AUTO_S) this.startQuestion();
         break;
       case "answer":
         this.updateAnswer(dt);
@@ -337,6 +338,7 @@ export default class Preu {
     drawTutorial(g, {
       title: T("preu.el_preu_in_just", "EL PREU (IN)JUST"),
       block: T("preu.com_es_juga", "Com es juga"),
+      explain: T("preu.com.text", "Tres preguntes amb xifres reals. Puja o baixa la mà per triar la teva resposta i deixa-la quieta sobre un botó dels costats per confirmar-la. Després, veuràs la realitat."),
       t: this.t,
       cards: [
         { label: T("preu.ma_amunt", "Mà amunt"), sub: T("preu.puja__", "▲ puja"), tone: "red", draw: (gg, x, y, t) => preuFigure(gg, x, y, 1, t) },

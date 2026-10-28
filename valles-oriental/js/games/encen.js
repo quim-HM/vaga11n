@@ -80,7 +80,7 @@ const LIT = 0.5;        // a cell counts as organised from half the range up: th
 const HOLD_S = 2;
 // «Com es juga» (stickman cards) first, then a level card before each map. Result cards move on by
 // themselves (no gesture), but stay long enough to be read even by a player who is ready at once.
-const HOWTO_MIN_S = 4.0, HOWTO_AUTO_S = 16, RAISE_S = 0.6;
+const HOWTO_MIN_S = 6.0, HOWTO_AUTO_S = 24, RAISE_S = 0.6;
 const READY_FIRST_S = 5.0, READY_S = 4.2, CARD_WON_S = 4.0, CARD_FAIL_S = 4.5, CARD_LAST_S = 5.5;
 // legacy data (app.data.geo.manresa/bages/catalunya) and bubble fallback
 const LEGACY_IDS = ["manresa", "bages", "catalunya"];
@@ -591,6 +591,9 @@ export default class Encen {
     drawTutorial(g, {
       title: T("joc.encen", "Encén la vaga"),
       block: T("encen.com_es_juga", "Com es juga"),
+      explain: inp.oneArm
+        ? T("encen.com.text_una", "Organitza la vaga al mapa del teu entorn. Mou la mà sense parar: on passes s'encén, i on deixes de passar es refreda. Arriba a la bandera de la barra de dalt i mantén-t'hi.")
+        : T("encen.com.text", "Organitza la vaga al mapa del teu entorn. Mou les mans sense parar: on passes s'encén, i on deixes de passar es refreda. Arriba a la bandera de la barra de dalt i mantén-t'hi."),
       t: this.phaseT,
       cards: encenCards(!!inp.oneArm, T),
     });

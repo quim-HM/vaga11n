@@ -4,7 +4,7 @@
 // is a neutral mid-tone and the arm(s) doing the gesture carry the card's accent colour, so the
 // gesture reads in every theme (an ink-coloured arm on an ink body disappears). Coordinates of a
 // figure are in its own space: origin between the feet, y up negative, about 290 units tall.
-import { W, C, text, panel, rrect, onCard, posterBlock, clamp, drawCheck } from "./ui.js";
+import { W, C, text, wrap, wrapLines, font, panel, rrect, onCard, posterBlock, clamp, drawCheck } from "./ui.js";
 import { textIcon, centerText, drawOkBadge } from "./icons.js";
 import { drawHand, handOutline } from "./hand.js";
 
@@ -133,11 +133,27 @@ export function drawCoinPath(g, a, b, t, colour, { r = 22, period = 2.2, phase =
 // --- screen -------------------------------------------------------------------------------------
 export const CARDS = { xs: [480, 960, 1440], y: 300, w: 440, h: 540, feet: 684, label: 734, sub: 786 };
 
-// «Com es juga» screen: the game title, the block, three cards. Each card: { draw(g, cx, feetY, t),
-// label, sub, tone } where tone is a card colour role ("red", "blue", "teal") for the sub-label.
-export function drawTutorial(g, { title, block, cards, t }) {
-  text(g, title, W / 2, 150, { size: 110, kind: "title", align: "center", color: C.head, maxW: W - 200 });
-  posterBlock(g, block, W / 2, 252, 56, { align: "center", maxW: W - 200 });
+// «Com es juga» screen: a small «COM ES JUGA» block, the game title, a short plain-text explanation of
+// the game (what it is, what to do, how it ends; at most two lines) and three cards. Each card:
+// { draw(g, cx, feetY, t), label, sub, tone } where tone is a card colour role ("red", "blue",
+// "teal") for the sub-label.
+export const EXPLAIN = { w: 1640, y0: 206, maxSize: 36, minSize: 28, lineH: 1.22 };
+
+export function drawTutorial(g, { title, block, explain = "", cards, t }) {
+  posterBlock(g, block, W / 2, 58, 34, { align: "center", maxW: W - 200 });
+  text(g, title, W / 2, 158, { size: 96, kind: "title", align: "center", color: C.head, maxW: W - 200 });
+  if (explain) {
+    // the largest size at which it fits in two lines; a single line sits in the middle of the band
+    let size = EXPLAIN.maxSize, lines = [];
+    for (; size >= EXPLAIN.minSize; size -= 2) {
+      font(g, size, "body", 600);
+      lines = wrapLines(g, explain, EXPLAIN.w);
+      if (lines.length <= 2) break;
+    }
+    const lh = Math.round(size * EXPLAIN.lineH);
+    const y = lines.length > 1 ? EXPLAIN.y0 : EXPLAIN.y0 + lh / 2;
+    wrap(g, explain, W / 2, y, EXPLAIN.w, { size, weight: 600, align: "center", color: C.ink, lineH: EXPLAIN.lineH, maxLines: 2 });
+  }
   cards.forEach((it, i) => onCard(() => {
     const x = CARDS.xs[i];
     panel(g, x - CARDS.w / 2, CARDS.y, CARDS.w, CARDS.h, { lw: 3 });

@@ -72,7 +72,7 @@ const GATE_TYPICAL = 3.4;
 // Reading time: even a player who is ready at once gets time to take in each card
 const GATE_MIN = 3.0;       // the first level card stays up at least this long before the gate can open
 const GATE_MIN_NEXT = 2.5;  // ... and the next ones (same layout, already known)
-const HOWTO_MIN = 4.0, HOWTO_AUTO = 16;   // «Com es juga»: raise a hand after 4 s, or it goes on by itself
+const HOWTO_MIN = 6.0, HOWTO_AUTO = 24;   // «Com es juga»: raise a hand after 6 s, or it goes on by itself
 const GO_DUR = 0.5;         // «Som-hi!»
 const GRACE = 1;            // invulnerable seconds at the start of each stage
 const STAGE_MIN = 15, STAGE_MAX = 17;   // length of the FIRST level (the next ones are shorter)
@@ -1098,11 +1098,15 @@ export default class FinalDeMes {
   // of the game under them, and «raise a hand» to start (it pulses if nobody reacts)
   _drawHowto(g) {
     const inp = this.app.input;
+    const oneHand = inp.usingMouse || !!inp.oneArm;
     drawTutorial(g, {
       title: T("joc.finaldemes", "Final de mes"),
       block: T("finaldemes.com_es_juga", "Com es juga"),
+      explain: oneHand
+        ? T("finaldemes.com.text_una", "Porta l'€ pel camí que han seguit els salaris i els preus des del 2015. Puja o baixa la mà per moure'l i no en surtis: fora del camí, se t'acaba el marge.")
+        : T("finaldemes.com.text", "Porta l'€ pel camí que han seguit els salaris i els preus des del 2015. Inclina la línia entre les mans per pujar o baixar, i no en surtis: fora del camí, se t'acaba el marge."),
       t: this.pt,
-      cards: finaldemesCards(inp.usingMouse || !!inp.oneArm, T),
+      cards: finaldemesCards(oneHand, T),
     });
     drawFinaldemesGoal(g, T("finaldemes.com.objectiu", "Mantén l'€ dins del camí"));
     if (this.pt > HOWTO_MIN) {
