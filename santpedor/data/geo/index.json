@@ -19,6 +19,15 @@
    "tipus_font": "oficial"
   },
   {
+   "id": "08019-34",
+   "nom": "Can Baró",
+   "comarca": "barcelones",
+   "fitxer": "barris/08019-34.json",
+   "n": 7,
+   "font": "bcn_seccions_censals",
+   "tipus_font": "oficial"
+  },
+  {
    "id": "17079",
    "nom": "Girona",
    "comarca": "girones",

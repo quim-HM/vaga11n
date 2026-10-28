@@ -88,6 +88,17 @@
     "notes": "73 barris, geometria EPSG:25831 (camp geometria_etrs89)."
   },
   {
+    "id": "bcn_seccions_censals",
+    "organisme": "Ajuntament de Barcelona (Open Data BCN)",
+    "titol": "Districtes i barris de la ciutat de Barcelona – BarcelonaCiutat_SeccionsCensals.csv (geometria ETRS89)",
+    "titol_curt": "Aj. Barcelona, Open Data BCN – seccions censals",
+    "url": "https://opendata-ajuntament.barcelona.cat/data/dataset/808daafa-d9ce-48c0-925a-fa5afdb1ed41/resource/e16856a7-b3c0-4c32-a468-cc190cbbf7a9/download",
+    "data_consulta": "2026-10-25",
+    "tipus": "oficial",
+    "llicencia": "CC BY 4.0 (Ajuntament de Barcelona)",
+    "notes": "1.068 seccions censals amb el codi de districte, barri i àrea estadística bàsica; geometria EPSG:25831 (camp geometria_etrs89). Es fan servir les 7 de Can Baró (districte 07, barri 34)."
+  },
+  {
     "id": "bcn_pad_mdbas_sexe_2026",
     "organisme": "Ajuntament de Barcelona (Open Data BCN)",
     "titol": "Població per sexe (padró municipal d'habitants) a 1 de gener de 2026, per secció censal i barri",

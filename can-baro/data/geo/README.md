@@ -6,9 +6,10 @@ Geometries reals (no inventades) per al joc, en WGS84 lon/lat (5 decimals), simp
 
 | Fitxer | Contingut | Features | Mida | Tolerància DP | Font geometria | Població |
 |---|---|---|---|---|---|---|
-| `index.json` | ciutats (13), comarques (43) i mapes finals (2) | | ~8 KB | | | |
+| `index.json` | ciutats (13) i un barri (Can Baró), comarques (43) i mapes finals (2) | | ~8 KB | | | |
 | `comarques/<slug>.json` (43) | municipis de cada comarca | 947 en total (3–68 per fitxer) | 1,5 MB en total, màx. 78 KB | extensió/1200 (16–56 m) | ICGC Divisions administratives v2r2 (CC BY 4.0) | Idescat, 1/1/2025 |
 | `barris/<INE>.json` (13) | barris de ciutats | 352 en total | 275 KB en total, màx. 79 KB | extensió/1200 (3–14 m) | oficial (Barcelona, Girona, Reus) o OSM (ODbL) | Barcelona 1/1/2026, Reus 31/12/2024, Manresa 2023; la resta null |
+| `barris/08019-34.json` | les 7 seccions censals de Can Baró (barri 34 de Barcelona), primer nivell de la versió `can-baro` | 7 | ~6 KB | 3 m | **Aj. Barcelona, Open Data BCN (CC BY 4.0)** | padró 1/1/2026 per secció censal |
 | `ppcc.json` | Països Catalans (sense l'Alguer) | 91 | ~360 KB | 300 m | ICGC, ICV, IGEAR, IDEIB, IGN/Etalab, OSM | Idescat, INE, INSEE |
 | `manresa_barris.json` | 18 barris de Manresa (ronda 1; mateix contingut que `barris/08113.json`, tolerància 6 m) | 18 | ~21 KB | 6 m | OpenStreetMap (ODbL) | Aj. Manresa, padró 2023 |
 | `bages_municipis.json` | 30 municipis del Bages (ronda 1; mateix contingut que `comarques/bages.json`) | 30 | ~55 KB | 35 m | ICGC v2r2 (CC BY 4.0) | Idescat, 1/1/2025 |
@@ -25,6 +26,10 @@ Geometries reals (no inventades) per al joc, en WGS84 lon/lat (5 decimals), simp
 ```
 
 * `ppcc.json` afegeix a cada feature `regio` i `font_geometria`.
+* La subdivisió d'un barri (`barris/<INE>-<barri>.json`) afegeix `territori` (nom que surt al joc), `unitat`
+  («seccions»: «3 / 7 seccions organitzades»), `unitat_genere` (`f`: «organitzades»), `etiquetes: false` (les zones no tenen nom: el joc no
+  n'escriu cap al mapa) i `municipi` (`{id, nom}`: el nivell següent comença
+  per aquest municipi). A `index.json` té l'id `<INE>-<barri>` i el nom del barri.
 * `index.json`: `ciutats[] = {id (INE), nom, comarca (slug), fitxer, n, font, tipus_font}`,
   `comarques[] = {id (slug), nom (amb article), codi (ICGC), fitxer, n}`, `final[] = {id, nom, fitxer, n}`.
 * `paths` = anells exteriors tancats (primer punt = últim punt); els forats s'han eliminat.

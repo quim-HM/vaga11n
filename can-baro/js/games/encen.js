@@ -138,7 +138,8 @@ function describeTerritory(geo, fallbackName, fallbackUnit) {
   if (article === "l'") fem = /^[^\s-]*a\b/i.test(bare);
   if (geo && typeof geo.genere === "string") fem = /^f/i.test(geo.genere);
   const kind = (fem ? "fem" : "masc") + (plural ? "_pl" : "");
-  const femUnit = /es$/i.test(unit);
+  // «seccions» is feminine without ending in -es: a geo file can say so with unitat_genere
+  const femUnit = geo && typeof geo.unitat_genere === "string" ? /^f/i.test(geo.unitat_genere) : /es$/i.test(unit);
   return { name, cap, bare, upper: cap.toUpperCase(), plural, fem, kind, unit, femUnit };
 }
 
@@ -240,6 +241,8 @@ export default class Encen {
     const terr = describeTerritory(geo, LEGACY_NAMES[i][0], isGeo ? LEGACY_NAMES[i][1] : "zones");
     if (!isGeo) terr.unit = "zones";
     const L = { i, id: (geo && geo.id) || LEGACY_IDS[i], geo, terr, map, areas: map.areas, isGeo, credit: isGeo ? this.mapCredit(geo) : "" };
+    // maps whose zones have no meaningful names (census sections) can turn the names off: "etiquetes": false
+    L.noLabels = !!(geo && geo.etiquetes === false);
     L.frame = map.frame || null;
     L.context = map.context || [];
     // with a framed view only the visible part of the areas is played: cap the area by the frame
@@ -758,7 +761,7 @@ export default class Encen {
       return null;
     };
     for (const a of [...A].sort((p, q) => q.lr - p.lr)) {
-      a.shown = place(a);
+      a.shown = L.noLabels ? null : place(a);
       if (!a.shown) continue;
       const { size, lines, out } = a.shown;
       const lx = out ? a.lxOut : a.lx, ly = out ? a.lyOut : a.ly;
@@ -885,7 +888,7 @@ export default class Encen {
         g.restore();
         text(g, label, bx + wob + w / 2, by + 37, { size: 34, weight: 700, align: "center", color: C.hlText });
       }
-      if (a && this.phase === "play") {
+      if (a && this.phase === "play" && !L.noLabels) {
         const label = a.lit
           ? T("encen.tooltip_fet", "{nom} · {organitzat}", { nom: a.nom, organitzat: this.litWordOne(L) })
           : T("encen.tooltip", "{nom}", { nom: a.nom });

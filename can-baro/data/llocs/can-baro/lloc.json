@@ -32,8 +32,8 @@
     ]
   },
   "joc3": {
-    "_nota": "El joc comença pels 73 barris de Barcelona (Can Baró n'és un), després els municipis del Barcelonès i els Països Catalans.",
-    "ciutat": "08019",
+    "_nota": "El joc comença per Can Baró (les seves 7 seccions censals, data/geo/barris/08019-34.json), després els municipis del Barcelonès i els Països Catalans. A la pàgina d'operador es pot posar Barcelona (73 barris) com a primer nivell.",
+    "ciutat": "08019-34",
     "comarca": "barcelones",
     "final": "ppcc"
   },
