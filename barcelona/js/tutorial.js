@@ -370,28 +370,30 @@ function motionArcs(g, x, y, side, colour) {
 // Goal line under the cards: a small cluster of map cells (as on the game's map), the middle ones
 // already lit, and the rule
 export function drawEncenGoal(g, label, y = 916) {
-  const size = 40, r = 15, hw = Math.sqrt(3) * r, gap = 22, iw = 4 * hw, pad = 7;
+  // a «flower» of 7 map cells (one in the middle, six around it): the organisation spreading from the
+  // centre, hottest in the middle and warmer on one side, as on the game's map
+  const size = 40, r = 17, hw = Math.sqrt(3) * r, gap = 24, iw = 2 * hw + hw;
   const tw = textIcon(g, label, -10000, -10000, { size, weight: 800 });
-  const x0 = W / 2 - (iw + 2 * pad + gap + tw) / 2 + pad, cy = y - 13;
-  const cells = [
-    [0.5, -0.75, 0.25], [1.5, -0.75, 0.9], [2.5, -0.75, 0.55], [3.5, -0.75, 0.1],
-    [0, 0.75, 0.15], [1, 0.75, 0.7], [2, 0.75, 1], [3, 0.75, 0.6],
-  ];
+  const x0 = W / 2 - (iw + gap + tw) / 2, cx = x0 + iw / 2, cy = y - 13;
+  const cells = [[0, 0, 1]];
+  const ring = [0.85, 0.7, 0.35, 0.2, 0.3, 0.6];          // heats of the six neighbours, clockwise from the right
+  for (let k = 0; k < 6; k++) {
+    const a = (k * 60 * Math.PI) / 180;
+    cells.push([Math.cos(a) * hw, Math.sin(a) * hw, ring[k]]);
+  }
   const warm = C.heatHot || C.red;
   onCard(() => {
-    // a small white map card behind the cells, as the other goal icons, so it reads on any theme
     g.save();
-    g.fillStyle = C.card; g.strokeStyle = C.cardLine; g.lineWidth = 2.5;
-    rrect(g, x0 - pad, cy - 1.5 * r - r - pad + 4, iw + 2 * pad + hw / 2, 3 * r + 2 * r + 2 * pad - 8, 6); g.fill(); g.stroke();
-    g.restore();
-    for (const [cx, ry, heat] of cells) {
-      const x = x0 + hw / 2 + cx * hw, yy = cy + ry * 1.5 * r;
-      hex(g, x, yy, r - 1);
+    // halo: the flower's silhouette in the card colour, so it reads on any field
+    for (const [dx, dy] of cells) { hex(g, cx + dx, cy + dy, r + 2.5); g.fillStyle = C.card; g.fill(); }
+    for (const [dx, dy, heat] of cells) {
+      hex(g, cx + dx, cy + dy, r - 1.2);
       g.fillStyle = mix(C.cardSoft, warm, heat); g.fill();
-      g.lineWidth = heat > 0.6 ? 2 : 1.5; g.strokeStyle = heat > 0.6 ? mix(C.cardLine, warm, 0.35) : mix(C.card, C.cardInk, 0.4); g.stroke();
+      g.lineWidth = 1.5; g.strokeStyle = mix(C.cardSoft, C.cardInk, heat > 0.6 ? 0.55 : 0.3); g.stroke();
     }
+    g.restore();
   });
-  textIcon(g, label, x0 + iw + hw / 2 + pad + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
+  textIcon(g, label, x0 + iw + gap, y + size * 0.36 - 2, { size, weight: 800, color: C.ink });
 }
 
 export function encenCards(oneArm, T) {
