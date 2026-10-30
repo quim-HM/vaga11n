@@ -60,6 +60,7 @@
       <tr><td>Jugador</td><td id="st-player">—</td></tr>
       <tr><td>Qualitat braços</td><td id="st-q">—</td></tr>
       <tr><td>Abast (unitats)</td><td id="st-reach">—</td></tr>
+      <tr><td>Enquadrament</td><td id="st-frame">—</td></tr>
     </table>
     <label>Zona de joc: límit esquerre <span class="val" id="v-zmin"></span></label>
     <input type="range" id="zmin" min="0" max="0.5" step="0.01">
@@ -115,6 +116,9 @@
     <ul>
       <li>Càmera centrada sota o sobre la pantalla, a l'alçada del pit (1,2–1,5 m).</li>
       <li>Jugador a 2,5–3,5 m: ha de veure's de cap a cintura amb els braços estirats amunt.</li>
+      <li>«Enquadrament» diu si el jugador d'ara cap a la imatge; a la vista prèvia, el rectangle discontinu
+        és l'espai que han d'abastar les mans (verd: hi cap; vermell: en surt). Fes-ho provar a gent alta i baixa
+        i posa les marques del terra on tothom hi càpiga. El joc mateix ja demana al jugador que s'apropi, faci un pas enrere o es mogui.</li>
       <li>Ajusta la zona perquè la gent que passa pels costats quedi a les franges fosques.</li>
       <li>Si algú del fons es detecta, puja «Mida mínima» fins que només surti el jugador.</li>
       <li>Si la imatge parpelleja amb el projector, desactiva l'exposició automàtica.</li>
@@ -127,6 +131,7 @@
 import { ChannelLink, WsLink } from "./js/link.js";
 import { LLOC_DIR } from "./js/lloc.js";
 import { loadFinalConfig } from "./js/data.js";
+import { measureFraming, candidateIssue } from "./js/framing.js";
 
 const $ = (id) => document.getElementById(id);
 const SERVER = new URLSearchParams(location.search).has("servidor");
@@ -207,8 +212,24 @@ link.subscribe((m) => {
     $("st-player").innerHTML = m.present ? `<span class="ok">#${m.seat} detectat</span>` : '<span class="bad">cap</span>';
     $("st-q").textContent = m.player ? m.player.q : "—";
     $("st-reach").textContent = m.player ? m.player.reach : "—";
+    $("st-frame").innerHTML = framingLabel(m);
   }
 });
+// Same check the game uses to tell the player to step back / come closer (js/framing.js), without
+// the smoothing: what the camera sees right now, with the margins left around the hands' area
+const FRAMING_NAMES = { aprop: "massa a prop (o massa amunt/avall)", lluny: "massa lluny", dreta: "massa a l'esquerra de la imatge", esquerra: "massa a la dreta de la imatge",
+  altres: "una altra persona al damunt", tapat: "braç tapat" };
+function framingLabel(m) {
+  if (!m.present || !m.player) {
+    const c = candidateIssue(m.cands);
+    return c ? `<span class="bad">ningú vàlid: ${FRAMING_NAMES[c]}</span>` : "—";
+  }
+  const f = measureFraming(m.player, { cands: m.cands, seat: m.seat });
+  if (!f) return "—";
+  const mg = f.margins, p = (v) => v.toFixed(2);
+  const detail = ` <small>(marges: dalt ${p(mg.top)} · baix ${p(mg.bottom)} · esq. ${p(mg.left)} · dreta ${p(mg.right)})</small>`;
+  return (f.issues.length ? `<span class="bad">${f.issues.map((k) => FRAMING_NAMES[k]).join(", ")}</span>` : '<span class="ok">bé</span>') + detail;
+}
 for (const [id, [s, k]] of Object.entries(sliders)) {
   $(id).addEventListener("input", () => {
     $("v-" + id).textContent = $(id).value;

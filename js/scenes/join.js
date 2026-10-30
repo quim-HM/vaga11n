@@ -5,8 +5,14 @@ import { W, H, C, text, wrap, ring, clamp, Particles, campaignButton } from "../
 import { Dwell, inCircle, inRect, reachToScreen } from "../input.js";
 import { drawHand } from "../hand.js";
 import { drawOkBadge } from "../icons.js";
+import { drawFramingCard, drawCameraView } from "../framehint.js";
 
 const MAX_S = 16;
+// While the player is badly placed for the camera (framing.js) the calibration waits up to this much
+// longer, so the games do not start with someone who cannot reach the screen
+const MAX_WAIT_S = 20;
+// «Així et veu la càmera», top right corner, clear of the right target (and its dwell ring)
+const VIEW = { x: W - 40 - 280, y: 22, w: 280 };
 
 export default class Join {
   constructor(app) {
@@ -17,6 +23,7 @@ export default class Join {
     this.place();
     this.armBtn = { x: W / 2, y: reachToScreen(0, -0.2).y, w: 520, h: 120, dwell: new Dwell(1.3) };
     this.doneT = null;
+    this.waitT = 0;
   }
 
   place() {
@@ -51,7 +58,9 @@ export default class Join {
       this.place();
     }
     if (b.cool) { b.cool -= dt; if (b.cool > 0) b.dwell.p = 0; else b.cool = 0; }
-    if (this.doneT === null && (this.stars.every((s) => s.done) || this.t > MAX_S)) { this.doneT = 0; this.app.sfx.good(); }
+    if (this.framingIssue()) this.waitT += dt;
+    const limit = MAX_S + Math.min(this.waitT, MAX_WAIT_S);
+    if (this.doneT === null && (this.stars.every((s) => s.done) || this.t > limit)) { this.doneT = 0; this.app.sfx.good(); }
     if (this.doneT !== null) {
       this.doneT += dt;
       if (this.doneT > 1.4) this.app.nextGame();
@@ -60,11 +69,15 @@ export default class Join {
 
   skip() { this.app.nextGame(); }
 
+  // camera players only: the mouse never needs placing
+  framingIssue() { return this.app.input.usingMouse ? null : this.app.input.framing.issue; }
+
   draw(g) {
     const app = this.app, inp = app.input;
     text(g, T("hola.hola", "HOLA!"), W / 2, 150, { size: 110, kind: "title", align: "center", color: C.head });
+    const issue = this.doneT === null ? this.framingIssue() : null;
     const msg = this.doneT !== null ? T("hola.molt_be_comencem", "Molt bé! Comencem.") : inp.oneArm ? T("hola.diana_una", "Col·loca la mà als cercles") : T("hola.diana_dues", "Col·loca les mans als cercles");
-    text(g, msg, W / 2, 240, { size: 60, weight: 800, align: "center" });
+    if (!issue) text(g, msg, W / 2, 240, { size: 60, weight: 800, align: "center" });
     app.drawSilhouette(g, { alpha: 0.18, lw: 40 });
     for (const s of this.stars) {
       handTarget(g, s.x, s.y, s.r, s.done, s.x < W / 2 ? "l" : "r");
@@ -77,6 +90,9 @@ export default class Join {
     campaignButton(g, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, { label, p, size: 36 });
     wrap(g, T("hola.tambe_es_pot_jugar", "Es pot jugar assegut."), W / 2, H - 110, 1500, { size: 32, align: "center", color: C.inkSoft });
     this.fx.draw(g);
+    // camera players: what the camera sees, and what to do when it cannot see them well
+    if (!inp.usingMouse) drawCameraView(g, VIEW.x, VIEW.y, VIEW.w, inp);
+    if (issue) drawFramingCard(g, W / 2, 190, issue, { w: 1060 });
     const over = inp.cursors().find((c) => inRect(c, b.x - b.w / 2, b.y - b.h / 2, b.w, b.h));
     app.drawCursors(g, { progress: over ? { [over.side]: clamp(b.dwell.p, 0, 1) } : null });
     app.drawPrivacy(g, 0.8);

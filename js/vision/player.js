@@ -79,6 +79,18 @@ export class PlayerSelector {
     return (sw / w) * (0.6 + 0.4 * centrality);
   }
 
+  // Why a person is not eligible, for the framing hints (web/js/framing.js): amagat = shoulders not
+  // visible, petit = too small (far away), zona = outside the play zone, null = eligible
+  whyNot(tr, w) {
+    const p = tr.person;
+    const sw = shoulderWidth(p);
+    if (sw <= 0) return "amagat";
+    if (sw < this.cfg.player.min_shoulder_width * w) return "petit";
+    const cx = (p.kpts[L_SHOULDER][0] + p.kpts[R_SHOULDER][0]) / 2 / w;
+    if (!(this.cfg.player.zone_x_min <= cx && cx <= this.cfg.player.zone_x_max)) return "zona";
+    return null;
+  }
+
   update(tracks, t, w) {
     const st = this.state;
     const scored = new Map(tracks.map((tr) => [tr.id, this.eligible(tr, w)]));

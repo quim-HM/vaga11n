@@ -5,6 +5,7 @@
 // at low resolution and is never stored or sent anywhere outside this browser.
 import { PlayerSelector, Tracker, shoulderWidth } from "./player.js";
 import { toPersons } from "./landmarks.js";
+import { measureFraming } from "../framing.js";
 
 const SKELETON = [[5, 7], [7, 9], [6, 8], [8, 10], [5, 6], [5, 11], [6, 12], [11, 12],
   [11, 13], [13, 15], [12, 14], [14, 16], [0, 5], [0, 6]];
@@ -252,6 +253,7 @@ export class BrowserVision {
       sw: r3(shoulderWidth(tr.person) / w),
       s: Math.round(tr.person.score * 100) / 100,
       ok: this.selector.eligible(tr, w) > 0,
+      why: this.selector.whyNot(tr, w),
     }));
     this.emit(msg);
 
@@ -266,7 +268,7 @@ export class BrowserVision {
     if (now - this._t0 >= 1000) { this.fps = (this._n * 1000) / (now - this._t0); this._n = 0; this._t0 = now; }
     if (this.onPreview && now < this.previewUntil && now - this._lastPreview > 120) {
       this._lastPreview = now;
-      this._renderPreview(tracks, player ? player.id : null);
+      this._renderPreview(tracks, player ? player.id : null, msg.player);
     }
   }
 
@@ -279,7 +281,7 @@ export class BrowserVision {
   }
 
   // --- operator preview --------------------------------------------------------------------------
-  _renderPreview(tracks, playerId) {
+  _renderPreview(tracks, playerId, features = null) {
     const v = this.video;
     const k = PREVIEW_W / v.videoWidth;
     const w = PREVIEW_W, h = Math.round(v.videoHeight * k);
@@ -311,6 +313,16 @@ export class BrowserVision {
         if (pr.kconf[a] > 0.3 && pr.kconf[c] > 0.3) { g.moveTo(pr.kpts[a][0] * k, pr.kpts[a][1] * k); g.lineTo(pr.kpts[c][0] * k, pr.kpts[c][1] * k); }
       }
       g.stroke();
+    }
+    // area the player's hands must reach (js/framing.js): it has to fit inside the image
+    const fr = features ? measureFraming(features) : null;
+    if (fr) {
+      const b = fr.box, out = fr.issues.some((k) => k !== "altres" && k !== "tapat");
+      g.save();
+      g.setLineDash([8, 6]); g.lineWidth = 3;
+      g.strokeStyle = out ? "rgb(255,60,60)" : "rgb(60,220,140)";
+      g.strokeRect(b.x0 * w, b.y0 * h, (b.x1 - b.x0) * w, (b.y1 - b.y0) * h);
+      g.restore();
     }
     g.fillStyle = "#fff";
     g.fillText(`${this.fps.toFixed(0)} fps  ${this.inferMs.toFixed(0)} ms  MediaPipe ${this.delegate || "—"}`, 8, h - 10);

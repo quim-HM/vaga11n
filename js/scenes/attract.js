@@ -65,8 +65,15 @@ export default class Attract {
       rrect(g, W / 2 - bw / 2 - e, y - bh / 2 - e, bw + 2 * e, bh + 2 * e, 4 + e / 2); g.stroke();
       g.restore();
     }
-    const msg = !present ? T("inici.posa_t_davant_la", "POSA'T DAVANT LA PANTALLA")
+    const fi = inp.usingMouse ? null : inp.framing.issue;
+    const msg = !present ? (fi === "lluny" ? T("inici.apropa_t", "APROPA'T A LA PANTALLA")
+        : fi === "aprop" ? T("inici.pas_enrere", "FES UN PAS ENRERE")
+        : fi === "dreta" || fi === "esquerra" ? T("inici.al_mig", "POSA'T AL MIG DE LA PANTALLA")
+        : T("inici.posa_t_davant_la", "POSA'T DAVANT LA PANTALLA"))
       : inp.usingMouse ? T("inici.mante_clic", "MANTÉN PREMUT EL CLIC PER JUGAR")
+      // too close: a raised hand would leave the image and never start the game
+      : fi === "aprop" ? T("inici.pas_enrere_aixeca", "FES UN PAS ENRERE I AIXECA LA MÀ")
+      : fi === "lluny" ? T("inici.apropa_t_aixeca", "APROPA'T I AIXECA LA MÀ")
       : T("inici.aixeca_una_ma_per", "AIXECA UNA MÀ PER JUGAR");
     let size = 54;
     font(g, size, "poster");

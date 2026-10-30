@@ -7,6 +7,7 @@ import { sfx, setMuted, isMuted } from "./audio.js";
 import { applyTheme } from "./temes.js";
 import { drawCountdown } from "./countdown.js";
 import { llocQuery, scoped } from "./lloc.js";
+import { drawFramingToast } from "./framehint.js";
 
 // Titles are getters so data/textos.json overrides (loaded after module evaluation) apply
 export const GAMES = [
@@ -33,6 +34,9 @@ const PAUSE_TIMEOUT_S = 15;    // paused for this long -> end session
 const RESUME_RAISE_S = 0.8;    // raise a hand this long to resume / take over
 const TRANS_S = 0.35;          // screen change: the new screen fades in from the page colour
 const ACK_S = 0.5;             // input acknowledged: a ring bursts out of the hand that did it
+// Badly placed for the camera (framing.js) for this long during a game: a small hint at the top.
+// Longer than in the calibration, so a quick lean or a step aside never interrupts the game.
+const TOAST_AFTER_S = 2.5;
 
 // Placeholder used while a game module is not available yet (keeps the flow testable)
 class Placeholder {
@@ -60,6 +64,7 @@ export class App {
     this.nav = { prev: 0, next: 0 };
     this.transT = TRANS_S;
     this.acks = [];
+    this.toast = { issue: null, a: 0 };
     this.newSession();
   }
 
@@ -103,8 +108,18 @@ export class App {
   }
 
   newSession() {
+    this.logFraming();
     this.session = { results: {}, startedAt: this.time, gameIndex: -1, oneArm: null };
     this.input.oneArm = null;
+    this.input.framing.reset();
+  }
+
+  // How well placed the last player was (console, for the team tuning the floor marks and the camera)
+  logFraming() {
+    const f = this.input.framing;
+    if (!f || f.seenT < 10) return;
+    const pct = Object.entries(f.totals).filter(([, s]) => s > 0).map(([k, s]) => `${k} ${Math.round((100 * s) / f.seenT)} %`);
+    console.info(`[vaga11n] Enquadrament de la partida (${Math.round(f.seenT)} s): ${pct.length ? pct.join(", ") : "sempre bé"}`);
   }
 
   async loadScene(name) {
@@ -192,6 +207,7 @@ export class App {
     this.acks = this.acks.filter((a) => a.t < ACK_S);
     this.input.update(dt);
     setMouseMode(this.input.usingMouse);
+    this.updateFramingToast(dt);
     if (!this.scene || this.switching) return;
     if (this.needsPlayer) {
       const present = this.input.state.present;
@@ -214,6 +230,15 @@ export class App {
     this.scene.update(dt);
   }
 
+  // The calibration shows its own framing hints; the start and final screens need no player
+  updateFramingToast(dt) {
+    const inp = this.input, f = inp.framing;
+    const show = !this.paused && this.needsPlayer && this.sceneName !== "join" && !inp.usingMouse
+      && inp.state.present && !!f.issue && f.issueT >= TOAST_AFTER_S;
+    if (show) this.toast.issue = f.issue;
+    this.toast.a = clamp(this.toast.a + (show ? dt : -dt) * 3, 0, 1);
+  }
+
   draw() {
     const g = this.g;
     const r = this.canvas.getBoundingClientRect();
@@ -231,6 +256,7 @@ export class App {
       g.beginPath(); g.rect(0, 0, W, H); g.clip();
       if (this.scene) this.scene.draw(g);
       this.drawFeedback(g);
+      if (!this.paused && this.toast.a > 0) drawFramingToast(g, W / 2, 0, this.toast.issue, { alpha: easeOut(this.toast.a) });
       if (!this.paused) this.drawNav(g);
       if (this.paused) this.drawPause(g);
       if (this.debug) this.drawDebug(g);
@@ -261,8 +287,14 @@ export class App {
     } else {
       const left = Math.max(0, PAUSE_TIMEOUT_S - this.paused.t);
       const present = this.input.state.present;
+      // somebody is there but not where the camera can take them as the player (framing.js)
+      const fi = present || this.input.usingMouse ? null : this.input.framing.issue;
+      const back = fi === "lluny" ? T("app.apropa_t_i_aixeca", "Apropa't a la pantalla i aixeca la mà")
+        : fi === "aprop" ? T("app.pas_enrere_i_aixeca", "Fes un pas enrere i aixeca la mà")
+        : fi === "dreta" || fi === "esquerra" ? T("app.al_mig_i_aixeca", "Posa't al mig de la pantalla i aixeca la mà")
+        : T("app.torna_davant_de_la", "Torna davant de la pantalla i aixeca una mà");
       text(g, present ? T("app.continues_tu_la_partida", "Continues tu la partida?") : T("app.on_ets", "On ets?"), W / 2, H / 2 - 150, { size: 110, kind: "title", align: "center", color: C.red, maxW: 1160 });
-      text(g, present ? T("app.aixeca_una_ma_per", "Aixeca una mà per continuar") : T("app.torna_davant_de_la", "Torna davant de la pantalla i aixeca una mà"), W / 2, H / 2 - 40, { size: 48, weight: 800, align: "center", maxW: 1160 });
+      text(g, present ? T("app.aixeca_una_ma_per", "Aixeca una mà per continuar") : back, W / 2, H / 2 - 40, { size: 48, weight: 800, align: "center", maxW: 1160 });
       drawCountdown(g, W / 2, H / 2 + 110, left, PAUSE_TIMEOUT_S, { r: 62 });
       text(g, T("app.si_no_hi_ha", "Si no hi ha ningú, la partida s'acabarà sola."), W / 2, H / 2 + 240, { size: 32, align: "center", color: C.inkSoft, maxW: 1160 });
     }
@@ -294,15 +326,17 @@ export class App {
 
   drawDebug(g) {
     const st = this.input.state;
+    const fm = this.input.framing, fr = fm.last;
     g.save();
     g.fillStyle = "rgba(26,31,54,0.82)";
-    g.fillRect(10, 10, 620, 210);
+    g.fillRect(10, 10, 780, 260);
     const lines = [
       `mode: ${this.input.mode}  escena: ${this.sceneName}`,
       `present: ${st.present}  seat: ${st.seat}  persones: ${st.people}`,
       `fps: ${st.fps}  inferència: ${st.ms} ms  qualitat: ${st.quality}`,
       `mà activa: ${this.input.active}  un braç: ${this.input.oneArm || "no"}  so: ${isMuted() ? "no" : "sí"}`,
       `absent: ${this.absentT.toFixed(1)} s  pausa: ${this.paused ? this.paused.t.toFixed(1) : "-"}`,
+      `enquadrament: ${fm.issue || "bé"}${fr ? `  abast ${fr.reach.toFixed(2)}  marges d${fr.margins.top.toFixed(2)} e${fr.margins.left.toFixed(2)} r${fr.margins.right.toFixed(2)} b${fr.margins.bottom.toFixed(2)}` : ""}`,
       ...(this.data.warnings || []).slice(0, 2),
     ];
     lines.forEach((ln, i) => text(g, ln, 26, 46 + i * 30, { size: 22, color: "#fff" }));

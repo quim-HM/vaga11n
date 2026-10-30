@@ -2,6 +2,7 @@
 // Sources: live camera (in-browser vision through LocalHost, or the Python vision process through a
 // WebSocket link), recorded skeletons (Python replay mode) or simulation (mouse + keyboard, no camera).
 import { W, H, clamp } from "./ui.js";
+import { FramingMonitor, measureFraming, candidateIssue } from "./framing.js";
 
 // Reach-space -> screen mapping. Reach space: origin at shoulders, unit = arm reach, y up.
 export const MAP = { xHalf: 1.0, yTop: 0.95, yBottom: -0.5 };
@@ -48,6 +49,7 @@ export class Input {
     this.cameraOk = null;          // last camera status reported by the host
     this.cameraError = null;       // human-readable reason when there is no camera
     this.lastPoseAt = -1e9;
+    this.framing = new FramingMonitor();   // is the player well placed for the camera? (framing.js)
     this.onServerMessage = null;  // set by the app: hello/config/difusio messages
     this._setupSim();
     // Always connect: even in simulation the host sends theme/territory configuration
@@ -187,8 +189,17 @@ export class Input {
       }
     }
     this.state = st;
+    this._updateFraming(dt);
     this._updateActive(dt);
     for (const side of ["l", "r"]) this.raisedT[side] = this.isRaised(side) ? this.raisedT[side] + dt : 0;
+  }
+
+  // Framing of the camera player (never in mouse mode: the simulated player is always well placed)
+  _updateFraming(dt) {
+    const st = this.state;
+    if (this.usingMouse) { this.framing.update(dt, null, null); return; }
+    const frame = st.present ? measureFraming(st, { oneArm: this.oneArm, cands: st.cands, seat: st.seat }) : null;
+    this.framing.update(dt, frame, st.present ? null : candidateIssue(st.cands));
   }
 
   _updateActive(dt) {
